@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
 import { ShoppingCart, Bell, User, Box, Sun, Moon } from "lucide-react";
 
 export default function Header() {
@@ -22,27 +23,36 @@ export default function Header() {
           <span className="font-semibold tracking-tight">Mercatus</span>
         </div>
         <nav className="hidden md:flex gap-6 text-sm font-medium">
-          <a href="/" className="hover:text-foreground/80 transition-colors">
+          <NavLink
+            to="/home"
+            className="hover:text-foreground/80 transition-colors"
+          >
             Home
-          </a>
-          <a
-            href="/about"
+          </NavLink>
+          <NavLink
+            to="/about"
             className="hover:text-foreground/80 transition-colors"
           >
             About
-          </a>
-          <a
-            href="/contact"
+          </NavLink>
+          <NavLink
+            to="/contact"
             className="hover:text-foreground/80 transition-colors"
           >
             Contact
-          </a>
-          <a
-            href="/products"
+          </NavLink>
+          <NavLink
+            to="/products"
             className="hover:text-foreground/80 transition-colors"
           >
             Products
-          </a>
+          </NavLink>
+          <NavLink
+            to="/login"
+            className="hover:text-foreground/80 transition-colors"
+          >
+            Login
+          </NavLink>
         </nav>
 
         <div className="flex items-center gap-3">
