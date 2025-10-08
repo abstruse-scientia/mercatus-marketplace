@@ -9,8 +9,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,10 +40,20 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new LoginResponseDto(HttpStatus.OK.getReasonPhrase(), authorities, null));
 
-        }catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        } catch(BadCredentialsException ex) {
+            return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Invalid username and password");
+        }catch(AuthenticationException ex) {
+            return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Authentication Failed");
+        }catch(Exception ex) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error has occurred");
         }
 
 
+    }
+
+
+
+    private ResponseEntity<?> buildErrorResponse(HttpStatus status, String message) {
+        return ResponseEntity.status(status).body(new LoginResponseDto(message, null, null));
     }
 }
