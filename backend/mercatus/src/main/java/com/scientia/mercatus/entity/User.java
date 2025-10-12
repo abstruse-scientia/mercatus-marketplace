@@ -30,6 +30,11 @@ public class User extends BaseEntity{
     @Column(name = "password_hash", nullable=false, length = 500)
     private String passwordHash;
 
+    @Size(max=100)
+    @NotNull
+    @Column(name = "name", nullable=false, length=100)
+    private String name;
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
