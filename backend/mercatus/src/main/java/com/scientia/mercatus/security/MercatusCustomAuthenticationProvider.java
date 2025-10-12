@@ -26,9 +26,9 @@ public class MercatusCustomAuthenticationProvider implements AuthenticationProvi
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-         String username = authentication.getName();
+         String userEmail = authentication.getName();
         String password = authentication.getCredentials().toString();
-        User user = userRepository.findByemail(username)
+        User user = userRepository.findByemail(userEmail)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found"));
         Set<Role> roles = user.getRoles();
         List<SimpleGrantedAuthority> authorities = roles.stream()
