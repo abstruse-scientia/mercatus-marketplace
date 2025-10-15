@@ -34,4 +34,5 @@ public class RefreshToken {
 
     @Column(name = "is_revoked", nullable = false)
     private boolean isRevoked;
+
 }
