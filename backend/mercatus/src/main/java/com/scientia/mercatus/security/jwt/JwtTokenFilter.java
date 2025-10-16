@@ -45,7 +45,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 Claims claims = Jwts.parser().verifyWith(jwtkeyProvider.getSecretKey())
                         .build().parseSignedClaims(token).getPayload();
                 String userEmail = String.valueOf(claims.get("email"));
-                User user = userRepository.findByemail(userEmail).orElseThrow(()->
+                User user = userRepository.findByEmail(userEmail).orElseThrow(()->
                         new RuntimeException("User not found with email: " + userEmail));
                 Set<Role> roles = user.getRoles();
                 List<SimpleGrantedAuthority> authorities = roles.stream()

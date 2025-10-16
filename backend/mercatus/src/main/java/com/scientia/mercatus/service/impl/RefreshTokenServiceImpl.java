@@ -1,10 +1,16 @@
 package com.scientia.mercatus.service.impl;
 
+import com.scientia.mercatus.dto.RefreshtTokenResponseDto;
 import com.scientia.mercatus.entity.RefreshToken;
 import com.scientia.mercatus.entity.User;
+import com.scientia.mercatus.exception.TokenExpiredException;
+import com.scientia.mercatus.exception.TokenNotFoundException;
+import com.scientia.mercatus.exception.TokenRevokedException;
 import com.scientia.mercatus.repository.RefreshTokenRepository;
+import com.scientia.mercatus.security.jwt.JwtTokenProvider;
 import com.scientia.mercatus.service.IRefreshTokenService;
 import com.scientia.mercatus.util.IRefreshTokenUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +24,7 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final IRefreshTokenUtil refreshTokenUtil;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
     @Override
@@ -34,22 +41,20 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
     }
 
     @Override
-    public boolean validateRefreshToken(String rawRefreshToken){
+    public RefreshToken validateRefreshToken(String rawRefreshToken){
         String hashedToken = refreshTokenUtil.hashToken(rawRefreshToken);
         var refreshToken = refreshTokenRepository.findByTokenHash(hashedToken);
         Instant currentTime = Instant.now();
         if (refreshToken.isEmpty()) {
-            return false;
+            throw new TokenNotFoundException("Refresh token not found");
         }
-        else if (refreshToken.get().isRevoked()) {
-            return false;
+        if (refreshToken.get().isRevoked()) {
+            throw new TokenRevokedException("Token is already revoked");
         }
-        else if (refreshToken.get().getExpiryDate().isBefore(currentTime)) {
-            return false;
+        if (refreshToken.get().getExpiryDate().isBefore(currentTime)) {
+            throw new TokenExpiredException("Token has expired");
         }
-        else {
-            return true;
-        }
+        return refreshToken.get();
     }
 
     @Override
@@ -60,20 +65,20 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
             return;
         }
         refreshToken.get().setRevoked(true);
+        refreshTokenRepository.save(refreshToken.get());
 
     }
 
     @Override
-    public String rotateRefreshToken(String rawRefreshToken) {
-        if (!validateRefreshToken(rawRefreshToken)) {
-            throw new IllegalArgumentException("Invalid refresh token");
-        }
-        revokeRefreshToken(rawRefreshToken);
-        String hashedToken = refreshTokenUtil.hashToken(rawRefreshToken);
-        var existingToken = refreshTokenRepository.findByTokenHash(hashedToken);
-        User user = existingToken.get().getUser();
-        return createRefreshToken(user);
-
+    @Transactional
+    public RefreshtTokenResponseDto rotateRefreshToken(String rawRefreshToken) {
+        RefreshToken existingToken = validateRefreshToken(rawRefreshToken);
+        existingToken.setRevoked(true);
+        refreshTokenRepository.save(existingToken);
+        User user = existingToken.getUser();
+        String newRawRefreshToken = createRefreshToken(user);
+        String newJwtToken = jwtTokenProvider.generateJwtToken(user);
+        return new RefreshtTokenResponseDto(newRawRefreshToken, newJwtToken);
     }
 
 }
