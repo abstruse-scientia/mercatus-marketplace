@@ -1,4 +1,4 @@
 package com.scientia.mercatus.dto;
 
-public record LoginRequestDto(String username, String password) {
+public record LoginRequestDto(String userEmail, String password) {
 }
