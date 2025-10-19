@@ -13,25 +13,27 @@ import java.math.BigDecimal;
 @Table(name = "products")
 public class Product extends BaseEntity{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id", nullable = false)
-    private Long id;
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="product_id", nullable = false)
+    private Long productId;
 
-    @Column(name = "name", nullable = false, length = 250)
+    @Column(name="name", nullable = false)
     private String name;
 
-    @Column(name = "description", nullable = false, length = 500)
+    @Column(name="description", nullable = false)
     private String description;
 
-    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    @Column(name = "price", nullable = false)
     private BigDecimal price;
 
     @Column(name = "popularity", nullable = false)
     private Integer popularity;
 
-    @Column(name = "image_url", length = 500)
-    private String imageUrl;
+    @JoinColumn(name = "category_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private Category category;
 
-
+    @OneToOne(mappedBy = "product")
+    private Inventory inventory;
 
 }

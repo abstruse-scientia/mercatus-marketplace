@@ -6,7 +6,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -43,5 +45,6 @@ public class User extends BaseEntity{
 
     private Set<Role> roles = new LinkedHashSet<>();
 
-
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders = new ArrayList<>();
 }

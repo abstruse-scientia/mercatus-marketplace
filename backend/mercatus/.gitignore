@@ -8,8 +8,8 @@ src/main/resources/application-dev.properties
 src/main/resources/application-prod.properties
 
 
-src/main/resources/db/migrations/V2.1__seed_user_for_rbac.sql
-src/main/resources/db/migrations/V2.2__seed_user_for_rbac.sql
+src/main/resources/db/migrations/V2_1__seed_user_for_rbac.sql
+src/main/resources/db/migrations/V2_2__seed_user_for_rbac.sql
 
 ### STS ###
 .apt_generated
