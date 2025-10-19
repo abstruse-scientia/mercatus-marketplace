@@ -1,10 +1,9 @@
 package com.scientia.mercatus.entity;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -19,23 +18,26 @@ import java.time.Instant;
 @Getter
 @Setter
 @MappedSuperclass
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class BaseEntity {
+public abstract class BaseEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
-    @CreationTimestamp
     private Instant createdAt;
 
-    @CreatedBy
-    @Column(name = "created_by", nullable = false, updatable = false)
-    private String createdBy;
-
     @LastModifiedDate
-    @UpdateTimestamp
-    @Column(name = "updated_at", insertable = false)
+    @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @CreatedBy
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", updatable = false)
+    private User createdBy;
+
+
+
     @LastModifiedBy
-    @Column(name = "updated_by", insertable = false)
-    private String updatedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by")
+    private User updatedBy;
 }
