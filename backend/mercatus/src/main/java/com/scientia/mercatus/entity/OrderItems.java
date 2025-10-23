@@ -1,6 +1,8 @@
 package com.scientia.mercatus.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,9 +35,23 @@ public class OrderItems extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    private Orders order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @Column(name = "product_popularity")
+    private Integer productPopularity;
+
+    @Size(max = 100)
+    @NotNull
+    @Column(name = "product_name", nullable = false, length = 100)
+    private String productName;
+
+    @Size(max = 300)
+    @NotNull
+    @Column(name = "product_description", nullable = false, length = 300)
+    private String productDescription;
+
 }

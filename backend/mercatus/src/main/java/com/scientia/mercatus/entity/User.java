@@ -36,10 +36,10 @@ public class User{
     @Column(name = "password_hash", nullable=false, length = 500)
     private String passwordHash;
 
-    @Size(max=100)
-    @NotNull
-    @Column(name = "name", nullable=false, length=100)
-    private String name;
+//    @Size(max=100)
+//    @NotNull
+//    @Column(name = "name", nullable=false, length=100)
+//    private String name;
 
 
     @CreatedDate
@@ -59,5 +59,5 @@ public class User{
     private Set<Role> roles = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Order> orders = new ArrayList<>();
+    private List<Orders> orders = new ArrayList<>();
 }
