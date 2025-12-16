@@ -19,7 +19,7 @@ public class JwtTokenProvider {
     public String generateJwtToken(User userDetail){
         String jwt = "";
         jwt = Jwts.builder().issuer("Mercatus").subject("JWT Token")
-                .claim("username", userDetail.getName())
+                .claim("username", userDetail.getUserName())
                 .claim("email", userDetail.getEmail())
                 .claim("roles", userDetail.getRoles().stream().map(Role::getName)
                         .collect(Collectors.joining(",")))

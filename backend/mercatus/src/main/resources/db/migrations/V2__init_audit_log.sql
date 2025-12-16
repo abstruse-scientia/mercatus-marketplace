@@ -4,9 +4,9 @@ CREATE TABLE IF NOT EXISTS audit_log (
                                          entity_id BIGINT NOT NULL ,
                                          action VARCHAR(255) NOT NULL ,
                                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                         created_by BIGINT,
+                                         created_by BIGINT UNSIGNED,
                                          updated_at TIMESTAMP NULL,
-                                         updated_by BIGINT,
+                                         updated_by BIGINT UNSIGNED,
                                          FOREIGN KEY (created_by) REFERENCES users(user_id),
                                          FOREIGN KEY (updated_by) REFERENCES users(user_id)
-);
+)engine=InnoDB;

@@ -1,7 +1,11 @@
 package com.scientia.mercatus.service.impl;
 
 import com.scientia.mercatus.entity.*;
+import com.scientia.mercatus.exception.CartNotFoundException;
+import com.scientia.mercatus.exception.IllegalQuantity;
+import com.scientia.mercatus.repository.CartItemsRepository;
 import com.scientia.mercatus.repository.CartRepository;
+import com.scientia.mercatus.repository.ProductRepository;
 import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.service.ICartService;
 import jakarta.transaction.Transactional;
@@ -9,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -19,14 +23,16 @@ enum Profile {
     USER
 }
 
-
+@Service
+@Transactional
 @RequiredArgsConstructor
 public class CartServiceImpl implements ICartService {
 
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
+    private final CartItemsRepository cartItemsRepository;
     @Override
-    @Transactional
     public Cart createCart(String sessionId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean authenticationState = isAuthenticated(authentication);
@@ -130,34 +136,81 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
-    public void addProductToCart(long cartId, long productId, double quantity) {
-
+    public void addProductToCart(long cartId, long productId, BigDecimal quantity) {
+        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <=0) {
+            throw new IllegalQuantity("Quantity must be greater than 0");
+        }
+        Cart currentCart = cartRepository.findByCartId(cartId).orElseThrow(() -> new CartNotFoundException("Cart not found"));
+        Product currentProduct = productRepository.findByProductId(productId).orElseThrow(NoSuchElementException::new);
+        Set<CartItems> currentCartItems = currentCart.getCartItems();
+        for (CartItems item : currentCartItems) {
+            if (item.getProduct().getProductId().equals(productId)) {
+                BigDecimal currentQuantity = item.getQuantity();
+                currentQuantity = currentQuantity.add(quantity);
+                item.setQuantity(currentQuantity);
+                cartRepository.save(currentCart);
+                return;
+            }
+        }
+        CartItems cartItem = new CartItems();
+        cartItem.setProduct(currentProduct);
+        cartItem.setQuantity(quantity);
+        cartItem.setCart(currentCart);
+        currentCartItems.add(cartItem);
+        cartRepository.save(currentCart);
     }
+
+
+
 
     @Override
     public void removeProductFromCart(long cartId, long productId) {
+        Product product = productRepository.findByProductId(productId).orElseThrow(NoSuchElementException::new);
+        Cart cart = cartRepository.findByCartId(cartId).orElseThrow(() ->
+                new CartNotFoundException("Cart not found"));
+        CartItems item = cart.getCartItems().
+                stream().filter(i -> i.getProduct().getProductId().equals(productId))
+                .findFirst().orElse(null);
+        if (item != null) {
+            cart.getCartItems().remove(item);
+        }
 
     }
 
     @Override
     public void updateProductQuantity(long cartId, long productId, double quantity) {
+            BigDecimal currentQuantity = BigDecimal.valueOf(quantity);
+            if (currentQuantity.compareTo(BigDecimal.ZERO) < 0) { // First case : quantity < 0
+                throw new IllegalQuantity("Quantity must be greater than 0");
+            }
+            Cart cart = cartRepository.findByCartId(cartId)
+                    .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+            CartItems item = cart.getCartItems().stream()
+                    .filter(i -> i.getProduct().getProductId().equals(productId))
+                    .findFirst().orElse(null);
+            if (item == null) {
+                return;
+            }
+            if (currentQuantity.compareTo(BigDecimal.ZERO) == 0) { //Second case: quantity = 0
+                cart.getCartItems().remove(item);
+                return;
+            }
+            item.setQuantity(currentQuantity); //Final case: update the quantity
 
     }
 
     @Override
-    public Cart getCart() {
-        return null;
+    public Cart getCart(String sessionId) {
+        return createCart(sessionId);
     }
 
     @Override
     public void clearCart(long cartId) {
-
+        Cart cart = cartRepository.
+                findByCartId(cartId).orElseThrow(() -> new CartNotFoundException("Cart not found"));
+        cart.getCartItems().clear();
     }
 
-    @Override
-    public Orders checkout(long cartId) {
-        return null;
-    }
 
 
 }

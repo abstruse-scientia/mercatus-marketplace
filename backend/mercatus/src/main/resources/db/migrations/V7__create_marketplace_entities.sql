@@ -1,32 +1,32 @@
 
 create table cart (
-                      cart_id bigint not null auto_increment,
+                      cart_id bigint unsigned not null auto_increment,
                       created_at datetime(6) not null,
-                      created_by bigint,
+                      created_by bigint unsigned,
                       updated_at datetime(6),
-                      updated_by bigint,
-                      user_id bigint not null,
+                      updated_by bigint unsigned,
+                      user_id bigint unsigned not null,
                       primary key (cart_id)
 ) engine=InnoDB;
 
 create table cart_items (
-                            quantity integer not null,
-                            cart_id bigint,
-                            cart_item_id bigint not null auto_increment,
+                            quantity integer unsigned not null,
+                            cart_id bigint unsigned NOT NULL ,
+                            cart_item_id bigint unsigned not null auto_increment,
                             created_at datetime(6) not null,
-                            created_by bigint,
-                            product_id bigint not null,
+                            created_by bigint unsigned,
+                            product_id bigint unsigned not null,
                             updated_at datetime(6),
-                            updated_by bigint,
+                            updated_by bigint unsigned,
                             primary key (cart_item_id)
 ) engine=InnoDB;
 
 create table category (
-                          category_id bigint not null auto_increment,
+                          category_id bigint unsigned not null auto_increment,
                           created_at datetime(6) not null,
-                          created_by bigint,
+                          created_by bigint unsigned,
                           updated_at datetime(6),
-                          updated_by bigint,
+                          updated_by bigint unsigned,
                           category_name varchar(100) not null,
                           primary key (category_id)
 ) engine=InnoDB;
@@ -34,22 +34,22 @@ create table category (
 create table inventory (
                            stock_quantity integer not null,
                            created_at datetime(6) not null,
-                           created_by bigint,
-                           inventory_id bigint not null auto_increment,
-                           product_id bigint not null,
+                           created_by bigint unsigned,
+                           inventory_id bigint unsigned not null auto_increment,
+                           product_id bigint unsigned not null,
                            updated_at datetime(6),
-                           updated_by bigint,
+                           updated_by bigint unsigned,
                            primary key (inventory_id)
 ) engine=InnoDB;
 
 create table orders (
                        total_amount decimal(12,2) not null,
                        created_at datetime(6) not null,
-                       created_by bigint,
-                       order_id bigint not null auto_increment,
+                       created_by bigint unsigned,
+                       order_id bigint unsigned not null auto_increment,
                        updated_at datetime(6),
-                       updated_by bigint,
-                       user_id bigint not null,
+                       updated_by bigint unsigned,
+                       user_id bigint unsigned  not null,
                        payment_status varchar(50) not null,
                        status varchar(100) not null,
                        order_reference varchar(255) not null,
@@ -61,14 +61,14 @@ create table order_items (
                              product_popularity integer,
                              subtotal decimal(10,2),
                              created_at datetime(6) not null,
-                             created_by bigint,
-                             order_id bigint not null,
-                             order_item_id bigint not null auto_increment,
+                             created_by bigint unsigned,
+                             order_id bigint unsigned not null,
+                             order_item_id bigint unsigned not null auto_increment,
                              popularity bigint,
-                             product_id bigint not null,
+                             product_id bigint unsigned not null,
                              quantity bigint,
                              updated_at datetime(6),
-                             updated_by bigint,
+                             updated_by bigint unsigned,
                              product_name varchar(100) not null,
                              product_description varchar(300) not null,
                              primary key (order_item_id)
@@ -77,12 +77,12 @@ create table order_items (
 create table products (
                           popularity integer not null,
                           price decimal(8,2) not null,
-                          category_id bigint not null,
+                          category_id bigint unsigned not null,
                           created_at datetime(6) not null,
-                          created_by bigint,
-                          product_id bigint not null auto_increment,
+                          created_by bigint unsigned,
+                          product_id bigint unsigned not null auto_increment,
                           updated_at datetime(6),
-                          updated_by bigint,
+                          updated_by bigint unsigned,
                           name varchar(100) not null,
                           description varchar(300) not null,
                           primary key (product_id)
