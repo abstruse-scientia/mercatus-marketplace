@@ -22,7 +22,7 @@ public class Cart extends BaseEntity{
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "cart")
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CartItems> cartItems = new LinkedHashSet<>();
 
     @Size(max = 100)
