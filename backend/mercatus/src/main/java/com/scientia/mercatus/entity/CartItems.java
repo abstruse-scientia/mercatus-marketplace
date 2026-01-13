@@ -28,4 +28,7 @@ public class CartItems extends BaseEntity{
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(name = "price_snapshot")
+    private BigDecimal priceSnapshot;
+
 }

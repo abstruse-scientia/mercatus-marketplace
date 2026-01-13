@@ -105,30 +105,14 @@ alter table orders
 
 
 
-alter table cart
-    add constraint FKmh5bgebkp76p4yr6t1dr1tya4
-        foreign key (created_by)
-            references users (user_id);
 
-alter table cart
-    add constraint FKsyh7kaauej1p9cdxjk98yfn5y
-        foreign key (updated_by)
-            references users (user_id);
 
 alter table cart
     add constraint FKg5uhi8vpsuy0lgloxk2h4w5o6
         foreign key (user_id)
             references users (user_id);
 
-alter table cart_items
-    add constraint FKbhw4r3ymojowg2oitk1q92anh
-        foreign key (created_by)
-            references users (user_id);
 
-alter table cart_items
-    add constraint FKoagcxwgqf1r0cx578r4phswe9
-        foreign key (updated_by)
-            references users (user_id);
 
 alter table cart_items
     add constraint FK99e0am9jpriwxcm6is7xfedy3
@@ -140,55 +124,22 @@ alter table cart_items
         foreign key (product_id)
             references products (product_id);
 
-alter table category
-    add constraint FKnbi9umnlfmtbpd3kcs8o37ta3
-        foreign key (created_by)
-            references users (user_id);
 
-alter table category
-    add constraint FKho9xxhac4fwi30iuak1pah7l4
-        foreign key (updated_by)
-            references users (user_id);
 
-alter table inventory
-    add constraint FKkr1hn52ku7b4p1ge591l05t6k
-        foreign key (created_by)
-            references users (user_id);
 
-alter table inventory
-    add constraint FKj9oqhy7kfm0rjoumf7dcc1ywl
-        foreign key (updated_by)
-            references users (user_id);
 
 alter table inventory
     add constraint FKq2yge7ebtfuvwufr6lwfwqy9l
         foreign key (product_id)
             references products (product_id);
 
-alter table orders
-    add constraint FKfkqyksjq8ji7occy87lgns90j
-        foreign key (created_by)
-            references users (user_id);
-
-alter table orders
-    add constraint FKk16sqm3ljf4mfdho333omrjij
-        foreign key (updated_by)
-            references users (user_id);
 
 alter table orders
     add constraint FKs9p0s8b1nh7m2no87xxteu83x
         foreign key (user_id)
             references users (user_id);
 
-alter table order_items
-    add constraint FKs2wcthlv8qp34l56jcwtgj64q
-        foreign key (created_by)
-            references users (user_id);
 
-alter table order_items
-    add constraint FKl145d42twpl0wlnorqvtr7b45
-        foreign key (updated_by)
-            references users (user_id);
 
 alter table order_items
     add constraint FKdy6l1ieu09exdjope704jwo1e
@@ -200,15 +151,7 @@ alter table order_items
         foreign key (product_id)
             references products (product_id);
 
-alter table products
-    add constraint FKl0lce8i162ldn9n01t2a6lcix
-        foreign key (created_by)
-            references users (user_id);
 
-alter table products
-    add constraint FKdeswm6d74skv6do803axl6edj
-        foreign key (updated_by)
-            references users (user_id);
 
 alter table products
     add constraint FK1cf90etcu98x1e6n9aks3tel3

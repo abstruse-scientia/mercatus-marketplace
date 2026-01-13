@@ -19,7 +19,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name="users")
-public class User{
+public class User extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,13 +42,6 @@ public class User{
     private String userName;
 
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
 
     @ManyToMany(fetch = FetchType.EAGER)
