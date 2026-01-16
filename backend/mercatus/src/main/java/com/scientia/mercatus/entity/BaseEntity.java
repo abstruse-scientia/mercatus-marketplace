@@ -30,14 +30,11 @@ public abstract class BaseEntity {
     private Instant updatedAt;
 
     @CreatedBy
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", updatable = false)
-    private User createdBy;
+    @Column(name = "created_by")
+    private Long createdBy;
 
 
-
+    @Column(name = "updated_by")
     @LastModifiedBy
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by")
-    private User updatedBy;
+    private Long updatedBy;
 }

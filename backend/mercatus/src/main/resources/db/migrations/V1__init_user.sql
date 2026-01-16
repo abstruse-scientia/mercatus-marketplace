@@ -3,6 +3,9 @@ CREATE TABLE IF NOT EXISTS users (
                                      user_name VARCHAR(100) NOT NULL ,
                                      email VARCHAR(50) NOT NULL UNIQUE,
                                      password_hash VARCHAR(500),
-                                     created_at    TIMESTAMP   DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                                     updated_at    TIMESTAMP   DEFAULT NULL
+                                     created_at datetime(6) not null,
+                                     created_by bigint unsigned,
+                                     updated_at datetime(6),
+                                     updated_by bigint unsigned
+
 )ENGINE=InnoDB;

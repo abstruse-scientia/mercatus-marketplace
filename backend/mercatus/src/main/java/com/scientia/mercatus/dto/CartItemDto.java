@@ -1,7 +1,6 @@
 package com.scientia.mercatus.dto;
 
-import com.scientia.mercatus.entity.CartItems;
-import com.scientia.mercatus.entity.Product;
+
 
 import java.math.BigDecimal;
 

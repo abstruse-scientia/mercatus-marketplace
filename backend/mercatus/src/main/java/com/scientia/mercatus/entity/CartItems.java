@@ -2,6 +2,7 @@ package com.scientia.mercatus.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,5 +28,8 @@ public class CartItems extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @Column(name = "price_snapshot")
+    private BigDecimal priceSnapshot;
 
 }

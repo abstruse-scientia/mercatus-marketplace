@@ -1,27 +1,25 @@
 package com.scientia.mercatus.service.impl;
 
+import com.scientia.mercatus.dto.CartContextDto;
+import com.scientia.mercatus.dto.CartItemDto;
+import com.scientia.mercatus.dto.CartResponseDto;
 import com.scientia.mercatus.entity.*;
-import com.scientia.mercatus.exception.CartNotFoundException;
 import com.scientia.mercatus.exception.IllegalQuantity;
 import com.scientia.mercatus.repository.CartItemsRepository;
 import com.scientia.mercatus.repository.CartRepository;
 import com.scientia.mercatus.repository.ProductRepository;
 import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.service.ICartService;
+import com.scientia.mercatus.service.SessionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
-enum Profile {
-    GUEST,
-    USER
-}
+
 
 @Service
 @Transactional
@@ -32,185 +30,187 @@ public class CartServiceImpl implements ICartService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartItemsRepository cartItemsRepository;
-    @Override
-    public Cart createCart(String sessionId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean authenticationState = isAuthenticated(authentication);
+    private final SessionService sessionService;
 
-        Profile activeProfile = authenticationState ? Profile.USER : Profile.GUEST;
-        Long userId = extractUserId(authentication);
 
-        Optional<Cart> guestCart = cartRepository.findBySessionId(sessionId);
-        Optional<Cart> userCart = userId == null ? Optional.empty() : cartRepository.findByUser_UserId(userId);
 
-        Cart activeCart = determineActiveCart(activeProfile, userId, sessionId,
-                guestCart.orElse(null), userCart.orElse(null));
-
-        persistCartChanges(activeCart, guestCart.isPresent() && userCart.isPresent());
-
-        return activeCart;
+    private Cart resolveGuestCart(CartContextDto cartContextDto) {
+        String sessionId = cartContextDto.getSessionId();
+        if (sessionId == null) {
+            throw new IllegalStateException("Session id is null");
+        }
+        return cartRepository.findBySessionId(sessionId).orElseGet(
+                () -> createGuestCart(sessionId)
+        );
     }
 
-
-    private Cart determineActiveCart(Profile activeProfile, Long userId, String sessionId, Cart guestCart, Cart userCart) {
-        boolean hasUserCart = userCart != null;
-        boolean hasGuestCart = guestCart != null;
-
-        if (!hasUserCart && !hasGuestCart) {
-            return resolveCartCreation(activeProfile, sessionId, userId);
+    private Cart resolveUserCart(CartContextDto cartContextDto) {
+        Cart userCart = cartRepository.
+                findByUser_UserId(cartContextDto.getUserId()).orElse(null);
+        User user = userRepository.findByUserId(cartContextDto.getUserId());
+        String sessionId = cartContextDto.getSessionId();
+        if  (sessionId == null) {
+            throw new IllegalStateException("Session id is null");
         }
-        if (hasGuestCart && !hasUserCart) {
-            if (activeProfile == Profile.USER && userId != null) {
-                return convertGuestCartToUserCart(guestCart, userId);
-            }
+        Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
+        if (userCart == null && guestCart == null) {
+            return createUserCart(user);
         }
-        if (hasUserCart && !hasGuestCart) {
+        if (guestCart == null) {
             return userCart;
         }
-        return mergeUserGuestCart(guestCart, userCart);
-    }
-
-    private Long extractUserId(Authentication authentication) {
-        var principal = authentication.getPrincipal();
-        if (principal instanceof User) {
-            return ((User) principal).getUserId();
+        if (userCart == null) {
+            Cart attachCart =  attachGuestCartToUser(guestCart,  user);
+            sessionService.revokeSession(sessionId);
+            return attachCart;
         }
-        return null;
+
+        mergeGuestToUserCart(guestCart, userCart);
+        sessionService.revokeSession(sessionId);
+        cartRepository.delete(guestCart);
+        return  cartRepository.save(userCart);
     }
 
-    private Cart convertGuestCartToUserCart(Cart guestCart, Long userId) {
-        User user = userRepository.findByUserId(userId);
+
+
+    @Override
+    public Cart resolveCart(CartContextDto cartContextDto) {
+
+        if (cartContextDto.getUserId() == null) {
+            return resolveGuestCart(cartContextDto);
+        }
+        return resolveUserCart(cartContextDto);
+
+    }
+
+    private Cart createGuestCart(String sessionId) {
+        Cart newCart = new Cart();
+        newCart.setSessionId(sessionId);
+        cartRepository.save(newCart);
+        return newCart;
+    }
+
+    private Cart createUserCart(User currentUser) {
+        Cart newCart = new Cart();
+        newCart.setUser(currentUser);
+        cartRepository.save(newCart);
+        return newCart;
+    }
+
+    private Cart attachGuestCartToUser(Cart guestCart, User user) {
         guestCart.setUser(user);
         guestCart.setSessionId(null);
-        return guestCart;
+        return cartRepository.save(guestCart);
     }
 
-    private Cart resolveCartCreation(Profile profileType, String sessionId, Long userId) {
-        Cart cart = new Cart();
-        cart.setSessionId(sessionId);
-        if (userId != null) {
-            User currentUser = userRepository.findByUserId(userId);
-            cart.setUser(currentUser);
-        }
-        return cart;
-    }
-
-    private Cart mergeUserGuestCart (Cart guestCart, Cart userCart) {
-        Map<Long, CartItems> cartStoredProducts = new HashMap<>();
-        for(CartItems item : userCart.getCartItems()) {
-            cartStoredProducts.put(item.getProduct().getProductId(), item);
-        }
-        for (CartItems item : guestCart.getCartItems()) {
-            Long productId = item.getProduct().getProductId();
-            BigDecimal guestCartQuantity = item.getQuantity() != null ? item.getQuantity() : BigDecimal.ZERO;
-            if (cartStoredProducts.containsKey(productId)) {
-
-                CartItems userCartItems= cartStoredProducts.get(productId);
-                BigDecimal userCartItemsQuantity = userCartItems.getQuantity() != null ? userCartItems.getQuantity() : BigDecimal.ZERO;
-
-                BigDecimal currentQuantity = userCartItemsQuantity.add(guestCartQuantity);
-                userCartItems.setQuantity(currentQuantity);
-
+    private void mergeGuestToUserCart(Cart guestCart, Cart userCart) {
+        Map<Long, CartItems> cartItems =  userCart.getCartItems().stream().collect(Collectors.toMap(
+                item -> item.getProduct().getProductId(),
+                item -> item
+        ));
+        for (CartItems guestItem: guestCart.getCartItems()) {
+            Long productId = guestItem.getProduct().getProductId();
+            if (cartItems.containsKey(productId)) {
+                CartItems cartItem = cartItems.get(productId);
+                cartItem.setQuantity(cartItem.getQuantity().add(guestItem.getQuantity()));
             }
             else {
-                item.setCart(userCart);
-                userCart.getCartItems().add(item);
-                cartStoredProducts.put(productId, item);
+                guestItem.setCart(userCart);
+                userCart.getCartItems().add(guestItem);
+                cartItems.put(productId, guestItem);
             }
         }
-        return userCart;
 
-    }
-
-    private boolean isAuthenticated(Authentication authentication) {
-        return  authentication != null && authentication.isAuthenticated() &&
-                !(authentication instanceof AnonymousAuthenticationToken);
-
-    }
-
-    protected void persistCartChanges(Cart activeCart, boolean deleteGuest) {
-        cartRepository.save(activeCart);
-        if (deleteGuest && activeCart.getUser() != null && activeCart.getSessionId() != null) {
-            cartRepository.deleteBySessionId(activeCart.getSessionId());
-        }
     }
 
     @Override
-    public void addProductToCart(long cartId, long productId, BigDecimal quantity) {
+    public void addToCart(Cart currentCart, Long productId, BigDecimal quantity) {
         if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <=0) {
             throw new IllegalQuantity("Quantity must be greater than 0");
         }
-        Cart currentCart = cartRepository.findByCartId(cartId).orElseThrow(() -> new CartNotFoundException("Cart not found"));
-        Product currentProduct = productRepository.findByProductId(productId).orElseThrow(NoSuchElementException::new);
-        Set<CartItems> currentCartItems = currentCart.getCartItems();
-        for (CartItems item : currentCartItems) {
-            if (item.getProduct().getProductId().equals(productId)) {
-                BigDecimal currentQuantity = item.getQuantity();
-                currentQuantity = currentQuantity.add(quantity);
-                item.setQuantity(currentQuantity);
-                cartRepository.save(currentCart);
-                return;
-            }
+
+        if (productId == null) {
+            throw new IllegalArgumentException("Product id cannot be null");
+        }
+        Product currentProduct = productRepository.findByProductId(productId).orElseThrow(()
+                -> new RuntimeException("Product not found"));
+        Optional<CartItems> cartItemOptional = cartItemsRepository.findByCartAndProduct(currentCart, currentProduct);
+        if (cartItemOptional.isPresent()) {
+            CartItems currentItem = cartItemOptional.get();
+            currentItem.setQuantity(currentItem.getQuantity().add(quantity));
+            cartItemsRepository.save(currentItem);
+            return;
         }
         CartItems cartItem = new CartItems();
         cartItem.setProduct(currentProduct);
         cartItem.setQuantity(quantity);
         cartItem.setCart(currentCart);
-        currentCartItems.add(cartItem);
-        cartRepository.save(currentCart);
+        cartItem.setPriceSnapshot(currentProduct.getPrice());
+        cartItemsRepository.save(cartItem);
+    }
+
+    @Override
+    public void removeFromCart(Cart currentCart, Long productId) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Product id cannot be null");
+        }
+        Product currentProduct = productRepository.findByProductId(productId).
+                orElseThrow(()-> new RuntimeException("Product not found: " + productId));
+        Optional<CartItems> cartItemOptional = cartItemsRepository.findByCartAndProduct(currentCart, currentProduct);
+        cartItemOptional.ifPresent(cartItemsRepository::delete);
+    }
+
+    @Override
+    public void clearCart(Cart currentCart) {
+        cartItemsRepository.deleteByCart(currentCart);
     }
 
 
-
-
     @Override
-    public void removeProductFromCart(long cartId, long productId) {
-        Product product = productRepository.findByProductId(productId).orElseThrow(NoSuchElementException::new);
-        Cart cart = cartRepository.findByCartId(cartId).orElseThrow(() ->
-                new CartNotFoundException("Cart not found"));
-        CartItems item = cart.getCartItems().
-                stream().filter(i -> i.getProduct().getProductId().equals(productId))
-                .findFirst().orElse(null);
-        if (item != null) {
-            cart.getCartItems().remove(item);
+    public void updateQuantity(Cart currentCart, Long productId, BigDecimal quantity) {
+        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalQuantity("Quantity must be greater than 0");
+        }
+        if (productId == null) {
+            throw new IllegalArgumentException("Product id cannot be null");
+        }
+        Product currentProduct = productRepository.findByProductId(productId).
+                orElseThrow(()-> new RuntimeException("Product not found: " + productId));
+        Optional<CartItems> currentCartItemOptional = cartItemsRepository.
+                findByCartAndProduct(currentCart, currentProduct);
+        if (currentCartItemOptional.isEmpty()) {
+            return;
         }
 
+        CartItems item = currentCartItemOptional.get();
+        if (quantity.compareTo(BigDecimal.ZERO) == 0) {
+            cartItemsRepository.delete(item);
+            return;
+        }
+        item.setQuantity(quantity);
+        cartItemsRepository.save(item);
     }
+
 
     @Override
-    public void updateProductQuantity(long cartId, long productId, double quantity) {
-            BigDecimal currentQuantity = BigDecimal.valueOf(quantity);
-            if (currentQuantity.compareTo(BigDecimal.ZERO) < 0) { // First case : quantity < 0
-                throw new IllegalQuantity("Quantity must be greater than 0");
-            }
-            Cart cart = cartRepository.findByCartId(cartId)
-                    .orElseThrow(() -> new CartNotFoundException("Cart not found"));
-            CartItems item = cart.getCartItems().stream()
-                    .filter(i -> i.getProduct().getProductId().equals(productId))
-                    .findFirst().orElse(null);
-            if (item == null) {
-                return;
-            }
-            if (currentQuantity.compareTo(BigDecimal.ZERO) == 0) { //Second case: quantity = 0
-                cart.getCartItems().remove(item);
-                return;
-            }
-            item.setQuantity(currentQuantity); //Final case: update the quantity
-
+    public CartResponseDto getCartDetails(Cart cart) {
+        Set<CartItemDto> cartItemList = new LinkedHashSet<>();
+        List<CartItems> items = cartItemsRepository.findByCartWithProduct(cart);
+        int totalCount = 0;
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for (CartItems item : items) {
+            BigDecimal totalItemPrice = item.getQuantity().multiply(item.getPriceSnapshot());
+            CartItemDto cartItemDto = new CartItemDto(
+                    item.getCartItemId(),
+                    item.getProduct().getName(),
+                    item.getQuantity(),
+                    item.getPriceSnapshot(),
+                    totalItemPrice
+            );
+            cartItemList.add(cartItemDto);
+            totalPrice =  totalPrice.add(totalItemPrice);
+            totalCount += item.getQuantity().intValue();
+        }
+        return new CartResponseDto(cartItemList, totalCount, totalPrice);
     }
-
-    @Override
-    public Cart getCart(String sessionId) {
-        return createCart(sessionId);
-    }
-
-    @Override
-    public void clearCart(long cartId) {
-        Cart cart = cartRepository.
-                findByCartId(cartId).orElseThrow(() -> new CartNotFoundException("Cart not found"));
-        cart.getCartItems().clear();
-    }
-
-
-
 }

@@ -1,15 +1,17 @@
 package com.scientia.mercatus.service;
 
+import com.scientia.mercatus.dto.CartContextDto;
+import com.scientia.mercatus.dto.CartResponseDto;
 import com.scientia.mercatus.entity.Cart;
-import com.scientia.mercatus.entity.Orders;
 
 import java.math.BigDecimal;
 
 public interface ICartService {
-    public Cart createCart(String sessionId);
-    public void addProductToCart(long cartId, long productId, BigDecimal quantity);
-    public void removeProductFromCart(long cartId, long productId);
-    public void updateProductQuantity(long cartId, long productId, double quantity);
-    public Cart getCart(String sessionId);
-    public void clearCart(long cartId);
+    Cart resolveCart(CartContextDto cartContext);
+    void addToCart(Cart currentCart, Long productId, BigDecimal quantity);
+    void removeFromCart(Cart currentCart, Long productId);
+    void clearCart(Cart currentCart);
+    void updateQuantity(Cart currentCart, Long productId, BigDecimal quantity);
+    CartResponseDto getCartDetails(Cart Cart);
+
 }

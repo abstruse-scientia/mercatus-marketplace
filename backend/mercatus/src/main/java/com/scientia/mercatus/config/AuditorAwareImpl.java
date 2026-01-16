@@ -10,16 +10,16 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component("auditorAwareImpl")
-public class AuditorAwareImpl implements AuditorAware<User> {
+public class AuditorAwareImpl implements AuditorAware<Long> {
 
     @Override
-    public Optional<User> getCurrentAuditor() {
+    public Optional<Long> getCurrentAuditor() {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated() ||
                     authentication.getPrincipal().equals("anonymousUser")) {
                 return Optional.empty();
             }
             User user = (User) authentication.getPrincipal();
-            return Optional.of(user);
+            return Optional.of(user.getUserId());
    }
 }
