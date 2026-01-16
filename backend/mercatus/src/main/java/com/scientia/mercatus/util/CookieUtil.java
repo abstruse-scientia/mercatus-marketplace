@@ -21,7 +21,7 @@ public class CookieUtil {
         }
         return null;
     }
-    public Cookie addSessionCookie(HttpServletResponse response, String sessionId) {
+    public void addSessionCookie(HttpServletResponse response, String sessionId) {
         Cookie newCookie = new Cookie("SESSION_ID", sessionId);
         newCookie.setPath("/");
         newCookie.setHttpOnly(true);
