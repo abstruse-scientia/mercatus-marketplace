@@ -52,5 +52,5 @@ public class User extends BaseEntity{
     private Set<Role> roles = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Orders> orders = new ArrayList<>();
+    private List<Order> orders = new ArrayList<>();
 }

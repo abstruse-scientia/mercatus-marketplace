@@ -16,7 +16,7 @@ import java.util.Set;
 @Table(name = "orders", schema = "mercatus_db", uniqueConstraints = {
         @UniqueConstraint(name = "UK2mnxs4cfnjg2w7q5xw77x91u", columnNames = {"order_reference"})
 })
-public class Orders extends BaseEntity {
+public class Order extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id", nullable = false)
@@ -27,29 +27,26 @@ public class Orders extends BaseEntity {
     private BigDecimal totalAmount;
 
 
-
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Size(max = 50)
-    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false, length = 50)
-    private String paymentStatus;
+    private PaymentStatus paymentStatus;
 
-    @Size(max = 100)
-    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 100)
-    private String status;
+    private OrderStatus status;
+
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "order_reference", nullable = false)
+    @Column(name = "order_reference", nullable = false, unique = true)
     private String orderReference;
 
-    @OneToMany
-    @JoinColumn(name = "order_id")
-    private Set<OrderItems> orderItems = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "order", cascade =  CascadeType.ALL, orphanRemoval = true)
+    private Set<OrderItem> orderItems = new LinkedHashSet<>();
 
 }
