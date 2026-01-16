@@ -20,14 +20,17 @@ public class Product extends BaseEntity{
     @Column(name="name", nullable = false)
     private String name;
 
-    @Column(name="description", nullable = false)
+    @Column(name="description")
     private String description;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price", nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
     @Column(name = "popularity", nullable = false)
-    private Integer popularity;
+    private Long popularity;
+
+    @Column(name = "total_sold_quantity", nullable = false)
+    private Long totalSoldQuantity = 0L;
 
     @JoinColumn(name = "category_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
