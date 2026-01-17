@@ -13,9 +13,8 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "orders", schema = "mercatus_db", uniqueConstraints = {
-        @UniqueConstraint(name = "UK2mnxs4cfnjg2w7q5xw77x91u", columnNames = {"order_reference"})
-})
+
+@Table(name = "orders")
 public class Order extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +26,10 @@ public class Order extends BaseEntity {
     private BigDecimal totalAmount;
 
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id")
+    private Cart cart;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
@@ -34,16 +37,16 @@ public class Order extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false, length = 50)
-    private PaymentStatus paymentStatus;
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 100)
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.CREATED;
 
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "order_reference", nullable = false, unique = true)
+    @Column(name = "order_reference", nullable = false, length = 255)
     private String orderReference;
 
     @OneToMany(mappedBy = "order", cascade =  CascadeType.ALL, orphanRemoval = true)

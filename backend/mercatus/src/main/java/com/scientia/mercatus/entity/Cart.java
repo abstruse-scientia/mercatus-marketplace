@@ -2,10 +2,8 @@ package com.scientia.mercatus.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -16,23 +14,23 @@ import java.util.Set;
 public class Cart extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long cartId;
+    @Column(name = "cart_id")
+    private Long cartId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = true, nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CartItems> cartItems = new LinkedHashSet<>();
+    private Set<CartItem> cartItems = new LinkedHashSet<>();
 
-    @Size(max = 100)
-    @Column(name = "session_id", length = 100)
+    @NotNull
+    @Column(name = "session_id", length = 100, nullable = false)
     private String sessionId;
 
-    @Size(max = 20)
-    @NotNull
-    @ColumnDefault("'ACTIVE'")
-    @Column(name = "status", nullable = false, length = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private CartStatus cartStatus = CartStatus.ACTIVE;
+
 
 }

@@ -6,13 +6,11 @@ import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.repository.CategoryRepository;
 import com.scientia.mercatus.repository.ProductRepository;
 import com.scientia.mercatus.repository.UserRepository;
-import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;

@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Entity
-@Table(name = "products")
+@Table(name = "product")
 public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class Product extends BaseEntity{
     private BigDecimal price;
 
     @Column(name = "popularity", nullable = false)
-    private Long popularity;
+    private Long popularity = 0L;
 
     @Column(name = "total_sold_quantity", nullable = false)
     private Long totalSoldQuantity = 0L;
@@ -36,7 +36,7 @@ public class Product extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Category category;
 
-    @OneToOne(mappedBy = "product")
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Inventory inventory;
 
 }

@@ -1,10 +1,6 @@
 package com.scientia.mercatus.repository;
 
 import com.scientia.mercatus.entity.Cart;
-import com.scientia.mercatus.entity.CartItems;
-import com.scientia.mercatus.entity.Product;
-import com.scientia.mercatus.entity.User;
-import jakarta.validation.constraints.Size;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

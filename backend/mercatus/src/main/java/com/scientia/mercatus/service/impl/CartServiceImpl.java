@@ -104,15 +104,15 @@ public class CartServiceImpl implements ICartService {
     }
 
     private void mergeGuestToUserCart(Cart guestCart, Cart userCart) {
-        Map<Long, CartItems> cartItems =  userCart.getCartItems().stream().collect(Collectors.toMap(
+        Map<Long, CartItem> cartItems =  userCart.getCartItems().stream().collect(Collectors.toMap(
                 item -> item.getProduct().getProductId(),
                 item -> item
         ));
-        for (CartItems guestItem: guestCart.getCartItems()) {
+        for (CartItem guestItem: guestCart.getCartItems()) {
             Long productId = guestItem.getProduct().getProductId();
             if (cartItems.containsKey(productId)) {
-                CartItems cartItem = cartItems.get(productId);
-                cartItem.setQuantity(cartItem.getQuantity().add(guestItem.getQuantity()));
+                CartItem cartItem = cartItems.get(productId);
+                cartItem.setQuantity(cartItem.getQuantity() + (guestItem.getQuantity()));
             }
             else {
                 guestItem.setCart(userCart);
@@ -124,8 +124,8 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
-    public void addToCart(Cart currentCart, Long productId, BigDecimal quantity) {
-        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <=0) {
+    public void addToCart(Cart currentCart, Long productId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
             throw new IllegalQuantity("Quantity must be greater than 0");
         }
 
@@ -134,18 +134,17 @@ public class CartServiceImpl implements ICartService {
         }
         Product currentProduct = productRepository.findByProductId(productId).orElseThrow(()
                 -> new RuntimeException("Product not found"));
-        Optional<CartItems> cartItemOptional = cartItemsRepository.findByCartAndProduct(currentCart, currentProduct);
+        Optional<CartItem> cartItemOptional = cartItemsRepository.findByCartAndProduct(currentCart, currentProduct);
         if (cartItemOptional.isPresent()) {
-            CartItems currentItem = cartItemOptional.get();
-            currentItem.setQuantity(currentItem.getQuantity().add(quantity));
+            CartItem currentItem = cartItemOptional.get();
+            currentItem.setQuantity(currentItem.getQuantity() + quantity);
             cartItemsRepository.save(currentItem);
             return;
         }
-        CartItems cartItem = new CartItems();
+        CartItem cartItem = new CartItem();
         cartItem.setProduct(currentProduct);
         cartItem.setQuantity(quantity);
         cartItem.setCart(currentCart);
-        cartItem.setPriceSnapshot(currentProduct.getPrice());
         cartItemsRepository.save(cartItem);
     }
 
@@ -156,7 +155,7 @@ public class CartServiceImpl implements ICartService {
         }
         Product currentProduct = productRepository.findByProductId(productId).
                 orElseThrow(()-> new RuntimeException("Product not found: " + productId));
-        Optional<CartItems> cartItemOptional = cartItemsRepository.findByCartAndProduct(currentCart, currentProduct);
+        Optional<CartItem> cartItemOptional = cartItemsRepository.findByCartAndProduct(currentCart, currentProduct);
         cartItemOptional.ifPresent(cartItemsRepository::delete);
     }
 
@@ -167,8 +166,8 @@ public class CartServiceImpl implements ICartService {
 
 
     @Override
-    public void updateQuantity(Cart currentCart, Long productId, BigDecimal quantity) {
-        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) < 0) {
+    public void updateQuantity(Cart currentCart, Long productId, Integer quantity) {
+        if (quantity == null || quantity  < 0) {
             throw new IllegalQuantity("Quantity must be greater than 0");
         }
         if (productId == null) {
@@ -176,14 +175,14 @@ public class CartServiceImpl implements ICartService {
         }
         Product currentProduct = productRepository.findByProductId(productId).
                 orElseThrow(()-> new RuntimeException("Product not found: " + productId));
-        Optional<CartItems> currentCartItemOptional = cartItemsRepository.
+        Optional<CartItem> currentCartItemOptional = cartItemsRepository.
                 findByCartAndProduct(currentCart, currentProduct);
         if (currentCartItemOptional.isEmpty()) {
             return;
         }
 
-        CartItems item = currentCartItemOptional.get();
-        if (quantity.compareTo(BigDecimal.ZERO) == 0) {
+        CartItem item = currentCartItemOptional.get();
+        if (quantity == 0) {
             cartItemsRepository.delete(item);
             return;
         }
@@ -195,16 +194,16 @@ public class CartServiceImpl implements ICartService {
     @Override
     public CartResponseDto getCartDetails(Cart cart) {
         Set<CartItemDto> cartItemList = new LinkedHashSet<>();
-        List<CartItems> items = cartItemsRepository.findByCartWithProduct(cart);
+        List<CartItem> items = cartItemsRepository.findByCartWithProduct(cart);
         int totalCount = 0;
         BigDecimal totalPrice = BigDecimal.ZERO;
-        for (CartItems item : items) {
-            BigDecimal totalItemPrice = item.getQuantity().multiply(item.getPriceSnapshot());
+        for (CartItem item : items) {
+            BigDecimal totalItemPrice = BigDecimal.valueOf(item.getQuantity()).multiply(item.getProduct().getPrice());
             CartItemDto cartItemDto = new CartItemDto(
                     item.getCartItemId(),
                     item.getProduct().getName(),
                     item.getQuantity(),
-                    item.getPriceSnapshot(),
+                    item.getProduct().getPrice(),
                     totalItemPrice
             );
             cartItemList.add(cartItemDto);
