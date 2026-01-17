@@ -26,7 +26,7 @@ public class Category extends BaseEntity{
     @Column(name = "category_name", nullable = false, length = 100)
     private String categoryName;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "category")
     @JsonManagedReference
     private List<Product> products;
 }

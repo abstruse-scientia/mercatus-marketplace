@@ -15,11 +15,12 @@ public class Inventory extends BaseEntity{
     private Long inventoryId;
 
     @Column(name = "stock_quantity", nullable = false)
-    private Long stockQuantity;
+    private Integer stockQuantity;
 
 
-    @JoinColumn(name = "product_id", nullable = false, unique = true)
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
 }

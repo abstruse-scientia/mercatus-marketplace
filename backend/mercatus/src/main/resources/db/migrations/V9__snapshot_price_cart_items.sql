@@ -1,2 +1,0 @@
-ALTER TABLE cart_items
-ADD COLUMN price_snapshot DECIMAL(12, 2) NOT NULL DEFAULT 0.0;
