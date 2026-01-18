@@ -92,7 +92,6 @@ create table orders (
                         updated_at DATETIME(6),
                         updated_by BIGINT UNSIGNED,
                         constraint unique_order_reference unique(order_reference),
-                        constraint fk_cart_cart_id foreign key (cart_id) references cart(cart_id) on delete set null,
                         constraint fk_order_user_id foreign key (user_id) references users(user_id)
 ) engine=InnoDB;
 
@@ -101,6 +100,7 @@ create table order_item (
 
                              order_id BIGINT UNSIGNED NOT NULL,
                              product_id BIGINT UNSIGNED NOT NULL,
+                             product_name varchar(255) not null,
 
                              quantity INT UNSIGNED NOT NULL,
                              price_snapshot DECIMAL(12, 2) NOT NULL,
@@ -110,8 +110,7 @@ create table order_item (
                              updated_at DATETIME(6),
                              updated_by BIGINT UNSIGNED,
                              PRIMARY KEY (order_item_id),
-                             constraint fk_order_item_order_id foreign key (order_id) references orders(order_id) on delete cascade ,
-                             constraint fk_order_item_product_id foreign key (product_id) references product(product_id)
+                             constraint fk_order_item_order_id foreign key (order_id) references orders(order_id) on delete cascade
 ) engine=InnoDB;
 
 
