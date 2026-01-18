@@ -26,9 +26,8 @@ public class Order extends BaseEntity {
     private BigDecimal totalAmount;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cart_id")
-    private Cart cart;
+    @Column(name = "cart_id")
+    private Long cartId;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
