@@ -13,5 +13,6 @@ public interface ICartService {
     void clearCart(Cart currentCart);
     void updateQuantity(Cart currentCart, Long productId, Integer quantity);
     CartResponseDto getCartDetails(Cart Cart);
+    Cart lockCartForCheckout(Long cartId);
 
 }

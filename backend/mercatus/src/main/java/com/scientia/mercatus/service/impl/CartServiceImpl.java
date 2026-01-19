@@ -212,4 +212,10 @@ public class CartServiceImpl implements ICartService {
         }
         return new CartResponseDto(cartItemList, totalCount, totalPrice);
     }
+
+    @Override
+    public Cart lockCartForCheckout(Long cartId) {
+        return cartRepository.findActiveCartForUpdate(cartId).orElseThrow(() ->
+                new IllegalStateException("Cart already checked out or inactive"));
+    }
 }

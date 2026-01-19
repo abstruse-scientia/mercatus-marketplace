@@ -4,5 +4,5 @@ import com.scientia.mercatus.dto.CartContextDto;
 import com.scientia.mercatus.entity.Order;
 
 public interface IOrderService {
-    public Order placeOrder(String sessionId, Long userId);
+    public Order placeOrder(String sessionId, Long userId, String orderReference);
 }
