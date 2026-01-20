@@ -4,6 +4,7 @@ import com.scientia.mercatus.entity.Role;
 import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
+
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class MercatusCustomAuthenticationProvider implements AuthenticationProvider {
