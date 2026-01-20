@@ -6,12 +6,14 @@ import io.jsonwebtoken.Jwts;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Profile("!test")
 public class JwtTokenProvider {
 
     private final JwtKeyProvider jwtKeyProvider;

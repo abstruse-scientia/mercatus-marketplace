@@ -12,11 +12,14 @@ import com.scientia.mercatus.service.IRefreshTokenService;
 import com.scientia.mercatus.util.IRefreshTokenUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
 
+
+@Profile("!test")
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements IRefreshTokenService {

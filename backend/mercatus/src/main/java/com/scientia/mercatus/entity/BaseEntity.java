@@ -14,6 +14,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -29,6 +30,18 @@ public abstract class BaseEntity {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+
+    @PrePersist
+    protected void onCreate() {
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
     @CreatedBy
     @Column(name = "created_by")
     private Long createdBy;
