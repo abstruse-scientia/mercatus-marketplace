@@ -1,10 +1,13 @@
 package com.scientia.mercatus.service.impl;
 
 import com.scientia.mercatus.dto.CartContextDto;
+import com.scientia.mercatus.dto.OrderSummaryDto;
 import com.scientia.mercatus.entity.*;
 
 import com.scientia.mercatus.exception.CartNotFoundException;
 import com.scientia.mercatus.exception.NoLoggedInUserFoundException;
+import com.scientia.mercatus.exception.OrderNotFoundException;
+import com.scientia.mercatus.exception.UnauthorizedOperationException;
 import com.scientia.mercatus.mapper.OrderItemMapper;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.repository.UserRepository;
@@ -14,9 +17,11 @@ import lombok.RequiredArgsConstructor;
 
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 
@@ -90,5 +95,58 @@ public class OrderServiceImpl implements IOrderService {
         } catch (DataIntegrityViolationException e) {
             return orderRepository.findByOrderReference(orderReference).orElseThrow();
         }
+    }
+
+    @Override
+    public void cancelOrder(Long orderId, Long userId) {
+            if (orderId == null) {
+                throw new OrderNotFoundException("Order not found");
+            }
+            if (userId == null) {
+                throw new NoLoggedInUserFoundException("User not found");
+            }
+
+            Order currentOrder = orderRepository.findByIdForUpdate(orderId).orElseThrow(
+                    ()->  new OrderNotFoundException("Order not found")
+            );
+
+            if (!currentOrder.getUser().getUserId().equals(userId)) {
+                throw new UnauthorizedOperationException("Give user can not cancel this order");
+            }
+
+
+            if (currentOrder.getStatus().equals(OrderStatus.CANCELLED)) {
+                return;
+            }
+            if (currentOrder.getStatus() != OrderStatus.CREATED) {
+                throw new IllegalStateException("Order cannot be cancelled in state"
+                        + currentOrder.getStatus());
+            }
+            currentOrder.setStatus(OrderStatus.CANCELLED);
+            currentOrder.setPaymentStatus(PaymentStatus.CANCELLED);
+            
+    }
+
+    @Override
+    public Page<OrderSummaryDto> getOrdersForUser(Long userId, Pageable pageable) {
+        if (userId == null) {
+            throw new NoLoggedInUserFoundException("User not found");
+        }
+
+        Page<Order> orders = orderRepository.findByUser_UserId(userId, pageable);
+
+        Page<OrderSummaryDto> pageDto = orders.map(order ->
+               new OrderSummaryDto(
+                       order.getId(),
+                       order.getTotalAmount(),
+                       order.getPaymentStatus(),
+                       order.getStatus(),
+                       order.getOrderReference(),
+                       order.getCreatedAt()
+               )
+        );
+        return pageDto;
+
+
     }
 }
