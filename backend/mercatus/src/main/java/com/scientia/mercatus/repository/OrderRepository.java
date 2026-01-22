@@ -12,11 +12,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface OrderRepository extends JpaRepository<Order, Integer> {
+public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Optional<Order> findByOrderReference(String orderReference);
 
-    Optional<Order> findById (Long orderId);
+
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
