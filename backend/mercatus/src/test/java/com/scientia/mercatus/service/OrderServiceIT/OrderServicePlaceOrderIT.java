@@ -1,4 +1,4 @@
-package com.scientia.mercatus.service;
+package com.scientia.mercatus.service.OrderServiceIT;
 
 
 import com.scientia.mercatus.dto.CartContextDto;
@@ -6,7 +6,8 @@ import com.scientia.mercatus.entity.*;
 import com.scientia.mercatus.mapper.OrderItemMapper;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.repository.UserRepository;
-import com.scientia.mercatus.service.impl.OrderServiceImpl;
+import com.scientia.mercatus.service.ICartService;
+import com.scientia.mercatus.service.IOrderService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -34,65 +38,80 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestPropertySource(properties = {
         "spring.flyway.enabled=false"
 })
-class OrderServiceImplITTest {
+class OrderServicePlaceOrderIT {
 
-    private Cart buildValidCart() {
-        Product product = new Product();
-        product.setProductId(100L);
-        product.setName("Test Product");
-        product.setPrice(BigDecimal.valueOf(100));
-
-        CartItem cartItem = new CartItem();
-        cartItem.setProduct(product);
-        cartItem.setQuantity(2);
-
-        Cart cart = new Cart();
-        cart.setCartId(1L);
-        cart.setCartItems(Set.of(cartItem));
-        cart.setCartStatus(CartStatus.ACTIVE);
-
-        return cart;
-    }
 
 
     @Autowired
     private OrderRepository orderRepository;
 
+
+    @Autowired
+    private IOrderService orderService;
+
+
     @Autowired
     private UserRepository userRepository;
 
-    private IOrderService orderService;   // ← INTERFACE, not impl
 
-    private ICartService cartService = Mockito.mock(ICartService.class);
-    private OrderItemMapper orderItemMapper = Mockito.mock(OrderItemMapper.class);
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        @Primary
+        public ICartService service() {
+            ICartService mock = Mockito.mock(ICartService.class);
+
+            Mockito.when(mock.resolveCart(Mockito.any(CartContextDto.class)))
+                    .thenAnswer(inv -> buildValidCart());
+            Mockito.when(mock.lockCartForCheckout(Mockito.anyLong()))
+                    .thenAnswer(inv -> buildValidCart());
+
+            return mock;
+        }
+
+        @Bean
+        public OrderItemMapper orderItemMapper() {
+            return new OrderItemMapper();
+        }
+
+
+        private static Cart buildValidCart() {
+            Product product = new Product();
+            product.setProductId(100L);
+            product.setName("Test Product");
+            product.setPrice(BigDecimal.valueOf(100));
+
+            CartItem cartItem = new CartItem();
+            cartItem.setProduct(product);
+            cartItem.setQuantity(2);
+
+            Cart cart = new Cart();
+            cart.setCartId(1L);
+            cart.setCartItems(Set.of(cartItem));
+            cart.setCartStatus(CartStatus.ACTIVE);
+
+            return cart;
+        }
+
+    }
+
 
     @BeforeEach
-    void setup() {
-
-        User user = new User();
-        user.setUserId(1L);
-        user.setUserName("user1");
-        user.setPasswordHash("password1");
-        user.setEmail("email1@example.com");
-        userRepository.save(user);
-
-        Cart cart = buildValidCart();
-
-        Mockito.when(cartService.resolveCart(Mockito.any(CartContextDto.class)))
-                .thenReturn(cart);
-
-        Mockito.when(cartService.lockCartForCheckout(1L))
-                .thenReturn(cart);
-
-        OrderItemMapper realMapper = new OrderItemMapper();
-
-        orderService = new OrderServiceImpl(
-                cartService,
-                realMapper,
-                orderRepository,
-                userRepository
-        );
+    void setUp() {
+        if (!userRepository.existsById(1L)) {
+            User user = new User();
+            user.setUserId(1L);
+            user.setUserName("user1");
+            user.setPasswordHash("password1");
+            user.setEmail("email1@example.com");
+            userRepository.save(user);
+        }
     }
+
+
+
+
 
     @Test
     void shouldCreateOnlyOneOrder_whenCalledConcurrentlyWithSameOrderReference() throws Exception {
