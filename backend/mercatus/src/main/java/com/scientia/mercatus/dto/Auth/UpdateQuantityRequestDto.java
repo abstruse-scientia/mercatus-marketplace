@@ -1,6 +1,4 @@
-package com.scientia.mercatus.dto;
-
-import java.math.BigDecimal;
+package com.scientia.mercatus.dto.Auth;
 
 public record UpdateQuantityRequestDto(Long productId, Integer quantity) {
 }

@@ -1,10 +1,8 @@
 package com.scientia.mercatus.service;
 
-import com.scientia.mercatus.dto.CartContextDto;
-import com.scientia.mercatus.dto.CartResponseDto;
+import com.scientia.mercatus.dto.Cart.CartContextDto;
+import com.scientia.mercatus.dto.Cart.CartResponseDto;
 import com.scientia.mercatus.entity.Cart;
-
-import java.math.BigDecimal;
 
 public interface ICartService {
     Cart resolveCart(CartContextDto cartContext);

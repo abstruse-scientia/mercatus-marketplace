@@ -1,7 +1,5 @@
 package com.scientia.mercatus.service;
 
-import com.scientia.mercatus.dto.CartContextDto;
-
 public interface SessionService {
 
     String createSession();

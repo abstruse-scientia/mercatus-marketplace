@@ -1,8 +1,8 @@
 package com.scientia.mercatus.service.impl;
 
-import com.scientia.mercatus.dto.CartContextDto;
-import com.scientia.mercatus.dto.CartItemDto;
-import com.scientia.mercatus.dto.CartResponseDto;
+import com.scientia.mercatus.dto.Cart.CartContextDto;
+import com.scientia.mercatus.dto.Cart.CartItemDto;
+import com.scientia.mercatus.dto.Cart.CartResponseDto;
 import com.scientia.mercatus.entity.*;
 import com.scientia.mercatus.exception.IllegalQuantity;
 import com.scientia.mercatus.repository.CartItemsRepository;

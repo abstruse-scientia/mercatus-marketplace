@@ -1,5 +1,5 @@
 package com.scientia.mercatus.service;
-import com.scientia.mercatus.dto.OrderSummaryDto;
+import com.scientia.mercatus.dto.Order.OrderSummaryDto;
 import com.scientia.mercatus.entity.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

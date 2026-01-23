@@ -1,7 +1,7 @@
 package com.scientia.mercatus.service.OrderServiceIT;
 
 
-import com.scientia.mercatus.dto.OrderSummaryDto;
+import com.scientia.mercatus.dto.Order.OrderSummaryDto;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.service.IOrderService;
 import org.junit.jupiter.api.Test;
@@ -48,8 +48,8 @@ public class OrderServiceGetOrderIT {
         assertNotNull(page);
         assertTrue(page.getContent().size() <= 5);
 
-        for (OrderSummaryDto Dto : page.getContent()) {
-            assertNotNull(Dto.getOrderReference());
+        for (OrderSummaryDto dto : page.getContent()) {
+            assertNotNull(dto.getOrderReference());
         }
 
 

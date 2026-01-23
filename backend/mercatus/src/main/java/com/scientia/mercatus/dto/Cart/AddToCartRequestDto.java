@@ -1,6 +1,4 @@
-package com.scientia.mercatus.dto;
-
-import java.math.BigDecimal;
+package com.scientia.mercatus.dto.Cart;
 
 public record AddToCartRequestDto(Long productId, Integer quantity) {
 }
