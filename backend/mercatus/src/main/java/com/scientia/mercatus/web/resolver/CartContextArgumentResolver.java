@@ -1,8 +1,7 @@
 package com.scientia.mercatus.web.resolver;
 
-import com.scientia.mercatus.dto.CartContextDto;
+import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.entity.User;
-import com.scientia.mercatus.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;

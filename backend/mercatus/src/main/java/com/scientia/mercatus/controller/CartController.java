@@ -1,6 +1,9 @@
 package com.scientia.mercatus.controller;
 
-import com.scientia.mercatus.dto.*;
+import com.scientia.mercatus.dto.Auth.UpdateQuantityRequestDto;
+import com.scientia.mercatus.dto.Cart.AddToCartRequestDto;
+import com.scientia.mercatus.dto.Cart.CartContextDto;
+import com.scientia.mercatus.dto.Cart.CartResponseDto;
 import com.scientia.mercatus.entity.Cart;
 
 import com.scientia.mercatus.service.impl.CartServiceImpl;
@@ -50,7 +53,7 @@ public class CartController {
 
     @PatchMapping("/items")
     public ResponseEntity<Void> updateQuantity(@RequestBody
-                                               UpdateQuantityRequestDto updateQuantityRequestDto,
+                                                   UpdateQuantityRequestDto updateQuantityRequestDto,
                                                CartContextDto cartContextDto
     ) {
         Cart currentCart = getCurrentCart(cartContextDto);

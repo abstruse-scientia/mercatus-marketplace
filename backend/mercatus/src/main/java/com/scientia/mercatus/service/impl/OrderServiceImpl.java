@@ -1,13 +1,13 @@
 package com.scientia.mercatus.service.impl;
 
-import com.scientia.mercatus.dto.CartContextDto;
-import com.scientia.mercatus.dto.OrderSummaryDto;
+import com.scientia.mercatus.dto.Cart.CartContextDto;
+import com.scientia.mercatus.dto.Order.OrderSummaryDto;
 import com.scientia.mercatus.entity.*;
 
 import com.scientia.mercatus.exception.NoLoggedInUserFoundException;
 import com.scientia.mercatus.exception.OrderNotFoundException;
 import com.scientia.mercatus.exception.UnauthorizedOperationException;
-import com.scientia.mercatus.mapper.OrderItemMapper;
+import com.scientia.mercatus.mapper.OrderMapper;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.service.ICartService;
@@ -15,35 +15,33 @@ import com.scientia.mercatus.service.IOrderService;
 import lombok.RequiredArgsConstructor;
 
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 
 public class OrderServiceImpl implements IOrderService {
 
     private final ICartService cartService;
-    private final OrderItemMapper orderItemMapper;
+    private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
 
     @Override
+    @Transactional
     public Order placeOrder(String sessionId, Long userId, String orderReference) {
         try {
             return placeOrderHelper(sessionId, userId, orderReference);
@@ -69,9 +67,6 @@ public class OrderServiceImpl implements IOrderService {
             Order currentOrder = orderRepository.findByIdForUpdate(orderId).orElseThrow(
                     ()->  new OrderNotFoundException("Order not found")
             );
-
-        System.out.println("Order owner = " + currentOrder.getUser().getUserId());
-        System.out.println("Caller user = " + userId);
             if (!currentOrder.getUser().getUserId().equals(userId)) {
                 throw new UnauthorizedOperationException("Given user can not cancel this order");
             }
@@ -114,7 +109,6 @@ public class OrderServiceImpl implements IOrderService {
 
 
 
-    @Transactional
     Order placeOrderHelper(String sessionId, Long userId, String orderRef) {
 
 
@@ -151,7 +145,7 @@ public class OrderServiceImpl implements IOrderService {
         Set<OrderItem> orderItems = new LinkedHashSet<>();
 
         for (CartItem item : items) {
-            OrderItem orderItem = orderItemMapper.convertCartItemToOrderItem(item, newOrder);
+            OrderItem orderItem = orderMapper.convertCartItemToOrderItem(item, newOrder);
             subtotal = subtotal.add(orderItem.getPriceSnapshot().multiply
                     (BigDecimal.valueOf(orderItem.getQuantity())));
             orderItems.add(orderItem);

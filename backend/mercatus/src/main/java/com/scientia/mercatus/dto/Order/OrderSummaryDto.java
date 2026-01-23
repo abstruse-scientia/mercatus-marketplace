@@ -1,4 +1,4 @@
-package com.scientia.mercatus.dto;
+package com.scientia.mercatus.dto.Order;
 
 import com.scientia.mercatus.entity.OrderStatus;
 import com.scientia.mercatus.entity.PaymentStatus;
