@@ -51,4 +51,7 @@ public class Order extends BaseEntity {
     @OneToMany(mappedBy = "order", cascade =  CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItem> orderItems = new LinkedHashSet<>();
 
+    @Embedded
+    private AddressSnapshot addressSnapshot;
+
 }
