@@ -10,6 +10,7 @@ import com.scientia.mercatus.exception.UnauthorizedOperationException;
 import com.scientia.mercatus.mapper.AddressMapper;
 import com.scientia.mercatus.repository.UserAddressRepository;
 import com.scientia.mercatus.repository.UserRepository;
+import com.scientia.mercatus.security.AuthContext;
 import com.scientia.mercatus.service.IAddressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -27,23 +28,12 @@ public class AddressServiceImpl implements IAddressService {
 
     private final UserAddressRepository userAddressRepository;
     private final AddressMapper addressMapper;
-
-    private Long getLoggedInUserId() {
-       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-       if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-           throw new UnauthorizedOperationException("User not allowed to access this resource");
-       }
-       if (!(auth.getPrincipal() instanceof User)) {
-           throw new UnauthorizedOperationException("Invalid Principal Type");
-       }
-       User user = (User) auth.getPrincipal();
-       return user.getUserId();
-    }
+    private final AuthContext authContext;
 
     @Override
     @Transactional
     public UserAddressDto addAddress(AddressRequestDto addressRequestDto) {
-        Long userId  = getLoggedInUserId();
+        Long userId  = authContext.getCurrentUserId();
         UserAddress userAddress = new UserAddress();
         userAddress.setUserId(userId);
         AddressSnapshot addressSnapshot = getAddressSnapshot(addressRequestDto);
@@ -63,7 +53,7 @@ public class AddressServiceImpl implements IAddressService {
     @Override
     @Transactional
     public void deleteAddress(Long addressId) {
-        Long userId = getLoggedInUserId();
+        Long userId = authContext.getCurrentUserId();
 
         UserAddress address = userAddressRepository.findByIdAndUserIdAndIsActiveTrue(addressId, userId)
                 .orElseThrow(()-> new AddressNotFoundException("Given address does not exist"));
@@ -76,7 +66,7 @@ public class AddressServiceImpl implements IAddressService {
 
     @Override
     public List<UserAddressDto> getAddresses() {
-        Long userId = getLoggedInUserId();
+        Long userId = authContext.getCurrentUserId();
         List <UserAddress> userAddresses = userAddressRepository.findByUserIdAndIsActiveTrue(userId);
         return userAddresses.stream().map(
                 addressMapper::toUserAddressDto
@@ -86,9 +76,29 @@ public class AddressServiceImpl implements IAddressService {
 
     @Override
     public UserAddressDto getDefaultAddress() {
-        Long userId = getLoggedInUserId();
+        Long userId = authContext.getCurrentUserId();
         UserAddress userAddress =  userAddressRepository.findByUserIdAndIsDefaultTrueAndIsActiveTrue(userId).orElseThrow(() ->
                 new AddressNotFoundException("No default address exists"));
+        return addressMapper.toUserAddressDto(userAddress);
+    }
+
+    @Override
+    @Transactional
+    public UserAddressDto updateAddress(Long addressId, AddressRequestDto addressDto) {
+        Long userId = authContext.getCurrentUserId();
+        UserAddress userAddress = userAddressRepository.findByIdAndUserIdAndIsActiveTrue(addressId, userId).orElseThrow(
+                () -> new AddressNotFoundException("Given address does not exist")
+        );
+        if (addressDto.isDefault() &&  !userAddress.isDefault()) {
+            userAddressRepository.clearDefaultUser(userId);
+            userAddress.setDefault(true);
+        }
+        if (!addressDto.isDefault()) {
+            userAddress.setDefault(false);
+        }
+        AddressSnapshot addressSnapshot = getAddressSnapshot(addressDto);
+        userAddress.setAddressSnapshot(addressSnapshot);
+
         return addressMapper.toUserAddressDto(userAddress);
     }
 

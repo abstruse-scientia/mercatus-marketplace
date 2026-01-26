@@ -25,4 +25,5 @@ public interface UserAddressRepository extends JpaRepository<UserAddress, Long> 
             "U.isDefault = true AND " +
             "U.userId = :userId")
     void clearDefaultUser(@Param("userId") Long userId);
+
 }
