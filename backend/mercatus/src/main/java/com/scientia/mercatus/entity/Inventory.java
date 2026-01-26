@@ -14,13 +14,7 @@ public class Inventory extends BaseEntity{
     @Column(name = "inventory_id", nullable = false)
     private Long inventoryId;
 
-    @Column(name = "stock_quantity", nullable = false)
-    private Integer stockQuantity;
-
-
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @Column(nullable = false, updatable = false)
+    private String sku;
 
 }
