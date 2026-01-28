@@ -1,8 +1,11 @@
 package com.scientia.mercatus.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 
 import java.math.BigDecimal;
@@ -36,7 +39,19 @@ public class Product extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Category category;
 
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Inventory inventory;
+
+    @Size(max = 100)
+    @NotNull
+    @Column(name = "sku", nullable = false, length = 100)
+    private String sku;
+
+    @NotNull
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
+    @NotNull
+
+    @Column(name = "is_sellable", nullable = false)
+    private Boolean isSellable = true;
 
 }
