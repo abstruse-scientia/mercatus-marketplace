@@ -2,6 +2,7 @@ package com.scientia.mercatus.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,5 +38,10 @@ public class OrderItem extends BaseEntity{
     @NotNull
     @Column(name = "price_snapshot", nullable = false, precision = 12, scale = 2)
     private BigDecimal priceSnapshot;
+
+    @Size(max = 100)
+    @NotNull
+    @Column(name = "reservation_key", nullable = false, length = 100, unique = true)
+    private String reservationKey;
 
 }

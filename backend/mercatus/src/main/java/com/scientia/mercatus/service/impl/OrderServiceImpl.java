@@ -23,10 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashSet;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 
 @Service
@@ -38,6 +41,7 @@ public class OrderServiceImpl implements IOrderService {
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final InventoryServiceImpl inventoryService;
 
 
     @Override
@@ -78,6 +82,9 @@ public class OrderServiceImpl implements IOrderService {
             if (currentOrder.getStatus() != OrderStatus.CREATED) {
                 throw new IllegalStateException("Order cannot be cancelled in state"
                         + currentOrder.getStatus());
+            }
+            for (OrderItem item: currentOrder.getOrderItems()) {
+                inventoryService.releaseReservation(item.getReservationKey());
             }
             currentOrder.setStatus(OrderStatus.CANCELLED);
             currentOrder.setPaymentStatus(PaymentStatus.CANCELLED);
@@ -145,7 +152,15 @@ public class OrderServiceImpl implements IOrderService {
         Set<OrderItem> orderItems = new LinkedHashSet<>();
 
         for (CartItem item : items) {
+            String reservationKey = UUID.randomUUID().toString();
+            Instant expiresAt = Instant.now().plus(10, ChronoUnit.MINUTES);
+            inventoryService.reserveStock(orderRef,
+                    reservationKey,
+                    item.getProduct().getSku(),
+                    item.getQuantity(),
+                    expiresAt);
             OrderItem orderItem = orderMapper.convertCartItemToOrderItem(item, newOrder);
+            orderItem.setReservationKey(reservationKey);
             subtotal = subtotal.add(orderItem.getPriceSnapshot().multiply
                     (BigDecimal.valueOf(orderItem.getQuantity())));
             orderItems.add(orderItem);
