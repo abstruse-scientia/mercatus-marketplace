@@ -43,4 +43,11 @@ public class StockReservation extends BaseEntity{
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+
+
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "order_reference", nullable = false, length = 255)
+    private String orderReference;
+
 }

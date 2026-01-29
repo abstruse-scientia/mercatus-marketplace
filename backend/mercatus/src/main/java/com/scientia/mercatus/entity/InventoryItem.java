@@ -35,9 +35,5 @@ public class InventoryItem extends BaseEntity {
     @Column(name = "version", nullable = false)
     private Long version;
 
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "order_reference", nullable = false, length = 255)
-    private String orderReference;
 
 }

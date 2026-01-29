@@ -4,10 +4,7 @@ import com.scientia.mercatus.entity.InventoryItem;
 import com.scientia.mercatus.entity.ReservationStatus;
 import com.scientia.mercatus.entity.StockReservation;
 
-import com.scientia.mercatus.exception.InsufficientStockException;
-import com.scientia.mercatus.exception.InvalidQuantityException;
-import com.scientia.mercatus.exception.ReservationAlreadyExpiredException;
-import com.scientia.mercatus.exception.InventoryItemNotFoundException;
+import com.scientia.mercatus.exception.*;
 import com.scientia.mercatus.repository.InventoryItemRepository;
 import com.scientia.mercatus.repository.StockReservationRepository;
 import com.scientia.mercatus.service.IInventoryService;
@@ -16,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -42,37 +39,88 @@ public class InventoryServiceImpl implements IInventoryService {
                 .orElseThrow(() -> new InventoryItemNotFoundException("No stock found."));
         int available = inventoryItem.getTotalStock() - inventoryItem.getReservedStock();
         if (available < quantity) {
-            throw new InsufficientStockException("Insufficient stock.");
+            throw new InsufficientStockException("Insufficient stock." + sku);
         }
+
+        inventoryItem.setReservedStock(inventoryItem.getReservedStock() + quantity) ;
         StockReservation reservation = new StockReservation();
-        reservation.setReservationKey(UUID.randomUUID().toString());
+        reservation.setReservationKey(reservationKey);
+        reservation.setOrderReference(orderReference);
         reservation.setSku(sku);
         reservation.setQuantity(quantity);
         reservation.setExpiresAt(expiresAt);
         reservation.setStatus(ReservationStatus.RESERVED);
+
+        inventoryItemRepository.save(inventoryItem);
+        stockReservationRepository.save(reservation);
         return reservation;
     }
 
 
 
     @Override
+    @Transactional
     public void addStock(String sku, int quantity) {
-
+        InventoryItem item = inventoryItemRepository.findBySku(sku).orElseGet(
+                    ()-> {
+                        InventoryItem inventoryItem = new InventoryItem();
+                        inventoryItem.setSku(sku);
+                        inventoryItem.setTotalStock(0);
+                        inventoryItem.setReservedStock(0);
+                        return inventoryItem;
+                    }
+                );
+        if (quantity <= 0) {
+            throw new InvalidQuantityException("Invalid quantity");
+        }
+        item.setTotalStock(item.getTotalStock() + quantity);
+        inventoryItemRepository.save(item);
     }
 
     @Override
+    @Transactional
     public void confirmReservation(String reservationKey) {
-
+        StockReservation stockReservation = stockReservationRepository.findByReservationKey(reservationKey);
+        if (stockReservation == null) {
+            throw new ReservationNotExistsException("No reservation exists for this reservation key." + reservationKey);
+        }
+        if (!stockReservation.getStatus().equals(ReservationStatus.RESERVED)) {
+            throw new InvalidReservationStateException("Invalid reservation state");
+        }
+        InventoryItem item = inventoryItemRepository.findBySku(stockReservation.getSku())
+                .orElseThrow(() -> new InventoryItemNotFoundException("No stock found."));
+        int quantity = stockReservation.getQuantity();
+        item.setReservedStock(item.getReservedStock() - quantity);
+        item.setTotalStock(item.getTotalStock() - quantity);
+        stockReservation.setStatus(ReservationStatus.CONFIRMED);
+        stockReservationRepository.save(stockReservation);
+        inventoryItemRepository.save(item);
     }
 
     @Override
     public int getAvailableStock(String sku) {
-        return 0;
+        InventoryItem item = inventoryItemRepository.findBySku(sku).orElseThrow(() ->
+                new InventoryItemNotFoundException("No stock found." + sku));
+        return item.getTotalStock() - item.getReservedStock();
     }
 
     @Override
+    @Transactional
     public void releaseReservation(String reservationKey) {
-
+        StockReservation stockReservation = stockReservationRepository.findByReservationKey(reservationKey);
+        if (stockReservation == null) {
+            throw new ReservationNotExistsException("No reservation exists for this reservation key." + reservationKey);
+        }
+        if (!stockReservation.getStatus().equals(ReservationStatus.RESERVED)) {
+            throw new InvalidReservationStateException("Invalid reservation state");
+        }
+        int quantity = stockReservation.getQuantity();
+        InventoryItem inventoryItem = inventoryItemRepository.findBySku(stockReservation.getSku())
+                .orElseThrow(() -> new InventoryItemNotFoundException("No stock found."));
+        inventoryItem.setReservedStock(inventoryItem.getReservedStock() - quantity);
+        stockReservation.setStatus(ReservationStatus.RELEASED);
+        stockReservationRepository.save(stockReservation);
+        inventoryItemRepository.save(inventoryItem);
     }
 
 
