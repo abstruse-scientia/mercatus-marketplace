@@ -50,12 +50,14 @@ public class DevDataSeeder implements CommandLineRunner {
         p1.setName("Canon EOS 1500D DSLR");
         p1.setDescription("24.1MP DSLR camera with 18-55mm lens");
         p1.setPrice(new BigDecimal("37999.00"));
+        p1.setSku("SKU-1");
 
         Product p2 = new Product();
         p2.setCategory(cameras);
         p2.setName("Sony Alpha a6400 Mirrorless");
         p2.setDescription("24.2MP mirrorless camera with 4K video");
         p2.setPrice(new BigDecimal("68999.00"));
+        p2.setSku("SKU-2");
 
 
         productRepository.saveAll(List.of(p1, p2));
