@@ -24,6 +24,8 @@ create table product (
                          created_by BIGINT UNSIGNED,
                          updated_at DATETIME(6),
                          updated_by BIGINT UNSIGNED,
+                         is_active tinyint(1) not null default true,
+                         is_sellable tinyint(1) not null default true,
                          constraint fk_product_category_id foreign key (category_id) references category(category_id)
 ) engine=InnoDB;
 
@@ -59,19 +61,6 @@ create table cart_item (
 ) engine=InnoDB;
 
 
-
-create table inventory (
-                           stock_quantity integer unsigned not null,
-                           created_at datetime(6) not null,
-                           created_by bigint unsigned,
-                           inventory_id bigint unsigned not null auto_increment,
-                           product_id bigint unsigned not null,
-                           updated_at datetime(6),
-                           updated_by bigint unsigned,
-                           primary key (inventory_id),
-                           constraint unique_inventory_product_id unique(product_id),
-                           constraint fk_inventory_product_id foreign key (product_id) references product(product_id)
-) engine=InnoDB;
 
 create table orders (
                         order_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -117,7 +106,7 @@ create table order_item (
 CREATE INDEX idx_cart_user ON cart(user_id);
 CREATE INDEX idx_items_cart ON cart_item(cart_id);
 CREATE INDEX idx_items_product ON cart_item(product_id);
-CREATE INDEX idx_inventory_product ON inventory(product_id);
+
 CREATE INDEX idx_orders_user ON orders(user_id);
 
 

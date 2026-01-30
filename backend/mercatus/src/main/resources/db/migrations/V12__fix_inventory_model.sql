@@ -2,12 +2,18 @@ drop table if exists inventory;
 
 
 
+alter table product
+add column sku varchar(100);
+
 update product
-set sku = CONCAT('SKU-', product_id)
-where sku is null;
+set sku = CONCAT("SKU", product_id)
+where sku is null or sku = '';
 
+alter table product
+modify sku varchar(100) not null;
 
-
+alter table product
+add constraint uk_product_sku unique (sku);
 
 
 
