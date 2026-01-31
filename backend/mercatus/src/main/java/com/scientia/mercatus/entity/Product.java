@@ -29,11 +29,6 @@ public class Product extends BaseEntity{
     @Column(name = "price", nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "popularity", nullable = false)
-    private Long popularity = 0L;
-
-    @Column(name = "total_sold_quantity", nullable = false)
-    private Long totalSoldQuantity = 0L;
 
     @JoinColumn(name = "category_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -42,16 +37,13 @@ public class Product extends BaseEntity{
 
     @Size(max = 100)
     @NotNull
-    @Column(name = "sku", nullable = false, length = 100)
+    @Column(name = "sku", nullable = false, length = 100, unique = true)
     private String sku;
 
     @NotNull
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
-    @NotNull
 
-    @Column(name = "is_sellable", nullable = false)
-    private Boolean isSellable = true;
 
 }
