@@ -36,7 +36,7 @@ public class Order extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false, length = 50)
-    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+    private OrderPaymentStatus orderPaymentStatus = OrderPaymentStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 100)
@@ -45,7 +45,7 @@ public class Order extends BaseEntity {
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "order_reference", nullable = false, length = 255)
+    @Column(name = "order_reference", nullable = false, length = 255, unique = true)
     private String orderReference;
 
     @OneToMany(mappedBy = "order", cascade =  CascadeType.ALL, orphanRemoval = true)

@@ -1,7 +1,7 @@
 package com.scientia.mercatus.dto.Order;
 
 import com.scientia.mercatus.entity.OrderStatus;
-import com.scientia.mercatus.entity.PaymentStatus;
+import com.scientia.mercatus.entity.OrderPaymentStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,16 +14,16 @@ import java.time.Instant;
 public class OrderSummaryDto {
     Long id;
     BigDecimal totalAmount;
-    PaymentStatus paymentStatus;
+    OrderPaymentStatus orderPaymentStatus;
     OrderStatus orderStatus;
     String orderReference;
     Instant createdAt;
 
-    public OrderSummaryDto(Long id,  BigDecimal totalAmount, PaymentStatus paymentStatus,
+    public OrderSummaryDto(Long id,  BigDecimal totalAmount, OrderPaymentStatus orderPaymentStatus,
                            OrderStatus orderStatus, String orderReference, Instant createdAt) {
         this.id = id;
         this.totalAmount = totalAmount;
-        this.paymentStatus = paymentStatus;
+        this.orderPaymentStatus = orderPaymentStatus;
         this.orderStatus = orderStatus;
         this.orderReference = orderReference;
         this.createdAt = createdAt;

@@ -87,7 +87,7 @@ public class OrderServiceImpl implements IOrderService {
                 inventoryService.releaseReservation(item.getReservationKey());
             }
             currentOrder.setStatus(OrderStatus.CANCELLED);
-            currentOrder.setPaymentStatus(PaymentStatus.CANCELLED);
+            currentOrder.setOrderPaymentStatus(OrderPaymentStatus.CANCELLED);
             
     }
 
@@ -103,7 +103,7 @@ public class OrderServiceImpl implements IOrderService {
                new OrderSummaryDto(
                        order.getId(),
                        order.getTotalAmount(),
-                       order.getPaymentStatus(),
+                       order.getOrderPaymentStatus(),
                        order.getStatus(),
                        order.getOrderReference(),
                        order.getCreatedAt()
