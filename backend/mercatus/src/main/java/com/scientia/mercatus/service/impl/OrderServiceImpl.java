@@ -11,7 +11,9 @@ import com.scientia.mercatus.mapper.OrderMapper;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.service.ICartService;
+import com.scientia.mercatus.service.IInventoryService;
 import com.scientia.mercatus.service.IOrderService;
+import com.scientia.mercatus.service.IProductService;
 import lombok.RequiredArgsConstructor;
 
 
@@ -41,7 +43,8 @@ public class OrderServiceImpl implements IOrderService {
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final InventoryServiceImpl inventoryService;
+    private final IInventoryService inventoryService;
+    private final IProductService  productService;
 
 
     @Override
@@ -154,9 +157,10 @@ public class OrderServiceImpl implements IOrderService {
         for (CartItem item : items) {
             String reservationKey = UUID.randomUUID().toString();
             Instant expiresAt = Instant.now().plus(10, ChronoUnit.MINUTES);
+            Product product = productService.getActiveProduct(item.getProduct().getProductId());
             inventoryService.reserveStock(orderRef,
                     reservationKey,
-                    item.getProduct().getSku(),
+                    product.getSku(),
                     item.getQuantity(),
                     expiresAt);
             OrderItem orderItem = orderMapper.convertCartItemToOrderItem(item, newOrder);
