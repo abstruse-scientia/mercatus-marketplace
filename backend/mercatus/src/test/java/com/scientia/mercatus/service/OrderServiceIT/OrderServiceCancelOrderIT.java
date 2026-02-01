@@ -3,7 +3,7 @@ package com.scientia.mercatus.service.OrderServiceIT;
 
 import com.scientia.mercatus.entity.Order;
 import com.scientia.mercatus.entity.OrderStatus;
-import com.scientia.mercatus.entity.PaymentStatus;
+import com.scientia.mercatus.entity.OrderPaymentStatus;
 import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.exception.UnauthorizedOperationException;
 import com.scientia.mercatus.repository.OrderRepository;
@@ -50,7 +50,7 @@ public class OrderServiceCancelOrderIT {
         order.setOrderReference(UUID.randomUUID().toString());
         order.setUser(userRepository.getReferenceByUserId(userId));
         order.setTotalAmount(BigDecimal.valueOf(1240));
-        order.setPaymentStatus(PaymentStatus.PENDING);
+        order.setOrderPaymentStatus(OrderPaymentStatus.PENDING);
         order.setStatus(OrderStatus.CREATED);
         return orderRepository.saveAndFlush(order);
     }
@@ -67,7 +67,7 @@ public class OrderServiceCancelOrderIT {
 
         Order cancelledOrder = orderRepository.findById(order.getId()).orElseThrow();
         assertEquals(OrderStatus.CANCELLED, cancelledOrder.getStatus());
-        assertEquals(PaymentStatus.CANCELLED, cancelledOrder.getPaymentStatus());
+        assertEquals(OrderPaymentStatus.CANCELLED, cancelledOrder.getOrderPaymentStatus());
 
     }
 

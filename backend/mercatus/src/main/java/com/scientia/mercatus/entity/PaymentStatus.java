@@ -1,9 +1,9 @@
 package com.scientia.mercatus.entity;
 
 public enum PaymentStatus {
-    PENDING,
+
+    CREATED,
+    PROCESSING,
     SUCCESS,
-    FAILED,
-    REFUNDED,
-    CANCELLED,
+    FAILED
 }
