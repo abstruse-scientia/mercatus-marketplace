@@ -143,9 +143,10 @@ public class OrderServiceImpl implements IOrderService {
         for (CartItem item : items) {
             String reservationKey = UUID.randomUUID().toString();
             Instant expiresAt = Instant.now().plus(10, ChronoUnit.MINUTES);
+            Product product = productService.getActiveProduct(item.getProduct().getProductId());
             inventoryService.reserveStock(orderRef,
                     reservationKey,
-                    item.getProduct().getSku(),
+                    product.getSku(),
                     item.getQuantity(),
                     expiresAt);
             OrderItem orderItem = orderMapper.convertCartItemToOrderItem(item, newOrder);
