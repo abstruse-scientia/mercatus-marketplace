@@ -28,20 +28,20 @@ public class StripeWebhookService {
     public void process(String payload, String signatureHeader) {
 
 
-        Event event = verifySignature(payload, signatureHeader);
+        Event event = verifySignature(payload, signatureHeader);//step 1: verifying whether it's the real on
 
 
-        if (eventRepository.existsById(event.getId())) {
+        if (eventRepository.existsById(event.getId())) {// step 2: have I process it before?
             return;
         }
 
 
-        handleEvent(event);
+        handleEvent(event);//step 3: check in to see what happened
 
 
         ProcessedPaymentEvent processedPaymentEvent = new ProcessedPaymentEvent();
         processedPaymentEvent.setEventId(event.getId());
-        eventRepository.save(processedPaymentEvent);
+        eventRepository.save(processedPaymentEvent);//step 5: remember that I handled it
     }
 
 
@@ -64,7 +64,7 @@ public class StripeWebhookService {
 
             case "payment_intent.succeeded" -> {
                 String providerPaymentId = extractPaymentIntentId(event);
-                paymentService.markPaymentSuccess(providerPaymentId);
+                paymentService.markPaymentSuccess(providerPaymentId);//step 4: what should I do in my System?
             }
 
             case "payment_intent.payment_failed" -> {
