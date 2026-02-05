@@ -2,6 +2,7 @@ package com.scientia.mercatus.service.impl;
 
 import com.scientia.mercatus.entity.ProcessedPaymentEvent;
 import com.scientia.mercatus.repository.ProcessedPaymentEventRepository;
+import com.scientia.mercatus.service.IOrderService;
 import com.scientia.mercatus.service.IPaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,7 @@ public class StripeWebhookService {
 
     private final IPaymentService paymentService;
     private final ProcessedPaymentEventRepository eventRepository;
+    private final IOrderService orderService;
 
     @Value("${stripe.webhook.secret}")
     private String webhookSecret;
@@ -64,12 +66,12 @@ public class StripeWebhookService {
 
             case "payment_intent.succeeded" -> {
                 String providerPaymentId = extractPaymentIntentId(event);
-                paymentService.markPaymentSuccess(providerPaymentId);//step 4: what should I do in my System?
+                orderService.handlePaymentSuccess(providerPaymentId);//step 4: what should I do in my System?
             }
 
             case "payment_intent.payment_failed" -> {
                 String providerPaymentId = extractPaymentIntentId(event);
-                paymentService.markPaymentFailed(providerPaymentId);
+                orderService.handlePaymentFailure(providerPaymentId);
             }
 
             default -> {
