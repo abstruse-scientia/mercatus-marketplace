@@ -3,9 +3,13 @@ package com.scientia.mercatus.controller;
 import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.dto.Order.OrderResponseDto;
 import com.scientia.mercatus.dto.Order.OrderSummaryDto;
+import com.scientia.mercatus.dto.Payment.CreatePaymentResponseDto;
+import com.scientia.mercatus.dto.Payment.PaymentIntentResultDto;
 import com.scientia.mercatus.entity.Order;
+import com.scientia.mercatus.entity.Payment;
 import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.mapper.OrderMapper;
+import com.scientia.mercatus.security.SpringSecurityAuthContext;
 import com.scientia.mercatus.service.IOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +31,7 @@ public class OrderController {
 
     private final IOrderService orderService;
     private final OrderMapper orderMapper;
+    private final SpringSecurityAuthContext authContext;
 
     @Value("${pagination.max-size:10}")
     private int maxPageSize;
@@ -65,5 +70,17 @@ public class OrderController {
     private User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (User) authentication.getPrincipal();
+    }
+
+
+    @PostMapping("/{orderId}/pay")
+    public ResponseEntity<CreatePaymentResponseDto> makePayment(@PathVariable Long orderId){
+        Long userId = authContext.getCurrentUserId();
+        PaymentIntentResultDto paymentIntentResultDto = orderService.initiatePayment(orderId, userId);
+        CreatePaymentResponseDto createPaymentResponseDto = new CreatePaymentResponseDto(
+                paymentIntentResultDto.paymentId(),
+                paymentIntentResultDto.clientSecret()
+        );
+        return ResponseEntity.ok().body(createPaymentResponseDto);
     }
 }

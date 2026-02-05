@@ -2,6 +2,7 @@ package com.scientia.mercatus.service.impl;
 
 import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.dto.Order.OrderSummaryDto;
+import com.scientia.mercatus.dto.Payment.PaymentIntentResultDto;
 import com.scientia.mercatus.entity.*;
 
 import com.scientia.mercatus.exception.NoLoggedInUserFoundException;
@@ -47,6 +48,7 @@ public class OrderServiceImpl implements IOrderService {
     private final IInventoryService inventoryService;
     private final IPaymentService paymentService;
     private final PaymentRepository paymentRepository;
+    private final StripePaymentGateway stripePaymentGateway;
 
 
     @Override
@@ -64,7 +66,7 @@ public class OrderServiceImpl implements IOrderService {
     @Transactional
     @Override
     public void cancelOrder(Long orderId, Long userId) {
-            Order currentOrder = loadAndValidateOrder(orderId, userId);
+            Order currentOrder = loadAndValidateOrderHelper(orderId, userId);
             if (currentOrder.getStatus().equals(OrderStatus.CANCELLED)) {
                 return;
             }
@@ -102,6 +104,69 @@ public class OrderServiceImpl implements IOrderService {
 
 
     }
+
+
+    @Transactional
+    @Override
+    public PaymentIntentResultDto initiatePayment(Long orderId, Long userId) {
+        Order order = loadAndValidateOrderHelper(orderId, userId);
+        if(!order.getStatus().equals(OrderStatus.CREATED)) {
+            throw new IllegalStateException("Payment can only be initiated in CREATED state");
+        }
+        if(!order.getOrderPaymentStatus().equals(OrderPaymentStatus.PENDING)) {
+            throw new IllegalStateException("Order can not be placed in current payment state");
+        }
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
+        Long amountMinor = order.getTotalAmount().movePointRight(2).longValueExact();
+        return stripePaymentGateway.createPaymentIntent(order.getOrderReference(),
+                amountMinor, "INR");
+    }
+
+
+
+
+
+    @Transactional
+    @Override
+    public void handlePaymentSuccess(String providerPaymentId) {
+        paymentService.markPaymentSuccess(providerPaymentId);
+        Payment payment = paymentRepository.findByProviderPaymentId(providerPaymentId).orElseThrow();
+        Order order = orderRepository.findByOrderReference(payment.getOrderReference()).orElseThrow();
+        if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.SUCCESS)) {
+            return;
+        }
+        for(OrderItem item : order.getOrderItems()) { // confirm reservation
+            inventoryService.confirmReservation(item.getReservationKey());
+        }
+        order.setOrderPaymentStatus(OrderPaymentStatus.SUCCESS);
+        order.setStatus(OrderStatus.CONFIRMED);
+    }
+
+
+    @Transactional
+    @Override
+    public void handlePaymentFailure(String providerPaymentId) {
+        paymentService.markPaymentFailed(providerPaymentId);
+        Payment payment = paymentRepository.findByProviderPaymentId(providerPaymentId).orElseThrow();
+        Order order = orderRepository.findByOrderReference(payment.getOrderReference()).orElseThrow();
+        if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.FAILED)) {
+            return;
+        }
+        for(OrderItem item : order.getOrderItems()) { // cancel reservation
+            inventoryService.releaseReservation(item.getReservationKey());
+        }
+        order.setOrderPaymentStatus(OrderPaymentStatus.FAILED);
+        order.setStatus(OrderStatus.CANCELLED);
+    }
+
+
+
+
+
+    /*----------------------------- Helper Functions ------------------------------------------- */
+
+
+
 
 
 
@@ -168,23 +233,8 @@ public class OrderServiceImpl implements IOrderService {
     }
 
 
-    @Transactional
-    public Payment initiatePayment(Long orderId, Long userId) {
-        Order order = loadAndValidateOrder(orderId, userId);
-        if(!order.getStatus().equals(OrderStatus.CREATED)) {
-            throw new IllegalStateException("Payment can only be initiated in CREATED state");
-        }
-        if(!order.getOrderPaymentStatus().equals(OrderPaymentStatus.PENDING)) {
-            throw new IllegalStateException("Order can not be placed in current payment state");
-        }
-        order.setStatus(OrderStatus.PAYMENT_PENDING);
-        Long amountMinor = order.getTotalAmount().movePointRight(2).longValueExact();
-        return paymentService.makePayment(order.getOrderReference(), amountMinor,
-                "INR", PaymentProvider.STRIPE);
-    }
 
-
-    private Order loadAndValidateOrder(Long orderId, Long userId) {
+    private Order loadAndValidateOrderHelper(Long orderId, Long userId) {
         if (orderId == null) {
             throw new OrderNotFoundException("Order not found");
         }

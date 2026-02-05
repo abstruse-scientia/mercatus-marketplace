@@ -16,18 +16,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class PaymentApplicationService {
+public class StripePaymentGateway {
 
     private  final IPaymentService paymentService;
     private final PaymentRepository paymentRepository;
     private final StripeClient stripeClient;
 
-    public PaymentIntentResultDto createPayment(String orderReference, Long amountMinor, String currency) {
-        Payment payment = paymentService.makePayment(orderReference, amountMinor, currency, PaymentProvider.STRIPE);
+    public PaymentIntentResultDto createPaymentIntent(String orderReference, Long amountMinor, String currency) {
+        Payment payment = paymentService.makePayment( // Create Internal Payment call
+                orderReference,
+                amountMinor,
+                currency,
+                PaymentProvider.STRIPE);
 
 
-        StripePaymentIntent intent = stripeClient.createPaymentIntent(payment.getCurrency(),
-                payment.getId(), payment.getAmount());
+        StripePaymentIntent intent = stripeClient.createPaymentIntent(
+                payment.getCurrency(), // Create Stripe Payment Intent (Mocked)
+                payment.getId(),
+                payment.getAmount());
 
         payment.setProviderPaymentId(intent.providerPaymentId());
         payment.setStatus(PaymentStatus.PROCESSING);
