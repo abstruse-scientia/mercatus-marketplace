@@ -33,8 +33,8 @@ public class CartController {
     public ResponseEntity<Void> addItemToCart(@RequestBody AddToCartRequestDto addToCartRequestDto,
                                               CartContextDto cartContextDto) {
 
-        Cart currentCart = getCurrentCart(cartContextDto);
-        cartService.addToCart(currentCart,
+
+        cartService.addToCart(cartContextDto,
                 addToCartRequestDto.productId(),
                 addToCartRequestDto.quantity());
         return ResponseEntity.notFound().build();
@@ -45,8 +45,7 @@ public class CartController {
     public ResponseEntity<Void> removeItemFromCart(@PathVariable Long productId,
                                                    CartContextDto cartContextDto) {
 
-        Cart currentCart = getCurrentCart(cartContextDto);
-        cartService.removeFromCart(currentCart, productId);
+        cartService.removeFromCart(cartContextDto, productId);
         return ResponseEntity.noContent().build();
     }
 
@@ -56,8 +55,7 @@ public class CartController {
                                                    UpdateQuantityRequestDto updateQuantityRequestDto,
                                                CartContextDto cartContextDto
     ) {
-        Cart currentCart = getCurrentCart(cartContextDto);
-        cartService.updateQuantity(currentCart,
+        cartService.updateQuantity(cartContextDto,
                 updateQuantityRequestDto.productId(),
                 updateQuantityRequestDto.quantity());
         return ResponseEntity.ok().build();
@@ -67,8 +65,7 @@ public class CartController {
 
     @DeleteMapping
     public ResponseEntity<Void> clearCart(CartContextDto cartContextDto) {
-        Cart currentCart = getCurrentCart(cartContextDto);
-        cartService.clearCart(currentCart);
+        cartService.clearCart(cartContextDto);
         return ResponseEntity.noContent().build();
     }
 

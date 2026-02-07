@@ -29,14 +29,15 @@ public class SessionFilter extends OncePerRequestFilter {
 
 
         String sessionId = cookieUtil.getSessionId(request);
-        if (!sessionService.validateSession(sessionId)) {
+        if (!sessionService.validateSession(sessionId)) { // case: if invalid
             if (sessionId != null) {
-                cookieUtil.deleteCookie(response);
+                cookieUtil.deleteCookie(response);// case: if invalid but not null then delete
+                // (must be in revoked list)
             }
             sessionId = sessionService.createSession();
             cookieUtil.addSessionCookie(response, sessionId);
         }
-        request.setAttribute(SESSION_ATTRIBUTE, sessionId);
+        request.setAttribute(SESSION_ATTRIBUTE, sessionId);//if valid then add an attribute to request
         filterChain.doFilter(request, response);
 
     }
