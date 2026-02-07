@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 
-@Profile("!test")
+
 @Component
 @RequiredArgsConstructor
 public class MercatusCustomAuthenticationProvider implements AuthenticationProvider {

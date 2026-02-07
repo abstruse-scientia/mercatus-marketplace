@@ -6,11 +6,10 @@ import com.scientia.mercatus.entity.Cart;
 
 public interface ICartService {
     Cart resolveCart(CartContextDto cartContext);
-    void addToCart(Cart currentCart, Long productId, Integer quantity);
-    void removeFromCart(Cart currentCart, Long productId);
-    void clearCart(Cart currentCart);
-    void updateQuantity(Cart currentCart, Long productId, Integer quantity);
+    void addToCart(CartContextDto ctxDto, Long productId, Integer quantity);
+    void removeFromCart(CartContextDto ctx, Long productId);
+    void clearCart(CartContextDto ctx);
+    void updateQuantity(CartContextDto ctx, Long productId, Integer quantity);
     CartResponseDto getCartDetails(Cart Cart);
     Cart lockCartForCheckout(Long cartId);
-
 }

@@ -1,7 +1,10 @@
 package com.scientia.mercatus.security;
 
+import com.scientia.mercatus.config.SecurityConfigProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -26,9 +29,9 @@ import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-@Profile("!test")
 @Configuration
 @EnableWebSecurity
+@EnableConfigurationProperties(SecurityConfigProperties.class)
 @RequiredArgsConstructor
 public class MercatusSecurityConfig {
 
@@ -38,8 +41,13 @@ public class MercatusSecurityConfig {
     private String allowedOrigins;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityConfigProperties props) throws Exception {
         System.out.println("security config loaded");
+        if (props.isDisabled()){
+            http.authorizeHttpRequests(authorizeRequests ->
+                    authorizeRequests.anyRequest().permitAll());
+            return http.build();
+        }
         return http.cors(corsConfig->corsConfig.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable) .
                 authorizeHttpRequests(auth -> auth.anyRequest().permitAll()

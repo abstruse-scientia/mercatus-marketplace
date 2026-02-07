@@ -54,19 +54,19 @@ public class CartServiceImpl implements ICartService {
             throw new IllegalStateException("Session id is null");
         }
         Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
-        if (userCart == null && guestCart == null) {
+        if (userCart == null && guestCart == null) { // if guest cart and user cart both absent
             return createUserCart(user);
         }
-        if (guestCart == null) {
+        if (guestCart == null) { // if guest cart absent, but user cart may be present
             return userCart;
         }
-        if (userCart == null) {
+        if (userCart == null) { // if user cart absent, but guest cart may be present
             Cart attachCart =  attachGuestCartToUser(guestCart,  user);
             sessionService.revokeSession(sessionId);
             return attachCart;
         }
 
-        mergeGuestToUserCart(guestCart, userCart);
+        mergeGuestToUserCart(guestCart, userCart);// if both cart are present
         sessionService.revokeSession(sessionId);
         cartRepository.delete(guestCart);
         return  cartRepository.save(userCart);
@@ -125,7 +125,8 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
-    public void addToCart(Cart currentCart, Long productId, Integer quantity) {
+    public void addToCart(CartContextDto ctxDto, Long productId, Integer quantity) {
+        Cart currentCart = resolveCart(ctxDto);
         if (quantity == null || quantity <= 0) {
             throw new IllegalQuantity("Quantity must be greater than 0");
         }
@@ -149,7 +150,8 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
-    public void removeFromCart(Cart currentCart, Long productId) {
+    public void removeFromCart(CartContextDto ctxDto, Long productId) {
+        Cart currentCart = resolveCart(ctxDto);
         if (productId == null) {
             throw new IllegalArgumentException("Product id cannot be null");
         }
@@ -159,13 +161,15 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
-    public void clearCart(Cart currentCart) {
+    public void clearCart(CartContextDto ctxDto) {
+        Cart currentCart = resolveCart(ctxDto);
         cartItemsRepository.deleteByCart(currentCart);
     }
 
 
     @Override
-    public void updateQuantity(Cart currentCart, Long productId, Integer quantity) {
+    public void updateQuantity(CartContextDto ctxDto, Long productId, Integer quantity) {
+        Cart currentCart = resolveCart(ctxDto);
         if (quantity == null || quantity  < 0) {
             throw new IllegalQuantity("Quantity must be greater than 0");
         }

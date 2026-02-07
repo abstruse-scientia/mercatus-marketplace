@@ -3,7 +3,6 @@ package com.scientia.mercatus.service.OrderServiceIT;
 
 import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.entity.*;
-import com.scientia.mercatus.mapper.OrderMapper;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.service.ICartService;
@@ -68,11 +67,6 @@ class OrderServicePlaceOrderIT {
                     .thenAnswer(inv -> buildValidCart());
 
             return mock;
-        }
-
-        @Bean
-        public OrderMapper orderItemMapper() {
-            return new OrderMapper();
         }
 
 

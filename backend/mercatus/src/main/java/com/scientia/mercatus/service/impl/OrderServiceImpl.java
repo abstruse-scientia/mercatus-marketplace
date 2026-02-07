@@ -12,10 +12,7 @@ import com.scientia.mercatus.mapper.OrderMapper;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.repository.PaymentRepository;
 import com.scientia.mercatus.repository.UserRepository;
-import com.scientia.mercatus.service.ICartService;
-import com.scientia.mercatus.service.IInventoryService;
-import com.scientia.mercatus.service.IOrderService;
-import com.scientia.mercatus.service.IPaymentService;
+import com.scientia.mercatus.service.*;
 import lombok.RequiredArgsConstructor;
 
 
@@ -49,6 +46,7 @@ public class OrderServiceImpl implements IOrderService {
     private final IPaymentService paymentService;
     private final PaymentRepository paymentRepository;
     private final StripePaymentGateway stripePaymentGateway;
+    private final IProductService productService;
 
 
     @Override
