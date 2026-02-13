@@ -23,7 +23,7 @@ public class JwtTokenProvider {
         jwt = Jwts.builder().issuer("Mercatus").subject("JWT Token")
                 .claim("username", userDetail.getUserName())
                 .claim("email", userDetail.getEmail())
-                .claim("roles", userDetail.getRoles().stream().map(Role::getName)
+                .claim("roles", userDetail.getRoles().stream().map(role -> role.getName().toString())
                         .collect(Collectors.joining(",")))
                 .issuedAt(new java.util.Date())
                 .expiration(new java.util.Date((new java.util.Date()).getTime() + 30 * 60 * 1000))

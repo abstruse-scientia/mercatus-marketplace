@@ -29,7 +29,7 @@
         @Override
         public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
             HttpServletRequest request = (HttpServletRequest)  webRequest.getNativeRequest();
-            Long userId = authContext.getCurrentUserId();
+            Long userId = authContext.getCurrentUserIdOrNull();
             String sessionId = (String) request.getAttribute("SESSION_ATTRIBUTE");
             if (sessionId == null) {
                 throw new IllegalStateException("Session id not found. Filter is broken");

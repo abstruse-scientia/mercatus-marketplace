@@ -25,4 +25,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdForUpdate(@Param("orderId") Long orderId);
 
     Page<Order> findByUser_UserId(Long userId, Pageable pageable);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+    
+        select o from Order o where o.orderReference = :orderReference
+
+    """)
+    Optional<Order> findByOrderReferenceForUpdate(@Param("orderReference") String orderReference);
 }

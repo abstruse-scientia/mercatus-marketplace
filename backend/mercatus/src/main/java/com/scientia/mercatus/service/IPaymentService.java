@@ -1,13 +1,15 @@
 package com.scientia.mercatus.service;
 
-import com.scientia.mercatus.entity.Payment;
+import com.razorpay.RazorpayException;
+import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.PaymentProvider;
 
 public interface IPaymentService {
 
-    Payment makePayment(String orderReference, Long amountMinor, String currency, PaymentProvider provider);
+    PaymentInitiationResultDto initiatePayment(String orderReference, String currency, PaymentProvider provider);
 
-    void markPaymentSuccess(String providerPaymentId);
+    void markPaymentSuccess(PaymentProvider provider, String providerOrderId,
+                            String providerPaymentId, long amountReceived);
 
-    void markPaymentFailed(String providerPaymentId);
+    void markPaymentFailed(PaymentProvider provider, String providerOderId, String providerPaymentId);
 }

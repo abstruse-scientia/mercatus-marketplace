@@ -1,5 +1,6 @@
 package com.scientia.mercatus.dto.Payment;
 
+import com.scientia.mercatus.entity.PaymentProvider;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -7,6 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CreatePaymentResponseDto {
 
-    private Long paymentId;
-    private String clientSecret;
+    private String orderId;
+    private long amount;
+    private String currency;
+    private PaymentProvider paymentProvider;
 }
