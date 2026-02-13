@@ -1,10 +1,12 @@
 package com.scientia.mercatus.service.impl;
 
+import com.razorpay.RazorpayException;
 import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.dto.Order.OrderSummaryDto;
-import com.scientia.mercatus.dto.Payment.PaymentIntentResultDto;
+import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.*;
 
+import com.scientia.mercatus.exception.InvalidPaymentStateException;
 import com.scientia.mercatus.exception.NoLoggedInUserFoundException;
 import com.scientia.mercatus.exception.OrderNotFoundException;
 import com.scientia.mercatus.exception.UnauthorizedOperationException;
@@ -19,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Pageable;
@@ -45,7 +48,6 @@ public class OrderServiceImpl implements IOrderService {
     private final IInventoryService inventoryService;
     private final IPaymentService paymentService;
     private final PaymentRepository paymentRepository;
-    private final StripePaymentGateway stripePaymentGateway;
     private final IProductService productService;
 
 
@@ -106,7 +108,7 @@ public class OrderServiceImpl implements IOrderService {
 
     @Transactional
     @Override
-    public PaymentIntentResultDto initiatePayment(Long orderId, Long userId) {
+    public PaymentInitiationResultDto initiatePayment(Long orderId, Long userId){
         Order order = loadAndValidateOrderHelper(orderId, userId);
         if(!order.getStatus().equals(OrderStatus.CREATED)) {
             throw new IllegalStateException("Payment can only be initiated in CREATED state");
@@ -115,9 +117,7 @@ public class OrderServiceImpl implements IOrderService {
             throw new IllegalStateException("Order can not be placed in current payment state");
         }
         order.setStatus(OrderStatus.PAYMENT_PENDING);
-        Long amountMinor = order.getTotalAmount().movePointRight(2).longValueExact();
-        return stripePaymentGateway.createPaymentIntent(order.getOrderReference(),
-                amountMinor, "INR");
+        return paymentService.initiatePayment(order.getOrderReference(), "INR", PaymentProvider.RAZORPAY);
     }
 
 
@@ -126,38 +126,79 @@ public class OrderServiceImpl implements IOrderService {
 
     @Transactional
     @Override
-    public void handlePaymentSuccess(String providerPaymentId) {
-        paymentService.markPaymentSuccess(providerPaymentId);
-        Payment payment = paymentRepository.findByProviderPaymentId(providerPaymentId).orElseThrow();
-        Order order = orderRepository.findByOrderReference(payment.getOrderReference()).orElseThrow();
-        if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.SUCCESS)) {
+    public void markPaid(String orderReference) {
+
+        Order order =  orderRepository.findByOrderReferenceForUpdate(orderReference).orElseThrow(
+                () -> new OrderNotFoundException("Order not found for reference: " + orderReference)
+        );
+        if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.SUCCESS)) { // Webhook retries: Idempotent behaviour
             return;
         }
-        for(OrderItem item : order.getOrderItems()) { // confirm reservation
-            inventoryService.confirmReservation(item.getReservationKey());
+        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
+            throw new InvalidPaymentStateException("Order not payable in current payment state");
         }
         order.setOrderPaymentStatus(OrderPaymentStatus.SUCCESS);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void finalizePaidOrder(String orderReference) {
+        Order order = orderRepository.findByOrderReferenceForUpdate(orderReference).orElseThrow(
+                () -> new  OrderNotFoundException("Order not found for reference: " + orderReference)
+        );
+        if (order.getStatus().equals(OrderStatus.CONFIRMED)) {
+            return;
+        }
+        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
+            return;
+        }
+        if (order.getOrderPaymentStatus() != OrderPaymentStatus.SUCCESS) {
+            return;
+        }
+        for (OrderItem item: order.getOrderItems()) {
+            inventoryService.confirmReservation(item.getReservationKey());
+        }
         order.setStatus(OrderStatus.CONFIRMED);
     }
 
 
-    @Transactional
+
     @Override
-    public void handlePaymentFailure(String providerPaymentId) {
-        paymentService.markPaymentFailed(providerPaymentId);
-        Payment payment = paymentRepository.findByProviderPaymentId(providerPaymentId).orElseThrow();
-        Order order = orderRepository.findByOrderReference(payment.getOrderReference()).orElseThrow();
-        if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.FAILED)) {
+    @Transactional
+    public void markPaymentFail(String orderReference) {
+        Order order =  orderRepository.findByOrderReferenceForUpdate(orderReference).orElseThrow(
+                () -> new OrderNotFoundException("Order not found for reference: " + orderReference)
+        );
+        if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.SUCCESS)) {
             return;
         }
-        for(OrderItem item : order.getOrderItems()) { // cancel reservation
-            inventoryService.releaseReservation(item.getReservationKey());
+        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
+            return;
         }
         order.setOrderPaymentStatus(OrderPaymentStatus.FAILED);
-        order.setStatus(OrderStatus.CANCELLED);
+
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void cancelFailedOrder(String orderReference) {
 
+        Order order = orderRepository
+                .findByOrderReferenceForUpdate(orderReference)
+                .orElseThrow(() -> new OrderNotFoundException(
+                        "Order not found for reference: " + orderReference));
+
+        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
+            return;
+        }
+
+        for (OrderItem item : order.getOrderItems()) {
+            inventoryService.releaseReservation(item.getReservationKey());
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+
+    }
 
 
 

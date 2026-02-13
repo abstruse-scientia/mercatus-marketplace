@@ -6,20 +6,24 @@ public final class PublicEndPoints {
     private PublicEndPoints(){}
 
     public static final String[] AUTH = {
-            "api/v1/auth/**"
+            "/api/v1/auth/**"
     };
 
     public static final String[] WEBHOOKS = {
-            "api/v1/webhook/**"
+            "/api/v1/webhook/**"
     };
 
     public static final String[] PRODUCTS = {
-            "api/v1/products/{id}",
-            "api/v1/products"
+            "/api/v1/products",
+            "/api/v1/products/*"
     };
 
-    public static final String[] CART = {
-            "api/v1/cart/**"
+    public static final String[] ALL = {
+            "/api/v1/auth/**",
+            "/api/v1/webhooks/**",
+            "/api/v1/products",
+            "/api/v1/products/*"
+
     };
 
 }

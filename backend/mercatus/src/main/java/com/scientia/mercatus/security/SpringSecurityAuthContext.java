@@ -24,4 +24,16 @@ public class SpringSecurityAuthContext implements AuthContext {
 
         return user.getUserId();
     }
+
+    @Override
+    public Long getCurrentUserIdOrNull() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated())  {
+            return null;
+        }
+        if (authentication.getPrincipal() instanceof User user) {
+            return user.getUserId();
+        }
+        return null;
+    }
 }

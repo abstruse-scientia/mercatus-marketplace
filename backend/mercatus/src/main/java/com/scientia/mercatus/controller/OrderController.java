@@ -4,9 +4,9 @@ import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.dto.Order.OrderResponseDto;
 import com.scientia.mercatus.dto.Order.OrderSummaryDto;
 import com.scientia.mercatus.dto.Payment.CreatePaymentResponseDto;
-import com.scientia.mercatus.dto.Payment.PaymentIntentResultDto;
+
+import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.Order;
-import com.scientia.mercatus.entity.Payment;
 import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.mapper.OrderMapper;
 import com.scientia.mercatus.security.SpringSecurityAuthContext;
@@ -76,10 +76,12 @@ public class OrderController {
     @PostMapping("/{orderId}/pay")
     public ResponseEntity<CreatePaymentResponseDto> makePayment(@PathVariable Long orderId){
         Long userId = authContext.getCurrentUserId();
-        PaymentIntentResultDto paymentIntentResultDto = orderService.initiatePayment(orderId, userId);
+        PaymentInitiationResultDto initiationResult= orderService.initiatePayment(orderId, userId);
         CreatePaymentResponseDto createPaymentResponseDto = new CreatePaymentResponseDto(
-                paymentIntentResultDto.paymentId(),
-                paymentIntentResultDto.clientSecret()
+                initiationResult.orderId(),
+                initiationResult.amount(),
+                initiationResult.currency(),
+                initiationResult.paymentProvider()
         );
         return ResponseEntity.ok().body(createPaymentResponseDto);
     }

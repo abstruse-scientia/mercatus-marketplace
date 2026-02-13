@@ -20,11 +20,22 @@ public class Role extends BaseEntity{
     @Column(name = "role_id", nullable = false)
     private Long id;
 
-    @Size(max=50)
-    @NotNull
-    @Column(name = "name", nullable = false, length = 50)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "name", nullable = false, length = 50, unique = true)
+    private RoleName name;
 
-    @ManyToMany(mappedBy = "roles")
-    private Set<User> users = new LinkedHashSet<>();
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Role)) return false;
+        Role role = (Role) obj;
+        return id != null && id.equals(role.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

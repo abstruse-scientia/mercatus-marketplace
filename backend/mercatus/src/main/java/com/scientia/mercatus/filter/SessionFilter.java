@@ -1,5 +1,6 @@
 package com.scientia.mercatus.filter;
 
+import com.scientia.mercatus.security.GuestAuthenticationToken;
 import com.scientia.mercatus.service.SessionService;
 import com.scientia.mercatus.util.CookieUtil;
 import jakarta.servlet.FilterChain;
@@ -7,6 +8,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -27,7 +30,7 @@ public class SessionFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
 
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String sessionId = cookieUtil.getSessionId(request);
         if (!sessionService.validateSession(sessionId)) { // case: if invalid
             if (sessionId != null) {
@@ -35,6 +38,10 @@ public class SessionFilter extends OncePerRequestFilter {
                 // (must be in revoked list)
             }
             sessionId = sessionService.createSession();
+            if (authentication == null || !authentication.isAuthenticated()) { // Makes Spring security aware of guest
+                GuestAuthenticationToken guestAuthenticationToken = new GuestAuthenticationToken(sessionId);
+                SecurityContextHolder.getContext().setAuthentication(guestAuthenticationToken);
+            }
             cookieUtil.addSessionCookie(response, sessionId);
         }
         request.setAttribute(SESSION_ATTRIBUTE, sessionId);//if valid then add an attribute to request

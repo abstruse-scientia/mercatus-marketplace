@@ -12,12 +12,6 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "payment", schema = "mercatus_db", indexes = {
-        @Index(name = "idx_payment_status", columnList = "status")
-}, uniqueConstraints = {
-        @UniqueConstraint(name = "uq_order_reference", columnNames = {"order_reference"}),
-        @UniqueConstraint(name = "uq_payment_provider_id", columnNames = {"provider_payment_id"})
-})
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,8 +24,11 @@ public class Payment {
     private String orderReference;
 
     @NotNull
-    @Column(name = "amount", nullable = false)
-    private Long amount;
+    @Column(name = "amount_received", nullable = false)
+    private Long amountReceived;
+
+    @Column(name = "amount_expected")
+    private Long amountExpected;
 
     @Size(max = 3)
     @NotNull
@@ -45,6 +42,10 @@ public class Payment {
     @Size(max = 255)
     @Column(name = "provider_payment_id", unique = true)
     private String providerPaymentId;
+
+    @Size(max = 255)
+    @Column(name = "provider_order_id")
+    private String providerOrderId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 40)
