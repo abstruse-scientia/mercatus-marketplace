@@ -9,12 +9,15 @@ import com.scientia.mercatus.repository.InventoryItemRepository;
 import com.scientia.mercatus.repository.StockReservationRepository;
 import com.scientia.mercatus.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InventoryServiceImpl implements IInventoryService {
@@ -39,7 +42,8 @@ public class InventoryServiceImpl implements IInventoryService {
                 .orElseThrow(() -> new InventoryItemNotFoundException("No stock found."));
         int available = inventoryItem.getTotalStock() - inventoryItem.getReservedStock();
         if (available < quantity) {
-            throw new InsufficientStockException("Insufficient stock." + sku);
+            log.warn("Insufficient stock for SKU: {}", sku);
+            throw new InsufficientStockException("Insufficient stock for requested items");
         }
 
         inventoryItem.setReservedStock(inventoryItem.getReservedStock() + quantity) ;
@@ -114,13 +118,40 @@ public class InventoryServiceImpl implements IInventoryService {
         if (!stockReservation.getStatus().equals(ReservationStatus.RESERVED)) {
             throw new InvalidReservationStateException("Invalid reservation state");
         }
+        releaseInternal(stockReservation);
+    }
+
+
+    private void releaseInternal(StockReservation stockReservation) {
+        if(stockReservation.getStatus() != (ReservationStatus.RESERVED)) {
+            return;
+        }
+
         int quantity = stockReservation.getQuantity();
         InventoryItem inventoryItem = inventoryItemRepository.findBySku(stockReservation.getSku())
                 .orElseThrow(() -> new InventoryItemNotFoundException("No stock found."));
         inventoryItem.setReservedStock(inventoryItem.getReservedStock() - quantity);
         stockReservation.setStatus(ReservationStatus.RELEASED);
-        stockReservationRepository.save(stockReservation);
         inventoryItemRepository.save(inventoryItem);
+        stockReservationRepository.save(stockReservation);
+
+    }
+
+
+
+    @Transactional
+    public void expireReservations() {
+
+        List<StockReservation> expired =
+                stockReservationRepository
+                        .findByStatusAndExpiresAtBefore(
+                                ReservationStatus.RESERVED,
+                                Instant.now()
+                        );
+
+        for (StockReservation r : expired) {
+            releaseInternal(r);
+        }
     }
 
 

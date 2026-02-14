@@ -7,11 +7,10 @@ import com.scientia.mercatus.entity.*;
 import com.scientia.mercatus.exception.IllegalQuantity;
 import com.scientia.mercatus.repository.CartItemsRepository;
 import com.scientia.mercatus.repository.CartRepository;
-import com.scientia.mercatus.repository.ProductRepository;
 import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.service.ICartService;
 import com.scientia.mercatus.service.IProductService;
-import com.scientia.mercatus.service.SessionService;
+import com.scientia.mercatus.service.ISessionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,7 @@ public class CartServiceImpl implements ICartService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final CartItemsRepository cartItemsRepository;
-    private final SessionService sessionService;
+    private final ISessionService ISessionService;
     private final IProductService productService;
 
 
@@ -62,12 +61,12 @@ public class CartServiceImpl implements ICartService {
         }
         if (userCart == null) { // if user cart absent, but guest cart may be present
             Cart attachCart =  attachGuestCartToUser(guestCart,  user);
-            sessionService.revokeSession(sessionId);
+            ISessionService.revokeSession(sessionId);
             return attachCart;
         }
 
         mergeGuestToUserCart(guestCart, userCart);// if both cart are present
-        sessionService.revokeSession(sessionId);
+        ISessionService.revokeSession(sessionId);
         cartRepository.delete(guestCart);
         return  cartRepository.save(userCart);
     }

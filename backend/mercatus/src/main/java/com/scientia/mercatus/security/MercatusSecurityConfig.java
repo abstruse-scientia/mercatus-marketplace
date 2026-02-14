@@ -4,6 +4,7 @@ import com.scientia.mercatus.config.PublicEndPoints;
 import com.scientia.mercatus.config.SecurityConfigProperties;
 import com.scientia.mercatus.security.jwt.JwtTokenValidatorFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -34,6 +35,7 @@ import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableConfigurationProperties(SecurityConfigProperties.class)
@@ -46,7 +48,7 @@ public class MercatusSecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityConfigProperties props, JwtTokenValidatorFilter jwtTokenValidatorFilter) throws Exception {
-        System.out.println("security config loaded");
+        log.info("Init security filter chain");
         if (props.isDisabled()) {
             return http
                     .csrf(AbstractHttpConfigurer::disable)
@@ -86,8 +88,10 @@ public class MercatusSecurityConfig {
         List<String> origins = Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(origins);
-        config.setAllowedMethods(List.of("*"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization",
+                "Content-Type",
+                "Idempotency-Key"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 

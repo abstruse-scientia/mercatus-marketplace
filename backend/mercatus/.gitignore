@@ -42,3 +42,8 @@ build/
 
 
 .env
+
+
+logs
+CODE_REVIEW.md
+

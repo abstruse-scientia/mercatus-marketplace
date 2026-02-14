@@ -23,11 +23,11 @@ public class Payment {
     @Column(name = "order_reference", nullable = false)
     private String orderReference;
 
-    @NotNull
-    @Column(name = "amount_received", nullable = false)
+    @Column(name = "amount_received")
     private Long amountReceived;
 
-    @Column(name = "amount_expected")
+    @NotNull
+    @Column(name = "amount_expected", nullable = false)
     private Long amountExpected;
 
     @Size(max = 3)

@@ -6,9 +6,8 @@ import com.razorpay.RazorpayException;
 import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.PaymentProvider;
 import com.scientia.mercatus.exception.PaymentGatewayException;
-import com.scientia.mercatus.repository.PaymentRepository;
+
 import com.scientia.mercatus.service.IPaymentGateway;
-import com.scientia.mercatus.service.IPaymentService;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -24,11 +23,11 @@ public class RazorpayPaymentGateWay implements IPaymentGateway {
 
     @Transactional
     @Override
-    public PaymentInitiationResultDto initiatePayment(String orderReference, long amountMinor, String currency)  {
+    public PaymentInitiationResultDto initiatePayment(String orderReference, long amountExpected, String currency)  {
 
 
         try {
-            Order razorpayOrder = createOrder(orderReference, amountMinor, currency);
+            Order razorpayOrder = createOrder(orderReference, amountExpected, currency);
 
 
 

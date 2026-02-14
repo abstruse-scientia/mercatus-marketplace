@@ -10,6 +10,7 @@ import com.scientia.mercatus.service.impl.CartServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +38,7 @@ public class CartController {
         cartService.addToCart(cartContextDto,
                 addToCartRequestDto.productId(),
                 addToCartRequestDto.quantity());
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 

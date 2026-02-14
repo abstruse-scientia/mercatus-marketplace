@@ -37,7 +37,7 @@ class CartServiceImplTest {
     private IProductService productService;
 
     @Mock
-    private SessionService sessionService;
+    private ISessionService ISessionService;
 
     @Mock
     private UserRepository userRepository;

@@ -17,5 +17,7 @@ public interface IInventoryService {
 
     void addStock(String sku, int quantity);
 
+    void expireReservations();
+
 
 }
