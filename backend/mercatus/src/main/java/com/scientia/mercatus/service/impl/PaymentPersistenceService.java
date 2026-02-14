@@ -4,7 +4,7 @@ import com.scientia.mercatus.entity.Payment;
 import com.scientia.mercatus.entity.PaymentProvider;
 import com.scientia.mercatus.entity.PaymentStatus;
 import com.scientia.mercatus.repository.PaymentRepository;
-import com.scientia.mercatus.service.IOrderService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,19 @@ import java.util.Optional;
 public class PaymentPersistenceService {
 
     private final PaymentRepository paymentRepository;
-    private final IOrderService orderService;
+
+
+
+    /* Used by payment service implementation to check pending payment for validation purpose */
+
+    @Transactional(readOnly = true)
+    public Payment findPendingPayment(PaymentProvider paymentProvider, String providerOrderId) {
+        return paymentRepository.findFirstByProviderAndProviderOrderIdAndStatusOrderByCreatedAtDesc(
+                paymentProvider,
+                providerOrderId,
+                PaymentStatus.PENDING
+        ).orElse(null);
+    }
 
     @Transactional
     public String persistPaymentSuccess(PaymentProvider provider, String providerOrderId,
@@ -29,13 +41,9 @@ public class PaymentPersistenceService {
         }
 
         Payment payment = optionalPayment.get();
-        if (amountReceived != payment.getAmountExpected()) {
-            throw new IllegalStateException("Amount received is not equal to amount expected");
-        }
         payment.setProviderPaymentId(providerPaymentId);
         payment.setAmountReceived(amountReceived);
         payment.setStatus(PaymentStatus.SUCCESS);
-        orderService.markPaid(payment.getOrderReference());
 
         return payment.getOrderReference();
 
@@ -67,8 +75,6 @@ public class PaymentPersistenceService {
         payment.setProviderPaymentId(providerPaymentId);
         payment.setStatus(PaymentStatus.FAILED);
 
-        // Update order payment state (NOT lifecycle state)
-        orderService.markPaymentFail(payment.getOrderReference());
 
         return payment.getOrderReference();
     }

@@ -1,16 +1,14 @@
 package com.scientia.mercatus.service.impl;
 
-import com.razorpay.RazorpayException;
 import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.*;
-import com.scientia.mercatus.exception.InvalidPaymentStateException;
+
+import com.scientia.mercatus.exception.AmountMismatchException;
 import com.scientia.mercatus.exception.OrderNotFoundException;
-import com.scientia.mercatus.exception.PaymentAlreadyExistsException;
-import com.scientia.mercatus.exception.PaymentNotFoundException;
+
 import com.scientia.mercatus.payment.PaymentGatewayRegistry;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.repository.PaymentRepository;
-import com.scientia.mercatus.service.IOrderService;
 import com.scientia.mercatus.service.IPaymentGateway;
 import com.scientia.mercatus.service.IPaymentService;
 import com.scientia.mercatus.util.CurrencyConversionUtil;
@@ -18,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 
 
 @Service
@@ -29,10 +26,9 @@ public class PaymentServiceImpl implements IPaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final PaymentGatewayRegistry gatewayRegistry;
-    private final IOrderService orderService;
     private final CurrencyConversionUtil currencyConversion;
     private final PaymentPersistenceService paymentPersistenceService;
-
+    private final PaymentResultHandler paymentResultHandler;
 
 
     @Override
@@ -51,20 +47,20 @@ public class PaymentServiceImpl implements IPaymentService {
             throw new IllegalStateException("Payment cannot be initiated for this order");
         }
 
-        long amountMinor = currencyConversion.toINRMinor(order.getTotalAmount());
+        long amountExpected = currencyConversion.toINRMinor(order.getTotalAmount());
 
         IPaymentGateway gateway = gatewayRegistry.get(provider);
 
         PaymentInitiationResultDto initiationResult = gateway.initiatePayment(
                 orderReference,
-                amountMinor,
+                amountExpected,
                 currency
         );
 
-
+        //Persist Payment Instance
         Payment payment = new Payment();
         payment.setOrderReference(orderReference);
-        payment.setAmountExpected(amountMinor);
+        payment.setAmountExpected(amountExpected);
         payment.setCurrency(currency);
         payment.setProvider(provider);
         payment.setStatus(PaymentStatus.PENDING);
@@ -79,17 +75,33 @@ public class PaymentServiceImpl implements IPaymentService {
 
 
 
+    /*Scenario: Webhook Success */
 
     @Override
     public void markPaymentSuccess(PaymentProvider provider, String providerOrderId,
                                    String providerPaymentId, long amountReceived) {
 
 
-        String orderReference = paymentPersistenceService.persistPaymentSuccess(provider, providerOrderId,
-                providerPaymentId, amountReceived);
-        if (orderReference != null) {
-            orderService.finalizePaidOrder(orderReference);
+        Payment payment = paymentPersistenceService.findPendingPayment(provider, providerOrderId);
+        if (payment == null) {
+            return; // idempotency : either duplicate or already processed
         }
+        if (amountReceived != payment.getAmountExpected()) { // amount validation
+            throw new AmountMismatchException("Amount mismatch. Expected: " + payment.getAmountExpected()
+            +"Received: " + amountReceived);
+        }
+
+        //persist  success (tx1)
+        String orderReference = paymentPersistenceService.persistPaymentSuccess(
+                provider,
+                providerOrderId,
+                providerPaymentId,
+                amountReceived
+        );
+
+        //order transition(tx2)
+        paymentResultHandler.onPaymentSuccess(orderReference);
+        paymentResultHandler.finalizePaidOrder(orderReference);
     }
 
 
@@ -97,11 +109,25 @@ public class PaymentServiceImpl implements IPaymentService {
     public void markPaymentFailed(PaymentProvider provider, String providerOrderId,
                                   String providerPaymentId) {
 
-        String orderReference = paymentPersistenceService.persistPaymentFailure(provider, providerOrderId,
-                providerPaymentId);
-        if (orderReference != null) {
-            orderService.cancelFailedOrder(orderReference);
+        Payment payment = paymentPersistenceService.findPendingPayment(provider, providerOrderId);
+        if (payment == null) {
+            return;
         }
+
+        //persist failure tx1
+        String orderReference = paymentPersistenceService.persistPaymentFailure(
+                provider,
+                providerOrderId,
+                providerPaymentId
+        );
+
+
+
+        //order transition tx2
+        paymentResultHandler.onPaymentFailure(orderReference);
+        paymentResultHandler.cancelFailedOrder(orderReference);
+
+
 
     }
 }

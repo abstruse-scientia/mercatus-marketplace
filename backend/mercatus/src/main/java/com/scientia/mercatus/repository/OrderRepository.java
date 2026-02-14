@@ -33,4 +33,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     """)
     Optional<Order> findByOrderReferenceForUpdate(@Param("orderReference") String orderReference);
+
+    Optional<Order> findByOrderReferenceAndUser_UserId(String orderRef, Long userId);
 }

@@ -1,27 +1,26 @@
 package com.scientia.mercatus.service.impl;
 
-import com.razorpay.RazorpayException;
 import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.dto.Order.OrderSummaryDto;
 import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.*;
 
-import com.scientia.mercatus.exception.InvalidPaymentStateException;
 import com.scientia.mercatus.exception.NoLoggedInUserFoundException;
 import com.scientia.mercatus.exception.OrderNotFoundException;
 import com.scientia.mercatus.exception.UnauthorizedOperationException;
 import com.scientia.mercatus.mapper.OrderMapper;
 import com.scientia.mercatus.repository.OrderRepository;
-import com.scientia.mercatus.repository.PaymentRepository;
+
 import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.service.*;
 import lombok.RequiredArgsConstructor;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Pageable;
@@ -41,13 +40,16 @@ import java.util.UUID;
 
 public class OrderServiceImpl implements IOrderService {
 
+
+    @Value("${inventory.reservation.expiry-minutes:10}")
+    private int reservationExpiryMinutes;
+
     private final ICartService cartService;
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final IInventoryService inventoryService;
     private final IPaymentService paymentService;
-    private final PaymentRepository paymentRepository;
     private final IProductService productService;
 
 
@@ -124,81 +126,7 @@ public class OrderServiceImpl implements IOrderService {
 
 
 
-    @Transactional
-    @Override
-    public void markPaid(String orderReference) {
 
-        Order order =  orderRepository.findByOrderReferenceForUpdate(orderReference).orElseThrow(
-                () -> new OrderNotFoundException("Order not found for reference: " + orderReference)
-        );
-        if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.SUCCESS)) { // Webhook retries: Idempotent behaviour
-            return;
-        }
-        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
-            throw new InvalidPaymentStateException("Order not payable in current payment state");
-        }
-        order.setOrderPaymentStatus(OrderPaymentStatus.SUCCESS);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Override
-    public void finalizePaidOrder(String orderReference) {
-        Order order = orderRepository.findByOrderReferenceForUpdate(orderReference).orElseThrow(
-                () -> new  OrderNotFoundException("Order not found for reference: " + orderReference)
-        );
-        if (order.getStatus().equals(OrderStatus.CONFIRMED)) {
-            return;
-        }
-        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
-            return;
-        }
-        if (order.getOrderPaymentStatus() != OrderPaymentStatus.SUCCESS) {
-            return;
-        }
-        for (OrderItem item: order.getOrderItems()) {
-            inventoryService.confirmReservation(item.getReservationKey());
-        }
-        order.setStatus(OrderStatus.CONFIRMED);
-    }
-
-
-
-    @Override
-    @Transactional
-    public void markPaymentFail(String orderReference) {
-        Order order =  orderRepository.findByOrderReferenceForUpdate(orderReference).orElseThrow(
-                () -> new OrderNotFoundException("Order not found for reference: " + orderReference)
-        );
-        if (order.getOrderPaymentStatus().equals(OrderPaymentStatus.SUCCESS)) {
-            return;
-        }
-        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
-            return;
-        }
-        order.setOrderPaymentStatus(OrderPaymentStatus.FAILED);
-
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void cancelFailedOrder(String orderReference) {
-
-        Order order = orderRepository
-                .findByOrderReferenceForUpdate(orderReference)
-                .orElseThrow(() -> new OrderNotFoundException(
-                        "Order not found for reference: " + orderReference));
-
-        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
-            return;
-        }
-
-        for (OrderItem item : order.getOrderItems()) {
-            inventoryService.releaseReservation(item.getReservationKey());
-        }
-
-        order.setStatus(OrderStatus.CANCELLED);
-
-    }
 
 
 
@@ -216,7 +144,8 @@ public class OrderServiceImpl implements IOrderService {
             throw new IllegalArgumentException("Order reference is required");
         }
 
-        Optional<Order> existingOrder= orderRepository.findByOrderReference(orderRef);
+        //Idempotency key (orderReference + userId )
+        Optional<Order> existingOrder= orderRepository.findByOrderReferenceAndUser_UserId(orderRef, userId);
 
         if (existingOrder.isPresent()) {
             return existingOrder.get();
@@ -246,7 +175,7 @@ public class OrderServiceImpl implements IOrderService {
 
         for (CartItem item : items) {
             String reservationKey = UUID.randomUUID().toString();
-            Instant expiresAt = Instant.now().plus(10, ChronoUnit.MINUTES);
+            Instant expiresAt = Instant.now().plus(reservationExpiryMinutes, ChronoUnit.MINUTES);
             Product product = productService.getActiveProduct(item.getProduct().getProductId());
             inventoryService.reserveStock(orderRef,
                     reservationKey,

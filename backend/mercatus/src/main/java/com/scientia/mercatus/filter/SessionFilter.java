@@ -1,7 +1,7 @@
 package com.scientia.mercatus.filter;
 
 import com.scientia.mercatus.security.GuestAuthenticationToken;
-import com.scientia.mercatus.service.SessionService;
+import com.scientia.mercatus.service.ISessionService;
 import com.scientia.mercatus.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,7 +21,7 @@ import java.io.IOException;
 public class SessionFilter extends OncePerRequestFilter {
 
     private final CookieUtil cookieUtil;
-    private final SessionService sessionService;
+    private final ISessionService ISessionService;
 
     public static final String SESSION_ATTRIBUTE = "SESSION_ATTRIBUTE";
     @Override
@@ -32,12 +32,12 @@ public class SessionFilter extends OncePerRequestFilter {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String sessionId = cookieUtil.getSessionId(request);
-        if (!sessionService.validateSession(sessionId)) { // case: if invalid
+        if (!ISessionService.validateSession(sessionId)) { // case: if invalid
             if (sessionId != null) {
                 cookieUtil.deleteCookie(response);// case: if invalid but not null then delete
                 // (must be in revoked list)
             }
-            sessionId = sessionService.createSession();
+            sessionId = ISessionService.createSession();
             if (authentication == null || !authentication.isAuthenticated()) { // Makes Spring security aware of guest
                 GuestAuthenticationToken guestAuthenticationToken = new GuestAuthenticationToken(sessionId);
                 SecurityContextHolder.getContext().setAuthentication(guestAuthenticationToken);

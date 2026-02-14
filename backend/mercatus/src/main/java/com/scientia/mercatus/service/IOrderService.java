@@ -10,9 +10,5 @@ public interface IOrderService {
     Order placeOrder(String sessionId, Long userId, String orderReference);
     void cancelOrder(Long orderId, Long userId);
     Page<OrderSummaryDto> getOrdersForUser(Long userId, Pageable pageable);
-    void markPaid(String orderReference);
-    void finalizePaidOrder(String orderReference);
-    void markPaymentFail(String orderReference);
-    void cancelFailedOrder(String orderReference);
     PaymentInitiationResultDto initiatePayment(Long orderId, Long userId);
 }

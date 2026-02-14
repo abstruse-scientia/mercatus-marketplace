@@ -1,6 +1,6 @@
 package com.scientia.mercatus.service;
 
-public interface SessionService {
+public interface ISessionService {
 
     String createSession();
     boolean validateSession(String sessionId);
