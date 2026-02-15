@@ -5,7 +5,7 @@ import com.scientia.mercatus.dto.*;
 import com.scientia.mercatus.dto.Auth.LoginRequestDto;
 import com.scientia.mercatus.dto.Auth.LoginResponseDto;
 import com.scientia.mercatus.dto.Auth.RefreshTokenRequestDto;
-import com.scientia.mercatus.dto.Auth.RefreshtTokenResponseDto;
+import com.scientia.mercatus.dto.Auth.RefreshTokenResponseDto;
 import com.scientia.mercatus.entity.User;
 
 
@@ -66,7 +66,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequestDto refreshTokenRequestDto) {
-        RefreshtTokenResponseDto response = iRefreshTokenService.rotateRefreshToken
+        RefreshTokenResponseDto response = iRefreshTokenService.rotateRefreshToken
                 (refreshTokenRequestDto.refreshToken());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

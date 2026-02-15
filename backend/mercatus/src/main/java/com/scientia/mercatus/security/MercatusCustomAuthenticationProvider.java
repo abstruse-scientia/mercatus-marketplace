@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 
-@Profile("!test")
+
 @Component
 @RequiredArgsConstructor
 public class MercatusCustomAuthenticationProvider implements AuthenticationProvider {
@@ -35,7 +35,7 @@ public class MercatusCustomAuthenticationProvider implements AuthenticationProvi
                 .orElseThrow(()-> new UsernameNotFoundException("User not found"));
         Set<Role> roles = user.getRoles();
         List<SimpleGrantedAuthority> authorities = roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName())).toList();
+                .map(role -> new SimpleGrantedAuthority(role.getName().name())).toList();
         if (passwordEncoder.matches(password, user.getPasswordHash())) {
             return new UsernamePasswordAuthenticationToken(user, null, authorities);
         } else {

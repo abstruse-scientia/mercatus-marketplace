@@ -1,6 +1,6 @@
 package com.scientia.mercatus.service.impl;
 
-import com.scientia.mercatus.service.SessionService;
+import com.scientia.mercatus.service.ISessionService;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -8,7 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class SessionServiceImpl implements SessionService {
+public class ISessionServiceImpl implements ISessionService {
 
     private final Set<String> revokeSessionIds =  ConcurrentHashMap.newKeySet();
     @Override

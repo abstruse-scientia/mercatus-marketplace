@@ -1,5 +1,7 @@
 package com.scientia.mercatus.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,6 +35,7 @@ public class User extends BaseEntity{
 
     @Size(max=500)
     @NotNull
+    @JsonIgnore
     @Column(name = "password_hash", nullable=false, length = 500)
     private String passwordHash;
 
@@ -44,13 +47,13 @@ public class User extends BaseEntity{
 
 
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
 
     private Set<Role> roles = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",  fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
 }

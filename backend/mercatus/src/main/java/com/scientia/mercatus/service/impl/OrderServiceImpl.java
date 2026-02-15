@@ -2,6 +2,7 @@ package com.scientia.mercatus.service.impl;
 
 import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.dto.Order.OrderSummaryDto;
+import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.*;
 
 import com.scientia.mercatus.exception.NoLoggedInUserFoundException;
@@ -9,15 +10,17 @@ import com.scientia.mercatus.exception.OrderNotFoundException;
 import com.scientia.mercatus.exception.UnauthorizedOperationException;
 import com.scientia.mercatus.mapper.OrderMapper;
 import com.scientia.mercatus.repository.OrderRepository;
+
 import com.scientia.mercatus.repository.UserRepository;
-import com.scientia.mercatus.service.ICartService;
-import com.scientia.mercatus.service.IOrderService;
+import com.scientia.mercatus.service.*;
 import lombok.RequiredArgsConstructor;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Pageable;
@@ -37,11 +40,17 @@ import java.util.UUID;
 
 public class OrderServiceImpl implements IOrderService {
 
+
+    @Value("${inventory.reservation.expiry-minutes:10}")
+    private int reservationExpiryMinutes;
+
     private final ICartService cartService;
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final InventoryServiceImpl inventoryService;
+    private final IInventoryService inventoryService;
+    private final IPaymentService paymentService;
+    private final IProductService productService;
 
 
     @Override
@@ -59,23 +68,7 @@ public class OrderServiceImpl implements IOrderService {
     @Transactional
     @Override
     public void cancelOrder(Long orderId, Long userId) {
-            if (orderId == null) {
-                throw new OrderNotFoundException("Order not found");
-            }
-            if (userId == null) {
-                throw new NoLoggedInUserFoundException("User not found");
-            }
-
-
-
-            Order currentOrder = orderRepository.findByIdForUpdate(orderId).orElseThrow(
-                    ()->  new OrderNotFoundException("Order not found")
-            );
-            if (!currentOrder.getUser().getUserId().equals(userId)) {
-                throw new UnauthorizedOperationException("Given user can not cancel this order");
-            }
-
-
+            Order currentOrder = loadAndValidateOrderHelper(orderId, userId);
             if (currentOrder.getStatus().equals(OrderStatus.CANCELLED)) {
                 return;
             }
@@ -87,7 +80,7 @@ public class OrderServiceImpl implements IOrderService {
                 inventoryService.releaseReservation(item.getReservationKey());
             }
             currentOrder.setStatus(OrderStatus.CANCELLED);
-            currentOrder.setPaymentStatus(PaymentStatus.CANCELLED);
+            currentOrder.setOrderPaymentStatus(OrderPaymentStatus.CANCELLED);
             
     }
 
@@ -103,7 +96,7 @@ public class OrderServiceImpl implements IOrderService {
                new OrderSummaryDto(
                        order.getId(),
                        order.getTotalAmount(),
-                       order.getPaymentStatus(),
+                       order.getOrderPaymentStatus(),
                        order.getStatus(),
                        order.getOrderReference(),
                        order.getCreatedAt()
@@ -115,6 +108,34 @@ public class OrderServiceImpl implements IOrderService {
     }
 
 
+    @Transactional
+    @Override
+    public PaymentInitiationResultDto initiatePayment(Long orderId, Long userId){
+        Order order = loadAndValidateOrderHelper(orderId, userId);
+        if(!order.getStatus().equals(OrderStatus.CREATED)) {
+            throw new IllegalStateException("Payment can only be initiated in CREATED state");
+        }
+        if(!order.getOrderPaymentStatus().equals(OrderPaymentStatus.PENDING)) {
+            throw new IllegalStateException("Order can not be placed in current payment state");
+        }
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
+        return paymentService.initiatePayment(order.getOrderReference(), "INR", PaymentProvider.RAZORPAY);
+    }
+
+
+
+
+
+
+
+
+
+    /*----------------------------- Helper Functions ------------------------------------------- */
+
+
+
+
+
 
     Order placeOrderHelper(String sessionId, Long userId, String orderRef) {
 
@@ -123,7 +144,8 @@ public class OrderServiceImpl implements IOrderService {
             throw new IllegalArgumentException("Order reference is required");
         }
 
-        Optional<Order> existingOrder= orderRepository.findByOrderReference(orderRef);
+        //Idempotency key (orderReference + userId )
+        Optional<Order> existingOrder= orderRepository.findByOrderReferenceAndUser_UserId(orderRef, userId);
 
         if (existingOrder.isPresent()) {
             return existingOrder.get();
@@ -153,10 +175,11 @@ public class OrderServiceImpl implements IOrderService {
 
         for (CartItem item : items) {
             String reservationKey = UUID.randomUUID().toString();
-            Instant expiresAt = Instant.now().plus(10, ChronoUnit.MINUTES);
+            Instant expiresAt = Instant.now().plus(reservationExpiryMinutes, ChronoUnit.MINUTES);
+            Product product = productService.getActiveProduct(item.getProduct().getProductId());
             inventoryService.reserveStock(orderRef,
                     reservationKey,
-                    item.getProduct().getSku(),
+                    product.getSku(),
                     item.getQuantity(),
                     expiresAt);
             OrderItem orderItem = orderMapper.convertCartItemToOrderItem(item, newOrder);
@@ -175,5 +198,23 @@ public class OrderServiceImpl implements IOrderService {
         } catch (DataIntegrityViolationException e) {
             return orderRepository.findByOrderReference(orderRef).orElseThrow();
         }
+    }
+
+
+
+    private Order loadAndValidateOrderHelper(Long orderId, Long userId) {
+        if (orderId == null) {
+            throw new OrderNotFoundException("Order not found");
+        }
+        if (userId == null) {
+            throw new NoLoggedInUserFoundException("User not found");
+        }
+        Order order = orderRepository.findByIdForUpdate(orderId).orElseThrow(
+                ()-> new OrderNotFoundException("Order not found")
+        );
+        if (!order.getUser().getUserId().equals(userId)) {
+            throw new  UnauthorizedOperationException("Unauthorized operation");
+        }
+        return order;
     }
 }

@@ -1,6 +1,6 @@
 package com.scientia.mercatus.service.impl;
 
-import com.scientia.mercatus.dto.Auth.RefreshtTokenResponseDto;
+import com.scientia.mercatus.dto.Auth.RefreshTokenResponseDto;
 import com.scientia.mercatus.entity.RefreshToken;
 import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.exception.TokenExpiredException;
@@ -74,14 +74,14 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
 
     @Override
     @Transactional
-    public RefreshtTokenResponseDto rotateRefreshToken(String rawRefreshToken) {
+    public RefreshTokenResponseDto rotateRefreshToken(String rawRefreshToken) {
         RefreshToken existingToken = validateRefreshToken(rawRefreshToken);
         existingToken.setRevoked(true);
         refreshTokenRepository.save(existingToken);
         User user = existingToken.getUser();
         String newRawRefreshToken = createRefreshToken(user);
         String newJwtToken = jwtTokenProvider.generateJwtToken(user);
-        return new RefreshtTokenResponseDto(newRawRefreshToken, newJwtToken);
+        return new RefreshTokenResponseDto(newRawRefreshToken, newJwtToken);
     }
 
 }

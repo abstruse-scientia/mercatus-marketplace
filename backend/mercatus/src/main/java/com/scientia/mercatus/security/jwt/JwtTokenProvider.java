@@ -1,6 +1,5 @@
 package com.scientia.mercatus.security.jwt;
 
-import com.scientia.mercatus.entity.Role;
 import com.scientia.mercatus.entity.User;
 import io.jsonwebtoken.Jwts;
 
@@ -23,7 +22,8 @@ public class JwtTokenProvider {
         jwt = Jwts.builder().issuer("Mercatus").subject("JWT Token")
                 .claim("username", userDetail.getUserName())
                 .claim("email", userDetail.getEmail())
-                .claim("roles", userDetail.getRoles().stream().map(Role::getName)
+                .claim("userId", userDetail.getUserId())
+                .claim("roles", userDetail.getRoles().stream().map(role -> role.getName().toString())
                         .collect(Collectors.joining(",")))
                 .issuedAt(new java.util.Date())
                 .expiration(new java.util.Date((new java.util.Date()).getTime() + 30 * 60 * 1000))

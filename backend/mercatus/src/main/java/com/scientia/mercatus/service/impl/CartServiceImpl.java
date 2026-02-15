@@ -7,10 +7,10 @@ import com.scientia.mercatus.entity.*;
 import com.scientia.mercatus.exception.IllegalQuantity;
 import com.scientia.mercatus.repository.CartItemsRepository;
 import com.scientia.mercatus.repository.CartRepository;
-import com.scientia.mercatus.repository.ProductRepository;
 import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.service.ICartService;
-import com.scientia.mercatus.service.SessionService;
+import com.scientia.mercatus.service.IProductService;
+import com.scientia.mercatus.service.ISessionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,9 +28,9 @@ public class CartServiceImpl implements ICartService {
 
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
-    private final ProductRepository productRepository;
     private final CartItemsRepository cartItemsRepository;
-    private final SessionService sessionService;
+    private final ISessionService ISessionService;
+    private final IProductService productService;
 
 
 
@@ -53,20 +53,20 @@ public class CartServiceImpl implements ICartService {
             throw new IllegalStateException("Session id is null");
         }
         Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
-        if (userCart == null && guestCart == null) {
+        if (userCart == null && guestCart == null) { // if guest cart and user cart both absent
             return createUserCart(user);
         }
-        if (guestCart == null) {
+        if (guestCart == null) { // if guest cart absent, but user cart may be present
             return userCart;
         }
-        if (userCart == null) {
+        if (userCart == null) { // if user cart absent, but guest cart may be present
             Cart attachCart =  attachGuestCartToUser(guestCart,  user);
-            sessionService.revokeSession(sessionId);
+            ISessionService.revokeSession(sessionId);
             return attachCart;
         }
 
-        mergeGuestToUserCart(guestCart, userCart);
-        sessionService.revokeSession(sessionId);
+        mergeGuestToUserCart(guestCart, userCart);// if both cart are present
+        ISessionService.revokeSession(sessionId);
         cartRepository.delete(guestCart);
         return  cartRepository.save(userCart);
     }
@@ -124,7 +124,8 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
-    public void addToCart(Cart currentCart, Long productId, Integer quantity) {
+    public void addToCart(CartContextDto ctxDto, Long productId, Integer quantity) {
+        Cart currentCart = resolveCart(ctxDto);
         if (quantity == null || quantity <= 0) {
             throw new IllegalQuantity("Quantity must be greater than 0");
         }
@@ -132,8 +133,7 @@ public class CartServiceImpl implements ICartService {
         if (productId == null) {
             throw new IllegalArgumentException("Product id cannot be null");
         }
-        Product currentProduct = productRepository.findByProductId(productId).orElseThrow(()
-                -> new RuntimeException("Product not found"));
+        Product currentProduct = productService.getActiveProduct(productId);
         Optional<CartItem> cartItemOptional = cartItemsRepository.findByCartAndProduct(currentCart, currentProduct);
         if (cartItemOptional.isPresent()) {
             CartItem currentItem = cartItemOptional.get();
@@ -149,39 +149,38 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
-    public void removeFromCart(Cart currentCart, Long productId) {
+    public void removeFromCart(CartContextDto ctxDto, Long productId) {
+        Cart currentCart = resolveCart(ctxDto);
         if (productId == null) {
             throw new IllegalArgumentException("Product id cannot be null");
         }
-        Product currentProduct = productRepository.findByProductId(productId).
-                orElseThrow(()-> new RuntimeException("Product not found: " + productId));
-        Optional<CartItem> cartItemOptional = cartItemsRepository.findByCartAndProduct(currentCart, currentProduct);
-        cartItemOptional.ifPresent(cartItemsRepository::delete);
+        cartItemsRepository
+                .findByCartAndProduct_ProductId(currentCart, productId)
+                .ifPresent(cartItemsRepository::delete);
     }
 
     @Override
-    public void clearCart(Cart currentCart) {
+    public void clearCart(CartContextDto ctxDto) {
+        Cart currentCart = resolveCart(ctxDto);
         cartItemsRepository.deleteByCart(currentCart);
     }
 
 
     @Override
-    public void updateQuantity(Cart currentCart, Long productId, Integer quantity) {
+    public void updateQuantity(CartContextDto ctxDto, Long productId, Integer quantity) {
+        Cart currentCart = resolveCart(ctxDto);
         if (quantity == null || quantity  < 0) {
             throw new IllegalQuantity("Quantity must be greater than 0");
         }
         if (productId == null) {
             throw new IllegalArgumentException("Product id cannot be null");
         }
-        Product currentProduct = productRepository.findByProductId(productId).
-                orElseThrow(()-> new RuntimeException("Product not found: " + productId));
-        Optional<CartItem> currentCartItemOptional = cartItemsRepository.
-                findByCartAndProduct(currentCart, currentProduct);
-        if (currentCartItemOptional.isEmpty()) {
+        CartItem item = cartItemsRepository
+                .findByCartAndProduct_ProductId(currentCart, productId).orElse(null);
+
+        if (item == null) {
             return;
         }
-
-        CartItem item = currentCartItemOptional.get();
         if (quantity == 0) {
             cartItemsRepository.delete(item);
             return;
@@ -198,17 +197,19 @@ public class CartServiceImpl implements ICartService {
         int totalCount = 0;
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (CartItem item : items) {
+            Product product = productService.getActiveProduct(item.getProduct().getProductId());
+            BigDecimal itemPrice = product.getPrice();
             BigDecimal totalItemPrice = BigDecimal.valueOf(item.getQuantity()).multiply(item.getProduct().getPrice());
             CartItemDto cartItemDto = new CartItemDto(
                     item.getCartItemId(),
-                    item.getProduct().getName(),
+                    product.getName(),
                     item.getQuantity(),
-                    item.getProduct().getPrice(),
+                    itemPrice,
                     totalItemPrice
             );
             cartItemList.add(cartItemDto);
             totalPrice =  totalPrice.add(totalItemPrice);
-            totalCount += item.getQuantity().intValue();
+            totalCount += item.getQuantity();
         }
         return new CartResponseDto(cartItemList, totalCount, totalPrice);
     }
