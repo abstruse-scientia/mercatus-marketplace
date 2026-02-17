@@ -26,6 +26,10 @@ public class Category extends BaseEntity{
     @Column(name = "category_name", nullable = false, length = 100)
     private String categoryName;
 
+
+    @Column(name = "slug", nullable = false, unique = true)
+    private String slug;
+
     @OneToMany(mappedBy = "category")
     @JsonManagedReference
     private List<Product> products;
