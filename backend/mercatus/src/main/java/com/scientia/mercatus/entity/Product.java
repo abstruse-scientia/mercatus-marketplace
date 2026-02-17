@@ -29,6 +29,8 @@ public class Product extends BaseEntity{
     @Column(name = "price", nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
+    @Column(name = "slug", unique = true, nullable = false)
+    private String slug;
 
     @JoinColumn(name = "category_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -44,6 +46,6 @@ public class Product extends BaseEntity{
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
-
-
+    @Column(name = "primary_image_url")
+    private String primaryImageUrl;
 }
