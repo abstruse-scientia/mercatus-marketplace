@@ -49,8 +49,14 @@ ADMIN_API_TODO.md
 
 
 logs
+
+# Frontend API Reference (internal use only)
+FRONTEND_API_REFERENCE.md
+
 CODE_REVIEW.md
 
 SWAGGER_DOCUMENTATION_STRATEGY.md
 
 DEPLOYMENT_STRATEGY.md
+
+admin_catalog_readme.md

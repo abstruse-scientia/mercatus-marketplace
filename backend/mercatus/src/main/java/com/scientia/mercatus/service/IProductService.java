@@ -1,7 +1,7 @@
 package com.scientia.mercatus.service;
 
 
-import com.scientia.mercatus.dto.Product.CreateProductRequestDto;
+import com.scientia.mercatus.dto.Product.Admin.CreateProductRequestDto;
 import com.scientia.mercatus.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
