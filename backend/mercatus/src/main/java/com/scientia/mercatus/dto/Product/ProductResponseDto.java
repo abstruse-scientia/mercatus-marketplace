@@ -15,8 +15,9 @@ public class ProductResponseDto {
     private String name;
     private String description;
     private BigDecimal price;
-    private String sku;
-
+    private String slug;
+    private String primaryImageUrl;
+    private String categoryName;
 
     public static ProductResponseDto from(Product product) {
         return new ProductResponseDto(
@@ -24,7 +25,9 @@ public class ProductResponseDto {
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
-                product.getSku()
+                product.getSlug(),
+                product.getPrimaryImageUrl(),
+                product.getCategory().getCategoryName()
         );
     }
 }

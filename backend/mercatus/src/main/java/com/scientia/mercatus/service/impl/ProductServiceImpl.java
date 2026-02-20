@@ -1,6 +1,6 @@
 package com.scientia.mercatus.service.impl;
 
-import com.scientia.mercatus.dto.Product.CreateProductRequestDto;
+import com.scientia.mercatus.dto.Product.Admin.CreateProductRequestDto;
 import com.scientia.mercatus.entity.Category;
 import com.scientia.mercatus.entity.Product;
 import com.scientia.mercatus.exception.BusinessException;

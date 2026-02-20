@@ -1,6 +1,6 @@
 package com.scientia.mercatus.controller;
 
-import com.scientia.mercatus.dto.Product.CreateProductRequestDto;
+import com.scientia.mercatus.dto.Product.Admin.CreateProductRequestDto;
 import com.scientia.mercatus.dto.Product.ProductResponseDto;
 import com.scientia.mercatus.entity.Product;
 import com.scientia.mercatus.service.IProductService;
