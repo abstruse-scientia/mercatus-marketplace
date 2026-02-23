@@ -17,6 +17,9 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Long
     // Find all images for a product
     List<ProductImage> findByProductProductId(Long productId);
 
+    // Find only one image for a product based on the ascending sort order
+
+    Optional<ProductImage> findFirstByProductProductIdOrderBySortOrderAsc(Long productId);
 
     // Find all images for a product ordered by sort order
     List<ProductImage> findByProductProductIdOrderBySortOrderAsc(Long productId);
@@ -24,6 +27,17 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Long
 
     //Find the primary image for a product
     Optional<ProductImage> findByProductProductIdAndIsPrimaryTrue(Long productId);
+
+
+    //Clear primary image
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            update ProductImage pi
+            set pi.isPrimary = false
+            where pi.product.productId = :productId and pi.isPrimary = true
+    """)
+    void clearPrimaryImage(@Param("productId") Long productId);
+
 
 
     // Delete all images for a product

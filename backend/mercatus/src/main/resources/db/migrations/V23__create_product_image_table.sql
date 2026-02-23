@@ -1,5 +1,5 @@
 create table product_image (
-    id bigint auto_increment primary key ,
+    id bigint unsigned auto_increment primary key ,
     product_id bigint unsigned not null,
     url varchar(500) not null ,
     is_primary boolean not null default false,

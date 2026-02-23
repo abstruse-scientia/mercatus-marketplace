@@ -6,6 +6,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class UpdateProductImageRequestDto {
-    boolean isPrimary;
-    int sortOrder;
+    private Boolean isPrimary;
+    private Integer sortOrder;
 }
