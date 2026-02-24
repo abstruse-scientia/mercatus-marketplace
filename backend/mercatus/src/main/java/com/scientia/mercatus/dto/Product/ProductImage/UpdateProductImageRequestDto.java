@@ -1,11 +1,11 @@
 package com.scientia.mercatus.dto.Product.ProductImage;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class UpdateProductImageRequestDto {
-    private Boolean isPrimary;
-    private Integer sortOrder;
+    private  Boolean isPrimary;
+    private  Integer sortOrder;
 }

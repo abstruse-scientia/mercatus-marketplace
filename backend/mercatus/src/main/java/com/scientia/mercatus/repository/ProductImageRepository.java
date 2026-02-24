@@ -1,7 +1,9 @@
 package com.scientia.mercatus.repository;
 
 import com.scientia.mercatus.entity.ProductImage;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,29 @@ import java.util.Optional;
 @Repository
 public interface ProductImageRepository extends JpaRepository<ProductImage, Long> {
 
+
+
+    //Get Replacement Image for primary auto promotion
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select pi
+        from ProductImage pi
+        where pi.product.productId = :productId
+        and pi.id != :imageId
+        order by pi.sortOrder asc
+    """)
+    Optional<ProductImage> findReplacementImage(@Param("productId") Long productId, @Param("imageId") Long imageId);
+
+
+
+
+    // Lock images for product
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select pi from ProductImage pi
+        where pi.product.productId = :productId
+    """)
+    void lockImagesForProduct(@Param("productId") Long productId);
 
     // Find all images for a product
     List<ProductImage> findByProductProductId(Long productId);
