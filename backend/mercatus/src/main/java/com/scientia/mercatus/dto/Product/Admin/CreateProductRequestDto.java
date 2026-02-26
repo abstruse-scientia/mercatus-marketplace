@@ -12,19 +12,19 @@ import java.math.BigDecimal;
 @Setter
 public class CreateProductRequestDto {
 
-    @NotBlank
+    @NotBlank(message = "Product name required.")
     private String name;
 
     private String description;
 
 
-    @NotNull
+    @NotNull(message = "Price must be greater than zero")
     private BigDecimal price;
 
-    @NotBlank
+    @NotBlank(message = "SKU is required")
     private String sku;
 
 
-    @NotNull
+    @NotNull(message = "Category id required")
     private Long categoryId;
 }

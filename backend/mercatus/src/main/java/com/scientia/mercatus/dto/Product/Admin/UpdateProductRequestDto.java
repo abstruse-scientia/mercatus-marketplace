@@ -13,22 +13,22 @@ import java.math.BigDecimal;
 @Setter
 public class UpdateProductRequestDto {
 
-    @NotBlank
+    @NotBlank(message = "Name required.")
     private String name;
 
     private String description;
 
-    @NotNull
+    @NotNull(message = "Price above zero required")
     @Positive
     private BigDecimal price;
 
-    @NotBlank
+    @NotBlank(message = "SKU required.")
     @Size(max = 100)
     private String sku;
 
     private String slug;
 
-    @NotNull
+    @NotNull(message = "Category id required.")
     private Long categoryId;
 
     private String primaryImageUrl;

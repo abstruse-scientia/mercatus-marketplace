@@ -17,13 +17,13 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     Optional<Category> findBySlug(String slug);
 
-    boolean existsByCategoryName(String categoryName);
+    boolean existsByCategoryNameIgnoreCase(String categoryName);
 
     boolean existsBySlug(String slug);
 
     // Check if category name exists for different category id (different category) [for update]
     @Query("""
-            select case when count(c) > 0 then true else false end from Category c  where c.categoryName = :categoryNamey and c.categoryId != :categoryId
+            select case when count(c) > 0 then true else false end from Category c  where c.categoryName = :categoryName and c.categoryId != :categoryId
     """)
     boolean existsByCategoryNameAndCategoryIdNot(@Param("categoryName") String categoryName, @Param("categoryId") Long categoryId);
 
