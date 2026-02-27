@@ -4,6 +4,7 @@ import com.scientia.mercatus.dto.Product.ProductImage.AddProductImageRequestDto;
 import com.scientia.mercatus.dto.Product.ProductImage.UpdateProductImageRequestDto;
 import com.scientia.mercatus.entity.Product;
 import com.scientia.mercatus.entity.ProductImage;
+import com.scientia.mercatus.exception.BusinessException;
 import com.scientia.mercatus.repository.ProductImageRepository;
 import com.scientia.mercatus.service.IProductImageService;
 import com.scientia.mercatus.service.IProductService;
@@ -67,12 +68,15 @@ public class    ProductImageServiceImpl implements IProductImageService {
 
     @Override
     @Transactional
-    public void deleteImage(Long imageId) {
+    public void deleteImage(Long productId, Long imageId) {
         if (imageId == null) {
             throw new IllegalArgumentException("Image id cannot be null.");
         }
         ProductImage productImage = productImageRepository.findById(imageId).orElseThrow(() ->
                 new IllegalStateException("Image id not found."));
+        if (!productImage.getProduct().getProductId().equals(productId)) {
+            throw new BusinessException("Image does not belong to the product.");
+        }
         productImageRepository.lockImagesForProduct(productImage.getProduct().getProductId());
         boolean imageIsPrimary = Boolean.TRUE.equals(productImage.getIsPrimary());
         productImageRepository.delete(productImage);
@@ -156,7 +160,7 @@ public class    ProductImageServiceImpl implements IProductImageService {
 
     @Override
     @Transactional
-    public ProductImage updateImage(Long imageId, UpdateProductImageRequestDto updateProduct) {
+    public ProductImage updateImage(Long productId, Long imageId, UpdateProductImageRequestDto updateProduct) {
         if (imageId == null) {
             throw new IllegalArgumentException("Image id cannot be null");
         }
@@ -164,7 +168,10 @@ public class    ProductImageServiceImpl implements IProductImageService {
         ProductImage productImage = productImageRepository.findById(imageId)
                 .orElseThrow(() -> new IllegalStateException("Image not found"));
 
-        Long productId = productImage.getProduct().getProductId();
+        if (!productImage.getProduct().getProductId().equals(productId)) {
+            throw new BusinessException("Image does not belong to the product.");
+        }
+
         productImageRepository.lockImagesForProduct(productId);
 
 
