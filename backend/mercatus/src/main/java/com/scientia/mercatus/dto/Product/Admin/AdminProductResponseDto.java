@@ -21,7 +21,7 @@ public class AdminProductResponseDto {
     private Long categoryId;
     private String categoryName;
 
-    private boolean isActive;
+    private Boolean isActive;
 
 
 }
