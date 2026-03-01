@@ -1,4 +1,6 @@
 package com.scientia.mercatus.dto.Category;
 
-public record CreateCategoryRequestDto(String name) {
+import jakarta.validation.constraints.NotBlank;
+
+public record CreateCategoryRequestDto(@NotBlank(message = "Name required for category.") String name) {
 }

@@ -38,9 +38,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             or lower(p.sku) like lower(concat('%', :query , '%'))
             and p.isActive = true
     """)
-    Page<Product> searchByNameOrSkuAndIsActive(@Param("query")String query, Pageable pageable);
+    Page<Product> searchByNameOrSlugAndIsActive(@Param("query")String query, Pageable pageable);
 
     boolean existsBySlugAndProductIdNot(String slug,  Long productId);
 
     boolean existsBySlug(String slug);
+
+    @Query("""
+        select p from Product p where p.category.categoryId = :categoryId and p.isActive = true
+    """)
+    Page<Product> findActiveProductsByCategory(@Param("categoryId")Long categoryId, Pageable pageable);
 }
+

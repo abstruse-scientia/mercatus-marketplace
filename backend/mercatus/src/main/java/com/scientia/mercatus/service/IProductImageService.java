@@ -14,3 +14,4 @@ public interface IProductImageService {
     void setPrimaryImage(Long productId, Long imageId);
     void reorderImages(Long productId, List<Long> imageIds);
 }
+

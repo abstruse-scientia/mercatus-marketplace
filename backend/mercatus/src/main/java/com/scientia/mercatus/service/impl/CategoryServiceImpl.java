@@ -30,14 +30,14 @@ public class CategoryServiceImpl implements ICategoryService {
         if (categoryRepository.existsByCategoryNameIgnoreCase(name)) {
             throw new BusinessException("Category already exists");
         }
-        String slug = slugUtil.baseSlug(name);
+        String slug = slugUtil.generateSlugForCreate(name, categoryRepository::existsBySlugIgnoreCase);
         Category newCategory =  new Category();
-        newCategory.setCategoryName(categoryName);
+        newCategory.setCategoryName(name);
         newCategory.setSlug(slug);
         try {
             return categoryRepository.save(newCategory);
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessException("Category already exists");
+                throw new BusinessException("Category or Slug already exists");
         }
     }
 
@@ -83,18 +83,21 @@ public class CategoryServiceImpl implements ICategoryService {
     @Transactional
     public Category updateCategory(Long categoryId, UpdateCategoryRequestDto updateCategoryRequestDto) {
         Long id = validateId(categoryId);
-        if (updateCategoryRequestDto == null) {
+        if (updateCategoryRequestDto == null) {// check if it's null or not; if yes throw
             throw new IllegalArgumentException("UpdateCategoryRequestDto cannot be null");
         }
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Category not found"));
-        if (updateCategoryRequestDto.categoryName() != null && updateCategoryRequestDto.categoryName().isBlank()) {
+        if (updateCategoryRequestDto.categoryName() != null && !updateCategoryRequestDto.categoryName().isBlank()) {
             String newName = updateCategoryRequestDto.categoryName().trim();
-            if (categoryRepository.existsByCategoryNameIgnoreCase(newName)) {
+            if (categoryRepository.existsByCategoryNameIgnoreCaseAndCategoryIdNot(newName, categoryId)) {
                 throw new BusinessException("Category name already exists");
             }
+            String slug = slugUtil.generateSlugForUpdate(newName, categoryId, categoryRepository::existsBySlugIgnoreCaseAndCategoryIdNot);
+            category.setSlug(slug);
             category.setCategoryName(newName);
         }
+
         return category;
 
     }
