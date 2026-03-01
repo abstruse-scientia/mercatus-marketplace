@@ -1,4 +1,8 @@
 package com.scientia.mercatus.dto.Auth;
 
-public record LoginRequestDto(String userEmail, String password) {
+import jakarta.validation.constraints.NotBlank;
+
+public record LoginRequestDto(
+        @NotBlank(message = "Email required.") String userEmail,
+        @NotBlank(message = "Password required.") String password) {
 }

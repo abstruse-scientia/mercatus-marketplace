@@ -43,6 +43,7 @@ public class ProductServiceImpl implements IProductService {
                 .orElseThrow(() -> new BusinessException("Active product not found"));
     }
 
+
     public Product getActiveProductBySku(String sku) {
         return productRepository.findBySkuAndIsActiveTrue(sku)
                 .orElseThrow(() -> new BusinessException("Product not available"));
@@ -50,18 +51,28 @@ public class ProductServiceImpl implements IProductService {
 
 
     public Page<Product> listActiveProducts(Pageable pageable) {
-        Pageable validatePageable = validatePageable(pageable);
-        return productRepository.findAllByIsActiveTrue(validatePageable);
+        validatePageable(pageable);
+        return productRepository.findAllByIsActiveTrue(pageable);
     }
 
 
     @Override
-    public Page<Product> searchProducts(String query, Pageable pageable) {
+    public Page<Product> searchActiveProductsByNameOrSlug(String query, Pageable pageable) {
         if (query == null || query.isEmpty()) {
             throw new BusinessException("Query cannot be null or empty");
         }
-        Pageable validatedPageable = validatePageable(pageable);
-        return productRepository.searchByNameOrSkuAndIsActive(query, validatedPageable);
+        validatePageable(pageable);
+        return productRepository.searchByNameOrSlugAndIsActive(query, pageable);
+    }
+
+    @Override
+    public Page<Product> listActiveProductsByCategory(Long categoryId, Pageable pageable) {
+        if (categoryId == null ) {
+            throw new BusinessException("Category id cannot be null");
+        }
+        validatePageable(pageable);
+        return productRepository.findActiveProductsByCategory(categoryId, pageable);
+
     }
 
 
@@ -119,21 +130,21 @@ public class ProductServiceImpl implements IProductService {
         if (categoryId == null) {
             throw new BusinessException("Category id cannot be null.");
         }
-        Pageable validatedPageable = validatePageable(pageable);
+        validatePageable(pageable);
 
-        return productRepository.findByCategoryCategoryId(categoryId, validatedPageable);
+        return productRepository.findByCategoryCategoryId(categoryId, pageable);
     }
 
     @Override
     public Page<Product> listAllProducts(Pageable pageable) {
-        Pageable validatedPageable = validatePageable(pageable);
-        return productRepository.findAll(validatedPageable);
+        validatePageable(pageable);
+        return productRepository.findAll(pageable);
     }
 
     @Override
     public Page<Product> listInactiveProducts(Pageable pageable) {
-        Pageable validatedPageable = validatePageable(pageable);
-        return productRepository.findAllByIsActiveFalse(validatedPageable);
+        validatePageable(pageable);
+        return productRepository.findAllByIsActiveFalse(pageable);
     }
 
 
@@ -179,11 +190,10 @@ public class ProductServiceImpl implements IProductService {
         }
     }
 
-    private Pageable validatePageable(Pageable pageable) {
+    private void validatePageable(Pageable pageable) {
         if (pageable == null) {
             throw new BusinessException("Pageable cannot be null");
         }
-        return pageable;
     }
 
     private Product mapToProduct(CreateProductRequestDto request, Category category) {

@@ -1,4 +1,7 @@
 package com.scientia.mercatus.dto.Auth;
 
-public record RefreshTokenRequestDto(String refreshToken) {
+import jakarta.validation.constraints.NotBlank;
+
+public record RefreshTokenRequestDto(
+        @NotBlank(message = "Refresh Token required.") String refreshToken) {
 }

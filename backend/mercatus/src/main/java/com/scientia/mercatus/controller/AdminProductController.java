@@ -70,13 +70,6 @@ public class AdminProductController {
         return ResponseEntity.status(HttpStatus.OK).body(pagedResponse);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<Page<AdminProductResponseDto>> searchProduct(@RequestParam  String query, Pageable pageable) {
-        Pageable safePageable = getSafePageable(pageable);
-        Page<Product> searchProducts = productService.searchProducts(query, safePageable);
-        Page<AdminProductResponseDto> pagedResponse = searchProducts.map(adminMapper::toAdminProductResponseDto);
-        return ResponseEntity.status(HttpStatus.OK).body(pagedResponse);
-    }
 
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<Page<AdminProductResponseDto>> listProductsByCategory

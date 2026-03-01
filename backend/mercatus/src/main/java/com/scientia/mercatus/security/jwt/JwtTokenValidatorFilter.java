@@ -70,11 +70,5 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String requestPath = request.getRequestURI();
-        return Arrays.stream(PublicEndPoints.ALL).anyMatch(publicPath -> antPathMatcher.match(publicPath, requestPath));
-    }
-
 
 }
