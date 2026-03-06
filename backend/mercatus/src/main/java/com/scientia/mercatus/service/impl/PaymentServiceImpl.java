@@ -3,8 +3,8 @@ package com.scientia.mercatus.service.impl;
 import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.*;
 
-import com.scientia.mercatus.exception.AmountMismatchException;
-import com.scientia.mercatus.exception.OrderNotFoundException;
+import com.scientia.mercatus.exception.BusinessException;
+import com.scientia.mercatus.exception.ErrorEnum;
 
 import com.scientia.mercatus.payment.PaymentGatewayRegistry;
 import com.scientia.mercatus.repository.OrderRepository;
@@ -13,11 +13,13 @@ import com.scientia.mercatus.service.IPaymentGateway;
 import com.scientia.mercatus.service.IPaymentService;
 import com.scientia.mercatus.util.CurrencyConversionUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements IPaymentService {
@@ -38,13 +40,13 @@ public class PaymentServiceImpl implements IPaymentService {
 
         Order order = orderRepository
                 .findByOrderReference(orderReference)
-                .orElseThrow(()-> new OrderNotFoundException("No order exists."));
+                .orElseThrow(()-> new BusinessException(ErrorEnum.ORDER_NOT_FOUND));
 
         if(order.getOrderPaymentStatus() == OrderPaymentStatus.SUCCESS) {
-            throw new IllegalStateException("Order already paid");
+            throw new BusinessException(ErrorEnum.PAYMENT_ALREADY_EXISTS);
         }
         if (order.getStatus() != OrderStatus.CREATED) {
-            throw new IllegalStateException("Payment cannot be initiated for this order");
+            throw new BusinessException(ErrorEnum.INVALID_PAYMENT);
         }
 
         long amountExpected = currencyConversion.toINRMinor(order.getTotalAmount());
@@ -87,8 +89,8 @@ public class PaymentServiceImpl implements IPaymentService {
             return; // idempotency : either duplicate or already processed
         }
         if (amountReceived != payment.getAmountExpected()) { // amount validation
-            throw new AmountMismatchException("Amount mismatch. Expected: " + payment.getAmountExpected()
-            +"Received: " + amountReceived);
+            log.info("Amount received: {} Expected amount: {}", amountReceived, payment.getAmountExpected());
+            throw new BusinessException(ErrorEnum.AMOUNT_MISMATCH);
         }
 
         //persist  success (tx1)

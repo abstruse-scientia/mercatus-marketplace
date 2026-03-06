@@ -3,6 +3,7 @@ package com.scientia.mercatus.service.impl;
 import com.scientia.mercatus.dto.Category.UpdateCategoryRequestDto;
 import com.scientia.mercatus.entity.Category;
 import com.scientia.mercatus.exception.BusinessException;
+import com.scientia.mercatus.exception.ErrorEnum;
 import com.scientia.mercatus.repository.CategoryRepository;
 import com.scientia.mercatus.service.ICategoryService;
 import com.scientia.mercatus.util.SlugUtil;
@@ -28,7 +29,7 @@ public class CategoryServiceImpl implements ICategoryService {
     public Category createCategory(String categoryName) {
         String name = validateName(categoryName);
         if (categoryRepository.existsByCategoryNameIgnoreCase(name)) {
-            throw new BusinessException("Category already exists");
+            throw new BusinessException(ErrorEnum.CATEGORY_NOT_EMPTY);
         }
         String slug = slugUtil.generateSlugForCreate(name, categoryRepository::existsBySlugIgnoreCase);
         Category newCategory =  new Category();
@@ -37,7 +38,7 @@ public class CategoryServiceImpl implements ICategoryService {
         try {
             return categoryRepository.save(newCategory);
         } catch (DataIntegrityViolationException e) {
-                throw new BusinessException("Category or Slug already exists");
+                throw new BusinessException(ErrorEnum.CATEGORY_OR_SLUG_EXISTS);
         }
     }
 
@@ -46,10 +47,10 @@ public class CategoryServiceImpl implements ICategoryService {
     public void deleteCategory(Long categoryId) {
         Long id = validateId(categoryId);
         Category category = categoryRepository.findById(id).orElseThrow(
-                () -> new BusinessException("Category not found"));
+                () -> new BusinessException(ErrorEnum.CATEGORY_NOT_FOUND));
         if (categoryRepository.hasProducts(categoryId)) {
             log.warn("Category {} has products attached to it",  categoryId);
-            throw new BusinessException("Category with products can not be deleted");
+            throw new BusinessException(ErrorEnum.CATEGORY_NOT_EMPTY);
         }
         categoryRepository.delete(category);
     }
@@ -58,7 +59,7 @@ public class CategoryServiceImpl implements ICategoryService {
     public Category getCategory(Long categoryId) {
 
         Long id = validateId(categoryId);
-        return categoryRepository.findById(id).orElseThrow(() -> new BusinessException("Category not found"));
+        return categoryRepository.findById(id).orElseThrow(() -> new BusinessException(ErrorEnum.CATEGORY_NOT_FOUND));
     }
 
     @Override
@@ -66,7 +67,9 @@ public class CategoryServiceImpl implements ICategoryService {
 
         String validatedSlug = validateSlug(slug);
         return categoryRepository.findBySlug(validatedSlug)
-                .orElseThrow(() -> new BusinessException("Category not found"));
+                .orElseThrow(() ->
+                        new BusinessException(ErrorEnum.CATEGORY_NOT_FOUND,
+                                "No category exists for particular slug" + validatedSlug));
     }
 
 
@@ -74,7 +77,7 @@ public class CategoryServiceImpl implements ICategoryService {
     @Override
     public Page<Category> listCategories(Pageable pageable) {
         if (pageable == null) {
-            throw new IllegalArgumentException("Pageable cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Pageable cannot be null");
         }
         return categoryRepository.findAll(pageable);
     }
@@ -84,14 +87,15 @@ public class CategoryServiceImpl implements ICategoryService {
     public Category updateCategory(Long categoryId, UpdateCategoryRequestDto updateCategoryRequestDto) {
         Long id = validateId(categoryId);
         if (updateCategoryRequestDto == null) {// check if it's null or not; if yes throw
-            throw new IllegalArgumentException("UpdateCategoryRequestDto cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "UpdateCategoryRequestDto cannot be null");
         }
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Category not found"));
+                .orElseThrow(() -> new BusinessException
+                        (ErrorEnum.CATEGORY_NOT_FOUND, "No category exists for Id: " + categoryId));
         if (updateCategoryRequestDto.categoryName() != null && !updateCategoryRequestDto.categoryName().isBlank()) {
             String newName = updateCategoryRequestDto.categoryName().trim();
             if (categoryRepository.existsByCategoryNameIgnoreCaseAndCategoryIdNot(newName, categoryId)) {
-                throw new BusinessException("Category name already exists");
+                throw new BusinessException(ErrorEnum.CATEGORY_NOT_EMPTY);
             }
             String slug = slugUtil.generateSlugForUpdate(newName, categoryId, categoryRepository::existsBySlugIgnoreCaseAndCategoryIdNot);
             category.setSlug(slug);
@@ -106,21 +110,21 @@ public class CategoryServiceImpl implements ICategoryService {
     /* -------------------- Helper functions --------------------   */
     private String validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new BusinessException("Category name cannot be blank");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Category name cannot be null or empty");
         }
         return name.trim();
     }
 
     private Long validateId(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Category id cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Category id cannot be null");
         }
         return id;
     }
 
     private  String validateSlug(String slug) {
         if (slug == null || slug.isBlank()) {
-            throw new BusinessException("Slug cannot be blank");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Category slug cannot be null or empty");
         }
         return slug.trim();
     }

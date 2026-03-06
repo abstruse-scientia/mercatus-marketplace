@@ -5,9 +5,7 @@ import com.scientia.mercatus.dto.Order.OrderSummaryDto;
 import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.*;
 
-import com.scientia.mercatus.exception.NoLoggedInUserFoundException;
-import com.scientia.mercatus.exception.OrderNotFoundException;
-import com.scientia.mercatus.exception.UnauthorizedOperationException;
+import com.scientia.mercatus.exception.*;
 import com.scientia.mercatus.mapper.OrderMapper;
 import com.scientia.mercatus.repository.OrderRepository;
 
@@ -59,7 +57,9 @@ public class OrderServiceImpl implements IOrderService {
         try {
             return placeOrderHelper(sessionId, userId, orderReference);
         }catch(DataIntegrityViolationException ex){
-            return orderRepository.findByOrderReference(orderReference).orElseThrow();
+            return orderRepository.findByOrderReference(orderReference).orElseThrow(() ->
+                    new BusinessException(ErrorEnum.INVALID_REQUEST)
+            );
         }
     }
 
@@ -73,8 +73,7 @@ public class OrderServiceImpl implements IOrderService {
                 return;
             }
             if (currentOrder.getStatus() != OrderStatus.CREATED) {
-                throw new IllegalStateException("Order cannot be cancelled in state"
-                        + currentOrder.getStatus());
+                throw new BusinessException(ErrorEnum.INVALID_REQUEST);
             }
             for (OrderItem item: currentOrder.getOrderItems()) {
                 inventoryService.releaseReservation(item.getReservationKey());
@@ -87,7 +86,7 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public Page<OrderSummaryDto> getOrdersForUser(Long userId, Pageable pageable) {
         if (userId == null) {
-            throw new NoLoggedInUserFoundException("User not found");
+            throw new BusinessException(ErrorEnum.NO_LOGGED_IN_USER_FOUND);
         }
 
         Page<Order> orders = orderRepository.findByUser_UserId(userId, pageable);
@@ -113,10 +112,10 @@ public class OrderServiceImpl implements IOrderService {
     public PaymentInitiationResultDto initiatePayment(Long orderId, Long userId){
         Order order = loadAndValidateOrderHelper(orderId, userId);
         if(!order.getStatus().equals(OrderStatus.CREATED)) {
-            throw new IllegalStateException("Payment can only be initiated in CREATED state");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Payment can only be initiated in CREATED state");
         }
         if(!order.getOrderPaymentStatus().equals(OrderPaymentStatus.PENDING)) {
-            throw new IllegalStateException("Order can not be placed in current payment state");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Order can not be placed in current payment state");
         }
         order.setStatus(OrderStatus.PAYMENT_PENDING);
         return paymentService.initiatePayment(order.getOrderReference(), "INR", PaymentProvider.RAZORPAY);
@@ -141,7 +140,7 @@ public class OrderServiceImpl implements IOrderService {
 
 
         if (orderRef == null) {
-            throw new IllegalArgumentException("Order reference is required");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Order reference can not be null");
         }
 
         //Idempotency key (orderReference + userId )
@@ -161,7 +160,7 @@ public class OrderServiceImpl implements IOrderService {
          * -> sees cart already checked out, therefore fails.*/
         Cart cart = cartService.lockCartForCheckout(currentCart.getCartId());
         if  (cart.getCartItems().isEmpty()) {
-            throw new IllegalStateException("Cart is empty");
+            throw new BusinessException(ErrorEnum.RESOURCE_NOT_FOUND, "Cart is empty.");
         }
 
         BigDecimal subtotal = BigDecimal.ZERO;
@@ -196,7 +195,8 @@ public class OrderServiceImpl implements IOrderService {
         try {
             return orderRepository.saveAndFlush(newOrder);
         } catch (DataIntegrityViolationException e) {
-            return orderRepository.findByOrderReference(orderRef).orElseThrow();
+            return orderRepository.findByOrderReference(orderRef).orElseThrow(() ->
+                    new BusinessException(ErrorEnum.ORDER_NOT_FOUND, "No order found for the order reference provide."));
         }
     }
 
@@ -204,16 +204,16 @@ public class OrderServiceImpl implements IOrderService {
 
     private Order loadAndValidateOrderHelper(Long orderId, Long userId) {
         if (orderId == null) {
-            throw new OrderNotFoundException("Order not found");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Order Id can not be null");
         }
         if (userId == null) {
-            throw new NoLoggedInUserFoundException("User not found");
+            throw new BusinessException(ErrorEnum.NO_LOGGED_IN_USER_FOUND);
         }
         Order order = orderRepository.findByIdForUpdate(orderId).orElseThrow(
-                ()-> new OrderNotFoundException("Order not found")
+                ()->  new BusinessException(ErrorEnum.ORDER_NOT_FOUND)
         );
         if (!order.getUser().getUserId().equals(userId)) {
-            throw new  UnauthorizedOperationException("Unauthorized operation");
+            throw new BusinessException(ErrorEnum.FORBIDDEN_OPERATION);
         }
         return order;
     }

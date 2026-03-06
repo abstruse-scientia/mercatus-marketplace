@@ -25,52 +25,76 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGlobalException(Exception exception, WebRequest webRequest){
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                webRequest.getDescription(false),
-                HttpStatus.NOT_FOUND,
-                exception.getMessage(),
-                LocalDateTime.now()
+        log.error("Unexpected error occurred", exception);
+        ErrorResponseDto errorResponseDto = getErrorResponseDto(
+                webRequest,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Internal Server Error",
+                null
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponseDto);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException exception)
+    public ResponseEntity<ErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException exception,
+                                                                          WebRequest webRequest)
     {
-        log.error("An exception occurred due to : {} ",exception.getMessage());
         Map<String, String> errors = new HashMap<>();
-        List<FieldError> fieldErrorList = exception.getBindingResult().getFieldErrors();
-        fieldErrorList.forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-
-        return ResponseEntity.badRequest().body(errors);
-
+        List<FieldError> fieldErrorsList = exception.getBindingResult().getFieldErrors();
+        fieldErrorsList.forEach(fieldError ->
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage())
+        );
+        ErrorResponseDto errorResponseDto = getErrorResponseDto(
+                webRequest,
+                HttpStatus.BAD_REQUEST,
+                "Method Argument Validation Failed",
+                errors
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
     }
 
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<Map<String, String>> handleConstraintViolationException(
-            ConstraintViolationException exception) {
-        log.error("An exception occurred due to : {}", exception.getMessage());
+    public ResponseEntity<ErrorResponseDto> handleConstraintViolationException(
+            ConstraintViolationException exception, WebRequest webRequest) {
+        log.error("An exception occurred due to:", exception);
         Map<String, String> errors = new HashMap<>();
         Set<ConstraintViolation<?>> constraintViolationSet = exception.getConstraintViolations();
         constraintViolationSet.forEach(constraintViolation ->
                 errors.put(constraintViolation.getPropertyPath().toString(),
                         constraintViolation.getMessage()));
-        return ResponseEntity.badRequest().body(errors);
-    }
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponseDto> handleResourceNotFoundException(ResourceNotFoundException exception,
-                                                                            WebRequest webRequest){
-        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
-                webRequest.getDescription(false),
-                HttpStatus.NOT_FOUND,
-                exception.getMessage(),
-                LocalDateTime.now()
+        ErrorResponseDto errorResponseDto = getErrorResponseDto(
+                webRequest,
+                HttpStatus.BAD_REQUEST,
+                "Constraint validation failed",
+                errors
         );
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponseDto> handleBusinessException(BusinessException exception, WebRequest webRequest){
+         ErrorResponseDto errorResponseDto  = getErrorResponseDto(
+                webRequest,
+                exception.getError().getStatus(),
+                exception.getError().getMessage(),
+                null
+        );
+        return  ResponseEntity.status(exception.getError().getStatus()).body(errorResponseDto);
+    }
+
+    private ErrorResponseDto getErrorResponseDto(WebRequest webRequest,
+                                                 HttpStatus httpStatus,
+                                                 String message,
+                                                 Map<String, String> validationError){
+        return new ErrorResponseDto(
+                webRequest.getDescription(false),
+                httpStatus,
+                message,
+                LocalDateTime.now(),
+                validationError
+        );
+    }
 
 }
 

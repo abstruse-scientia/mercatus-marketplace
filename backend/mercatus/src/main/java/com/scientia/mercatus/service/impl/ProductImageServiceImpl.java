@@ -5,6 +5,7 @@ import com.scientia.mercatus.dto.Product.ProductImage.UpdateProductImageRequestD
 import com.scientia.mercatus.entity.Product;
 import com.scientia.mercatus.entity.ProductImage;
 import com.scientia.mercatus.exception.BusinessException;
+import com.scientia.mercatus.exception.ErrorEnum;
 import com.scientia.mercatus.repository.ProductImageRepository;
 import com.scientia.mercatus.service.IProductImageService;
 import com.scientia.mercatus.service.IProductService;
@@ -32,13 +33,13 @@ public class    ProductImageServiceImpl implements IProductImageService {
     @Transactional
     public ProductImage addImageToProduct(Long productId, AddProductImageRequestDto addImage) {
         if (addImage.getUrl() == null || addImage.getUrl().isEmpty()) {
-            throw new IllegalArgumentException("Image url cannot be empty.");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Image url cannot be empty");
         }
         if (addImage.getSortOrder() == null) {
-            throw new IllegalStateException("Sort order cannot be null.");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST,"Sort order cannot be empty.");
         }
         if (productId == null) {
-            throw new IllegalArgumentException("Product id cannot be null.");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Product ID cannot be null.");
         }
         Product product = productService.getActiveProduct(productId);
 
@@ -70,12 +71,12 @@ public class    ProductImageServiceImpl implements IProductImageService {
     @Transactional
     public void deleteImage(Long productId, Long imageId) {
         if (imageId == null) {
-            throw new IllegalArgumentException("Image id cannot be null.");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Image ID cannot be null.");
         }
         ProductImage productImage = productImageRepository.findById(imageId).orElseThrow(() ->
-                new IllegalStateException("Image id not found."));
+                new BusinessException(ErrorEnum.PRODUCT_IMAGE_NOT_FOUND));
         if (!productImage.getProduct().getProductId().equals(productId)) {
-            throw new BusinessException("Image does not belong to the product.");
+            throw new BusinessException(ErrorEnum.PRODUCT_ID_MISMATCH);
         }
         productImageRepository.lockImagesForProduct(productImage.getProduct().getProductId());
         boolean imageIsPrimary = Boolean.TRUE.equals(productImage.getIsPrimary());
@@ -94,7 +95,7 @@ public class    ProductImageServiceImpl implements IProductImageService {
     @Override
     public List<ProductImage> getImagesForProduct(Long productId) {
         if (productId == null) {
-            throw new IllegalArgumentException("Product id cannot be null.");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Product id cannot be null.");
         }
         return List.copyOf(productImageRepository.findByProductProductIdOrderBySortOrderAsc(productId));
     }
@@ -108,14 +109,14 @@ public class    ProductImageServiceImpl implements IProductImageService {
          if match-> overwrite the sort order in sequence of the imageIds provided*/
 
         if (productId == null) {
-            throw new IllegalArgumentException("Product id cannot be null.");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST);
         }
         List<ProductImage> images = productImageRepository.findByProductProductIdOrderBySortOrderAsc(productId);
         if (images == null || images.isEmpty()) {
-            throw new IllegalStateException("No images were found");
+            throw new BusinessException(ErrorEnum.PRODUCT_IMAGE_NOT_FOUND);
         }
         if (images.size() != imageIds.size()) {
-            throw new IllegalStateException("Images count does not match.");
+            throw new BusinessException(ErrorEnum.IMAGE_COUNT_MISMATCH);
         }
         Map<Long, ProductImage> imageMap = images.stream().collect(Collectors.toMap(
                 ProductImage::getId,//key
@@ -126,7 +127,7 @@ public class    ProductImageServiceImpl implements IProductImageService {
             ProductImage productImage = imageMap.get(imageId);
             if (productImage == null) {
                 log.warn("Product image with id {} not found for product Id {}.", imageId,  productId);
-                throw new IllegalStateException("Image id not found.");
+                throw new BusinessException(ErrorEnum.PRODUCT_IMAGE_NOT_FOUND);
             }
             productImage.setSortOrder(order++);
         }
@@ -138,17 +139,17 @@ public class    ProductImageServiceImpl implements IProductImageService {
         /* How to do this ? get the productImage associated with and set it to primary. before that check
         * if there exists primary id for this particular product deactivate it first and then set. */
         if (productId == null) {
-            throw new IllegalArgumentException("Product id cannot be null.");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Product id cannot be null.");
         }
         if (imageId == null) {
-            throw new IllegalArgumentException("Image id cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Image id cannot be null.");
         }
 
         ProductImage productImage = productImageRepository.findById(imageId).
-                orElseThrow(()-> new IllegalStateException("Image id not found."));
+                orElseThrow(()-> new BusinessException(ErrorEnum.PRODUCT_IMAGE_NOT_FOUND));
         productImageRepository.lockImagesForProduct(productId);
         if (!productImage.getProduct().getProductId().equals(productId)) {
-            throw new IllegalStateException("Product id of image doesn't match.");
+            throw new BusinessException(ErrorEnum.PRODUCT_ID_MISMATCH, "Product Image's product Id does not match.");
         }
         if (Boolean.TRUE.equals(productImage.getIsPrimary())) {
             return;
@@ -162,14 +163,14 @@ public class    ProductImageServiceImpl implements IProductImageService {
     @Transactional
     public ProductImage updateImage(Long productId, Long imageId, UpdateProductImageRequestDto updateProduct) {
         if (imageId == null) {
-            throw new IllegalArgumentException("Image id cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Image id cannot be null.");
         }
 
         ProductImage productImage = productImageRepository.findById(imageId)
-                .orElseThrow(() -> new IllegalStateException("Image not found"));
+                .orElseThrow(() -> new BusinessException(ErrorEnum.PRODUCT_IMAGE_NOT_FOUND));
 
         if (!productImage.getProduct().getProductId().equals(productId)) {
-            throw new BusinessException("Image does not belong to the product.");
+            throw new BusinessException(ErrorEnum.IMAGE_PRODUCT_MISMATCH);
         }
 
         productImageRepository.lockImagesForProduct(productId);
@@ -184,7 +185,7 @@ public class    ProductImageServiceImpl implements IProductImageService {
         if(Boolean.FALSE.equals(newPrimary) && Boolean.TRUE.equals(productImage.getIsPrimary())) {
             ProductImage replacementImage = productImageRepository
                     .findReplacementImage(productId, productImage.getId())
-                    .orElseThrow(() -> new IllegalStateException("Image id not found for replacement."));
+                    .orElseThrow(() -> new BusinessException(ErrorEnum.PRODUCT_IMAGE_NOT_FOUND));
             replacementImage.setIsPrimary(true);
             productImage.setIsPrimary(false);
 

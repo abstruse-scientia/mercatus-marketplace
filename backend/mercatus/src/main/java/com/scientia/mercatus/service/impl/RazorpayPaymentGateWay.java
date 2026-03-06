@@ -5,14 +5,18 @@ import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.PaymentProvider;
-import com.scientia.mercatus.exception.PaymentGatewayException;
+import com.scientia.mercatus.exception.BusinessException;
+import com.scientia.mercatus.exception.ErrorEnum;
+
 
 import com.scientia.mercatus.service.IPaymentGateway;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RazorpayPaymentGateWay implements IPaymentGateway {
@@ -39,7 +43,8 @@ public class RazorpayPaymentGateWay implements IPaymentGateway {
             );
 
         }catch (RazorpayException e) {
-            throw new PaymentGatewayException("Failed to create Razorpay order for reference" + orderReference, e);
+            log.info("Razor Exception for order reference{}",  orderReference);
+            throw new BusinessException(ErrorEnum.PAYMENT_GATEWAY_ERROR);
         }
 
     }

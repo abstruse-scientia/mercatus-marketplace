@@ -3,7 +3,7 @@ package com.scientia.mercatus.util;
 import com.github.slugify.Slugify;
 
 import com.scientia.mercatus.exception.BusinessException;
-import com.scientia.mercatus.exception.SlugNotUniqueException;
+import com.scientia.mercatus.exception.ErrorEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +38,7 @@ public class SlugUtil {
             }
             generatedSlug = baseSlug + "-" + attempt;
         }
-        throw new SlugNotUniqueException("Unable to generate unique slug.");
+        throw new BusinessException(ErrorEnum.SLUG_NOT_UNIQUE, "Unable to generate unique slug.");
     }
 
     public String generateSlugForUpdate(String input, Long id, BiFunction<String, Long, Boolean> exists){
@@ -50,6 +50,6 @@ public class SlugUtil {
             }
             generatedSlug = baseSlug + "-" + attempt;
         }
-        throw new SlugNotUniqueException("Unable to generate unique slug.");
+        throw new BusinessException(ErrorEnum.SLUG_NOT_UNIQUE, "Unable to generate unique slug.");
     }
 }

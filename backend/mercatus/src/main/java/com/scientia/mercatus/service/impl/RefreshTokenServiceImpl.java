@@ -3,15 +3,14 @@ package com.scientia.mercatus.service.impl;
 import com.scientia.mercatus.dto.Auth.RefreshTokenResponseDto;
 import com.scientia.mercatus.entity.RefreshToken;
 import com.scientia.mercatus.entity.User;
-import com.scientia.mercatus.exception.TokenExpiredException;
-import com.scientia.mercatus.exception.TokenNotFoundException;
-import com.scientia.mercatus.exception.TokenRevokedException;
+import com.scientia.mercatus.exception.*;
 import com.scientia.mercatus.repository.RefreshTokenRepository;
 import com.scientia.mercatus.security.jwt.JwtTokenProvider;
 import com.scientia.mercatus.service.IRefreshTokenService;
 import com.scientia.mercatus.util.IRefreshTokenUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +19,12 @@ import java.time.Instant;
 
 
 @Profile("!test")
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements IRefreshTokenService {
+
+
 
 
     private final RefreshTokenRepository refreshTokenRepository;
@@ -31,6 +33,7 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
 
 
     @Override
+    @Transactional
     public String createRefreshToken(User user){
         var refreshToken = new RefreshToken();
         refreshToken.setUser(user);
@@ -44,27 +47,30 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
     }
 
     @Override
+    @Transactional()
     public RefreshToken validateRefreshToken(String rawRefreshToken){
         String hashedToken = refreshTokenUtil.hashToken(rawRefreshToken);
         var refreshToken = refreshTokenRepository.findByTokenHash(hashedToken);
         Instant currentTime = Instant.now();
         if (refreshToken.isEmpty()) {
-            throw new TokenNotFoundException("Refresh token not found");
+            throw new BusinessException(ErrorEnum.TOKEN_NOT_FOUND);
         }
         if (refreshToken.get().isRevoked()) {
-            throw new TokenRevokedException("Token is already revoked");
+            throw new BusinessException(ErrorEnum.TOKEN_REVOKED);
         }
         if (refreshToken.get().getExpiryDate().isBefore(currentTime)) {
-            throw new TokenExpiredException("Token has expired");
+            throw new BusinessException(ErrorEnum.TOKEN_EXPIRED);
         }
         return refreshToken.get();
     }
 
     @Override
+    @Transactional
     public void revokeRefreshToken(String rawRefreshToken) {
         String hashedToken = refreshTokenUtil.hashToken(rawRefreshToken);
         var refreshToken= refreshTokenRepository.findByTokenHash(hashedToken);
         if (refreshToken.isEmpty()) {
+            log.warn("Invalid revoke request. Refresh token not found.");
             return;
         }
         refreshToken.get().setRevoked(true);
