@@ -4,6 +4,8 @@ import com.scientia.mercatus.entity.Order;
 import com.scientia.mercatus.entity.OrderItem;
 import com.scientia.mercatus.entity.OrderPaymentStatus;
 import com.scientia.mercatus.entity.OrderStatus;
+import com.scientia.mercatus.exception.BusinessException;
+import com.scientia.mercatus.exception.ErrorEnum;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +24,7 @@ public class PaymentResultHandler {
     @Transactional
     public void onPaymentSuccess(String orderReference) {
 
-        Order order = orderRepository
-                .findByOrderReferenceForUpdate(orderReference)
-                .orElseThrow();
+        Order order = findOrderForUpdate(orderReference);
 
         if (order.getOrderPaymentStatus() == OrderPaymentStatus.SUCCESS) {
             return;
@@ -40,9 +40,7 @@ public class PaymentResultHandler {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void finalizePaidOrder(String orderReference) {
 
-        Order order = orderRepository
-                .findByOrderReferenceForUpdate(orderReference)
-                .orElseThrow();
+        Order order = findOrderForUpdate(orderReference);
 
         if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
             return;
@@ -58,9 +56,7 @@ public class PaymentResultHandler {
     @Transactional
     public void onPaymentFailure(String orderReference) {
 
-        Order order = orderRepository
-                .findByOrderReferenceForUpdate(orderReference)
-                .orElseThrow();
+        Order order = findOrderForUpdate(orderReference);
 
         if (order.getOrderPaymentStatus() == OrderPaymentStatus.SUCCESS) {
             return;
@@ -72,9 +68,7 @@ public class PaymentResultHandler {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void cancelFailedOrder(String orderReference) {
 
-        Order order = orderRepository
-                .findByOrderReferenceForUpdate(orderReference)
-                .orElseThrow();
+        Order order = findOrderForUpdate(orderReference);
 
         if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
             return;
@@ -85,5 +79,12 @@ public class PaymentResultHandler {
         }
 
         order.setStatus(OrderStatus.CANCELLED);
+    }
+
+
+    private Order findOrderForUpdate(String orderReference) {
+        return orderRepository
+                .findByOrderReferenceForUpdate(orderReference)
+                .orElseThrow(() -> new BusinessException(ErrorEnum.ORDER_NOT_FOUND, "No order found for the order reference provide."));
     }
 }

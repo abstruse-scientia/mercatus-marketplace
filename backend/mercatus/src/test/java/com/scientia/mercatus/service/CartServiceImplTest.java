@@ -5,7 +5,6 @@ import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.entity.Cart;
 import com.scientia.mercatus.entity.CartItem;
 import com.scientia.mercatus.entity.Product;
-import com.scientia.mercatus.exception.IllegalQuantity;
 import com.scientia.mercatus.repository.CartItemsRepository;
 import com.scientia.mercatus.repository.CartRepository;
 import com.scientia.mercatus.repository.UserRepository;

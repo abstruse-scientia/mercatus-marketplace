@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -13,4 +14,6 @@ public class ErrorResponseDto {
     private HttpStatus status;
     private String errorMessage;
     private LocalDateTime errorTimestamp;
+
+    private Map<String, String> validationErrors;
 }

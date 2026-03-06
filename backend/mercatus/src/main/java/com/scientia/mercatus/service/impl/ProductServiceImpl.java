@@ -5,6 +5,7 @@ import com.scientia.mercatus.dto.Product.Admin.UpdateProductRequestDto;
 import com.scientia.mercatus.entity.Category;
 import com.scientia.mercatus.entity.Product;
 import com.scientia.mercatus.exception.BusinessException;
+import com.scientia.mercatus.exception.ErrorEnum;
 import com.scientia.mercatus.repository.CategoryRepository;
 import com.scientia.mercatus.repository.ProductRepository;
 import com.scientia.mercatus.service.IProductService;
@@ -40,13 +41,13 @@ public class ProductServiceImpl implements IProductService {
     public Product getActiveProduct(Long productId) {
         return productRepository.findById(productId)
                 .filter(Product::getIsActive)
-                .orElseThrow(() -> new BusinessException("Active product not found"));
+                .orElseThrow(() -> new BusinessException(ErrorEnum.PRODUCT_NOT_FOUND, "No active product found."));
     }
 
 
     public Product getActiveProductBySku(String sku) {
         return productRepository.findBySkuAndIsActiveTrue(sku)
-                .orElseThrow(() -> new BusinessException("Product not available"));
+                .orElseThrow(() -> new BusinessException(ErrorEnum.PRODUCT_NOT_FOUND, "No product found."));
     }
 
 
@@ -59,7 +60,7 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public Page<Product> searchActiveProductsByNameOrSlug(String query, Pageable pageable) {
         if (query == null || query.isEmpty()) {
-            throw new BusinessException("Query cannot be null or empty");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Query cannot be null or empty");
         }
         validatePageable(pageable);
         return productRepository.searchByNameOrSlugAndIsActive(query, pageable);
@@ -68,7 +69,7 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public Page<Product> listActiveProductsByCategory(Long categoryId, Pageable pageable) {
         if (categoryId == null ) {
-            throw new BusinessException("Category id cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Category cannot be null");
         }
         validatePageable(pageable);
         return productRepository.findActiveProductsByCategory(categoryId, pageable);
@@ -84,14 +85,14 @@ public class ProductServiceImpl implements IProductService {
 
 
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new BusinessException("Category not found"));
+                .orElseThrow(() -> new BusinessException(ErrorEnum.CATEGORY_NOT_FOUND));
 
         Product product = mapToProduct(request,  category);
 
         try {
             return productRepository.save(product);
         }catch(DataIntegrityViolationException e) {
-            throw new BusinessException("Product already exists");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Product already exists.");
         }
     }
 
@@ -122,13 +123,13 @@ public class ProductServiceImpl implements IProductService {
     public Product getProductById(Long productId) {
         validateProductId(productId);
         return  productRepository.findById(productId)
-                .orElseThrow(() -> new BusinessException("Product not found"));
+                .orElseThrow(() -> new BusinessException(ErrorEnum.PRODUCT_NOT_FOUND));
     }
 
     @Override
     public Page<Product> listProductsByCategory(Long categoryId, Pageable pageable) {
         if (categoryId == null) {
-            throw new BusinessException("Category id cannot be null.");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Category id cannot be null");
         }
         validatePageable(pageable);
 
@@ -155,7 +156,7 @@ public class ProductServiceImpl implements IProductService {
         validateProductId(productId);
 
         Product product = productRepository.findProductForUpdate(productId)
-                .orElseThrow(()-> new BusinessException("Product not found"));
+                .orElseThrow(()-> new BusinessException(ErrorEnum.PRODUCT_NOT_FOUND));
 
         if (update.getName() != null && !update.getName().equals(product.getName())) {
             product.setName(update.getName());
@@ -169,7 +170,7 @@ public class ProductServiceImpl implements IProductService {
         }
         if (update.getCategoryId() != null) {
             Category category = categoryRepository.findById(update.getCategoryId())
-                    .orElseThrow(() -> new BusinessException("Category not found"));
+                    .orElseThrow(() -> new BusinessException(ErrorEnum.CATEGORY_NOT_FOUND));
             product.setCategory(category);
         }
         if (update.getPrimaryImageUrl() != null) {
@@ -186,13 +187,13 @@ public class ProductServiceImpl implements IProductService {
      */
     void  validateProductId(Long productId) {
         if (productId == null) {
-            throw new BusinessException("Product id cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Product id cannot be null");
         }
     }
 
     private void validatePageable(Pageable pageable) {
         if (pageable == null) {
-            throw new BusinessException("Pageable cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Pageable cannot be null");
         }
     }
 
@@ -219,7 +220,7 @@ public class ProductServiceImpl implements IProductService {
             }
             productSlug = baseSlug + "-" + attempt;
         }
-        throw new BusinessException("Unable to generate unique slug");
+        throw new BusinessException(ErrorEnum.SLUG_NOT_UNIQUE, "Unable to create unique slug");
     }
 
     private String slugForCreate(String name) {
@@ -231,12 +232,12 @@ public class ProductServiceImpl implements IProductService {
             }
             productSlug = baseSlug + "-" + attempt;
         }
-        throw new BusinessException("Unable to generate unique slug");
+        throw new BusinessException(ErrorEnum.SLUG_NOT_UNIQUE, "Unable to create unique slug");
     }
 
     private Product getProductForUpdate(Long productId) {
         validateProductId(productId);
         return productRepository.findProductForUpdate(productId)
-                .orElseThrow(()-> new BusinessException("Product not found"));
+                .orElseThrow(()-> new BusinessException(ErrorEnum.PRODUCT_NOT_FOUND));
     }
 }

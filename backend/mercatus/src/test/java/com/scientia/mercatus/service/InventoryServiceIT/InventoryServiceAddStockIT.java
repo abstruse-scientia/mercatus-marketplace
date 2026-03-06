@@ -1,7 +1,6 @@
 package com.scientia.mercatus.service.InventoryServiceIT;
 
 import com.scientia.mercatus.entity.InventoryItem;
-import com.scientia.mercatus.exception.InvalidQuantityException;
 import com.scientia.mercatus.repository.InventoryItemRepository;
 import com.scientia.mercatus.service.IInventoryService;
 import org.junit.jupiter.api.Test;

@@ -3,24 +3,23 @@ package com.scientia.mercatus.service.impl;
 import com.scientia.mercatus.dto.AddressRequestDto;
 import com.scientia.mercatus.dto.UserAddressDto;
 import com.scientia.mercatus.entity.AddressSnapshot;
-import com.scientia.mercatus.entity.User;
+
 import com.scientia.mercatus.entity.UserAddress;
-import com.scientia.mercatus.exception.AddressNotFoundException;
-import com.scientia.mercatus.exception.UnauthorizedOperationException;
+
+import com.scientia.mercatus.exception.BusinessException;
+import com.scientia.mercatus.exception.ErrorEnum;
+
 import com.scientia.mercatus.mapper.AddressMapper;
 import com.scientia.mercatus.repository.UserAddressRepository;
-import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.security.AuthContext;
 import com.scientia.mercatus.service.IAddressService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +55,7 @@ public class AddressServiceImpl implements IAddressService {
         Long userId = authContext.getCurrentUserId();
 
         UserAddress address = userAddressRepository.findByIdAndUserIdAndIsActiveTrue(addressId, userId)
-                .orElseThrow(()-> new AddressNotFoundException("Given address does not exist"));
+                .orElseThrow(()-> new BusinessException(ErrorEnum.DEFAULT_ADDRESS_NOT_FOUND));
 
         address.setActive(false);
         if (address.isDefault()) {
@@ -78,7 +77,7 @@ public class AddressServiceImpl implements IAddressService {
     public UserAddressDto getDefaultAddress() {
         Long userId = authContext.getCurrentUserId();
         UserAddress userAddress =  userAddressRepository.findByUserIdAndIsDefaultTrueAndIsActiveTrue(userId).orElseThrow(() ->
-                new AddressNotFoundException("No default address exists"));
+                new BusinessException(ErrorEnum.DEFAULT_ADDRESS_NOT_FOUND));
         return addressMapper.toUserAddressDto(userAddress);
     }
 
@@ -87,7 +86,7 @@ public class AddressServiceImpl implements IAddressService {
     public UserAddressDto updateAddress(Long addressId, AddressRequestDto addressDto) {
         Long userId = authContext.getCurrentUserId();
         UserAddress userAddress = userAddressRepository.findByIdAndUserIdAndIsActiveTrue(addressId, userId).orElseThrow(
-                () -> new AddressNotFoundException("Given address does not exist")
+                () -> new BusinessException(ErrorEnum.ADDRESS_NOT_FOUND)
         );
         if (addressDto.isDefault() &&  !userAddress.isDefault()) {
             userAddressRepository.clearDefaultUser(userId);

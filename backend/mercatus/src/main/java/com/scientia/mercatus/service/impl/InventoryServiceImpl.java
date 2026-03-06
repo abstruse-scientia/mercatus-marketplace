@@ -33,17 +33,17 @@ public class InventoryServiceImpl implements IInventoryService {
             return stockReservation;
         }
         if (quantity <= 0) {
-            throw new InvalidQuantityException("Invalid quantity");
+            throw new BusinessException(ErrorEnum.ILLEGAL_QUANTITY);
         }
         if (expiresAt.isBefore(Instant.now())) {
-            throw new ReservationAlreadyExpiredException("Reservation already expired");
+            throw new BusinessException(ErrorEnum.RESERVATION_EXISTS);
         }
         InventoryItem inventoryItem = inventoryItemRepository.findBySku(sku)
-                .orElseThrow(() -> new InventoryItemNotFoundException("No stock found."));
+                .orElseThrow(() -> new BusinessException(ErrorEnum.INVENTORY_ITEM_NOT_FOUND));
         int available = inventoryItem.getTotalStock() - inventoryItem.getReservedStock();
         if (available < quantity) {
-            log.warn("Insufficient stock for SKU: {}", sku);
-            throw new InsufficientStockException("Insufficient stock for requested items");
+            log.error("Insufficient stock for SKU: {}", sku);
+            throw new BusinessException(ErrorEnum.INSUFFICIENT_STOCK);
         }
 
         inventoryItem.setReservedStock(inventoryItem.getReservedStock() + quantity) ;
@@ -75,7 +75,7 @@ public class InventoryServiceImpl implements IInventoryService {
                     }
                 );
         if (quantity <= 0) {
-            throw new InvalidQuantityException("Invalid quantity");
+            throw new BusinessException(ErrorEnum.ILLEGAL_QUANTITY);
         }
         item.setTotalStock(item.getTotalStock() + quantity);
         inventoryItemRepository.save(item);
@@ -86,13 +86,13 @@ public class InventoryServiceImpl implements IInventoryService {
     public void confirmReservation(String reservationKey) {
         StockReservation stockReservation = stockReservationRepository.findByReservationKey(reservationKey);
         if (stockReservation == null) {
-            throw new ReservationNotExistsException("No reservation exists for this reservation key." + reservationKey);
+            throw new BusinessException(ErrorEnum.RESERVATION_NOT_FOUND);
         }
         if (!stockReservation.getStatus().equals(ReservationStatus.RESERVED)) {
-            throw new InvalidReservationStateException("Invalid reservation state");
+            throw new BusinessException(ErrorEnum.INVALID_RESERVATION);
         }
         InventoryItem item = inventoryItemRepository.findBySku(stockReservation.getSku())
-                .orElseThrow(() -> new InventoryItemNotFoundException("No stock found."));
+                .orElseThrow(() -> new BusinessException(ErrorEnum.INVENTORY_ITEM_NOT_FOUND));
         int quantity = stockReservation.getQuantity();
         item.setReservedStock(item.getReservedStock() - quantity);
         item.setTotalStock(item.getTotalStock() - quantity);
@@ -104,7 +104,7 @@ public class InventoryServiceImpl implements IInventoryService {
     @Override
     public int getAvailableStock(String sku) {
         InventoryItem item = inventoryItemRepository.findBySku(sku).orElseThrow(() ->
-                new InventoryItemNotFoundException("No stock found." + sku));
+                new BusinessException(ErrorEnum.INVENTORY_ITEM_NOT_FOUND));
         return item.getTotalStock() - item.getReservedStock();
     }
 
@@ -113,10 +113,10 @@ public class InventoryServiceImpl implements IInventoryService {
     public void releaseReservation(String reservationKey) {
         StockReservation stockReservation = stockReservationRepository.findByReservationKey(reservationKey);
         if (stockReservation == null) {
-            throw new ReservationNotExistsException("No reservation exists for this reservation key." + reservationKey);
+            throw new BusinessException(ErrorEnum.RESERVATION_NOT_FOUND);
         }
         if (!stockReservation.getStatus().equals(ReservationStatus.RESERVED)) {
-            throw new InvalidReservationStateException("Invalid reservation state");
+            throw new BusinessException(ErrorEnum.INVALID_RESERVATION);
         }
         releaseInternal(stockReservation);
     }
@@ -129,7 +129,7 @@ public class InventoryServiceImpl implements IInventoryService {
 
         int quantity = stockReservation.getQuantity();
         InventoryItem inventoryItem = inventoryItemRepository.findBySku(stockReservation.getSku())
-                .orElseThrow(() -> new InventoryItemNotFoundException("No stock found."));
+                .orElseThrow(() -> new BusinessException(ErrorEnum.INVENTORY_ITEM_NOT_FOUND));
         inventoryItem.setReservedStock(inventoryItem.getReservedStock() - quantity);
         stockReservation.setStatus(ReservationStatus.RELEASED);
         inventoryItemRepository.save(inventoryItem);

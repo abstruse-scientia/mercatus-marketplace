@@ -4,7 +4,8 @@ import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.dto.Cart.CartItemDto;
 import com.scientia.mercatus.dto.Cart.CartResponseDto;
 import com.scientia.mercatus.entity.*;
-import com.scientia.mercatus.exception.IllegalQuantity;
+import com.scientia.mercatus.exception.BusinessException;
+import com.scientia.mercatus.exception.ErrorEnum;
 import com.scientia.mercatus.repository.CartItemsRepository;
 import com.scientia.mercatus.repository.CartRepository;
 import com.scientia.mercatus.repository.UserRepository;
@@ -13,6 +14,7 @@ import com.scientia.mercatus.service.IProductService;
 import com.scientia.mercatus.service.ISessionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 
 
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -37,7 +40,7 @@ public class CartServiceImpl implements ICartService {
     private Cart resolveGuestCart(CartContextDto cartContextDto) {
         String sessionId = cartContextDto.getSessionId();
         if (sessionId == null) {
-            throw new IllegalStateException("Session id is null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Session id required.");
         }
         return cartRepository.findBySessionId(sessionId).orElseGet(
                 () -> createGuestCart(sessionId)
@@ -50,7 +53,7 @@ public class CartServiceImpl implements ICartService {
         User user = userRepository.findByUserId(cartContextDto.getUserId());
         String sessionId = cartContextDto.getSessionId();
         if  (sessionId == null) {
-            throw new IllegalStateException("Session id is null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Session id required.");
         }
         Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
         if (userCart == null && guestCart == null) { // if guest cart and user cart both absent
@@ -127,11 +130,11 @@ public class CartServiceImpl implements ICartService {
     public void addToCart(CartContextDto ctxDto, Long productId, Integer quantity) {
         Cart currentCart = resolveCart(ctxDto);
         if (quantity == null || quantity <= 0) {
-            throw new IllegalQuantity("Quantity must be greater than 0");
+            throw new BusinessException(ErrorEnum.ILLEGAL_QUANTITY, "Quantity should be greater than 0");
         }
 
         if (productId == null) {
-            throw new IllegalArgumentException("Product id cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Product id required.");
         }
         Product currentProduct = productService.getActiveProduct(productId);
         Optional<CartItem> cartItemOptional = cartItemsRepository.findByCartAndProduct(currentCart, currentProduct);
@@ -152,7 +155,7 @@ public class CartServiceImpl implements ICartService {
     public void removeFromCart(CartContextDto ctxDto, Long productId) {
         Cart currentCart = resolveCart(ctxDto);
         if (productId == null) {
-            throw new IllegalArgumentException("Product id cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Product id required.");
         }
         cartItemsRepository
                 .findByCartAndProduct_ProductId(currentCart, productId)
@@ -170,10 +173,10 @@ public class CartServiceImpl implements ICartService {
     public void updateQuantity(CartContextDto ctxDto, Long productId, Integer quantity) {
         Cart currentCart = resolveCart(ctxDto);
         if (quantity == null || quantity  < 0) {
-            throw new IllegalQuantity("Quantity must be greater than 0");
+            throw new BusinessException(ErrorEnum.ILLEGAL_QUANTITY, "Quantity should be greater than 0");
         }
         if (productId == null) {
-            throw new IllegalArgumentException("Product id cannot be null");
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Product id required.");
         }
         CartItem item = cartItemsRepository
                 .findByCartAndProduct_ProductId(currentCart, productId).orElse(null);
@@ -217,6 +220,6 @@ public class CartServiceImpl implements ICartService {
     @Override
     public Cart lockCartForCheckout(Long cartId) {
         return cartRepository.findActiveCartForUpdate(cartId).orElseThrow(() ->
-                new IllegalStateException("Cart already checked out or inactive"));
+             new BusinessException(ErrorEnum.INVALID_REQUEST, "Cart already checked out or inactive."));
     }
 }
