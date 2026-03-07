@@ -49,13 +49,13 @@ public class CartServiceImpl implements ICartService {
 
     private Cart resolveUserCart(CartContextDto cartContextDto) {
         Cart userCart = cartRepository.
-                findByUser_UserId(cartContextDto.getUserId()).orElse(null);
+                findByUser_UserIdForUpdate(cartContextDto.getUserId()).orElse(null);
         User user = userRepository.findByUserId(cartContextDto.getUserId());
         String sessionId = cartContextDto.getSessionId();
         if  (sessionId == null) {
             throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Session id required.");
         }
-        Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
+        Cart guestCart = cartRepository.findBySessionIdForUpdate(sessionId).orElse(null);
         if (userCart == null && guestCart == null) { // if guest cart and user cart both absent
             return createUserCart(user);
         }
@@ -87,6 +87,10 @@ public class CartServiceImpl implements ICartService {
     }
 
     private Cart createGuestCart(String sessionId) {
+        Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
+        if (guestCart != null) {
+            return guestCart;
+        }
         Cart newCart = new Cart();
         newCart.setSessionId(sessionId);
         cartRepository.save(newCart);
@@ -94,6 +98,10 @@ public class CartServiceImpl implements ICartService {
     }
 
     private Cart createUserCart(User currentUser) {
+        Cart userCart = cartRepository.findByUser(currentUser);
+        if (userCart != null) {
+            return userCart;
+        }
         Cart newCart = new Cart();
         newCart.setUser(currentUser);
         cartRepository.save(newCart);
@@ -125,6 +133,14 @@ public class CartServiceImpl implements ICartService {
         }
 
     }
+
+
+    /*
+     Constraint on cart item allows the addToCart method to remain safe
+     from race condition, at no point will the new cart_item being created
+     will lead to duplication of row in cart table. Since the constraint
+     on cart item (product_id, cart_id) does not allow duplicate rows in cart table.
+     */
 
     @Override
     public void addToCart(CartContextDto ctxDto, Long productId, Integer quantity) {
