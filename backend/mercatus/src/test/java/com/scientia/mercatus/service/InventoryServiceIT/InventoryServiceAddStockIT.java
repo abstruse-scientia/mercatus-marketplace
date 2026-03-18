@@ -1,6 +1,7 @@
 package com.scientia.mercatus.service.InventoryServiceIT;
 
 import com.scientia.mercatus.entity.InventoryItem;
+import com.scientia.mercatus.exception.BusinessException;
 import com.scientia.mercatus.repository.InventoryItemRepository;
 import com.scientia.mercatus.service.IInventoryService;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,7 @@ public class InventoryServiceAddStockIT {
     @Test
     void shouldFailOnInvalidQuantity() {
         assertThrows(
-                InvalidQuantityException.class,
+                BusinessException.class,
                 () -> inventoryService.addStock("SKU-1", 0)
         );
     }

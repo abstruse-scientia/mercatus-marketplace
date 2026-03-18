@@ -64,6 +64,14 @@ public class AddressServiceImpl implements IAddressService {
     }
 
     @Override
+    public AddressSnapshot getAddressSnapshot(Long userId,Long addressId) {
+        UserAddress address = userAddressRepository.findByIdAndUserIdAndIsActiveTrue(addressId, userId).orElseThrow(
+                () -> new BusinessException(ErrorEnum.ADDRESS_NOT_FOUND)
+        );
+        return address.getAddressSnapshot();
+    }
+
+    @Override
     public List<UserAddressDto> getAddresses() {
         Long userId = authContext.getCurrentUserId();
         List <UserAddress> userAddresses = userAddressRepository.findByUserIdAndIsActiveTrue(userId);

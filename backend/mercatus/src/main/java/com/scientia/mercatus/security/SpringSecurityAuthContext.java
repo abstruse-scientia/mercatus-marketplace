@@ -14,21 +14,20 @@ public class SpringSecurityAuthContext implements AuthContext {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated() ||
-                authentication instanceof AnonymousAuthenticationToken) {
-            throw new IllegalStateException("No authenticated user");
+        if (authentication == null) {
+            throw new IllegalStateException("Authentication object is null");
+        }
+        if (authentication.getPrincipal() instanceof User user) {
+            return user.getUserId();
         }
 
-        User user =
-                (User) authentication.getPrincipal();
-
-        return user.getUserId();
+        throw new IllegalStateException("No authenticated user in security context.");
     }
 
     @Override
     public Long getCurrentUserIdOrNull() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated())  {
+        if (authentication == null)  {
             return null;
         }
         if (authentication.getPrincipal() instanceof User user) {

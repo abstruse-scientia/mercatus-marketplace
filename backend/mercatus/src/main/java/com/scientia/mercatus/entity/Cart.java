@@ -37,5 +37,4 @@ public class Cart extends BaseEntity{
     @Column(name = "version", nullable = false)
     private Long version;
 
-
 }

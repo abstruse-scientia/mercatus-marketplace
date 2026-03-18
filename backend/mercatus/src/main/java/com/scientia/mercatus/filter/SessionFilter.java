@@ -21,7 +21,7 @@ import java.io.IOException;
 public class SessionFilter extends OncePerRequestFilter {
 
     private final CookieUtil cookieUtil;
-    private final ISessionService ISessionService;
+    private final ISessionService sessionService;
 
     public static final String SESSION_ATTRIBUTE = "SESSION_ATTRIBUTE";
     @Override
@@ -30,22 +30,28 @@ public class SessionFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        //When to set guest authentication token when session Id is null ? or invalid
+        /*
+        No it should be created either ways when session Id is invalid or valid, it should be created
+        when auth is null , its null when user is not authenticated either as guest or logged in
+         */
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String sessionId = cookieUtil.getSessionId(request);
-        if (!ISessionService.validateSession(sessionId)) { // case: if invalid
+        //if invalid session
+        if (!sessionService.validateSession(sessionId)) {
+            // if session id is invalid due to it being part of revoked session
             if (sessionId != null) {
-                cookieUtil.deleteCookie(response);// case: if invalid but not null then delete
-                // (must be in revoked list)
+                cookieUtil.deleteCookie(response);
             }
-            sessionId = ISessionService.createSession();
-            if (authentication == null || !authentication.isAuthenticated()) { // Makes Spring security aware of guest
-                GuestAuthenticationToken guestAuthenticationToken = new GuestAuthenticationToken(sessionId);
-                SecurityContextHolder.getContext().setAuthentication(guestAuthenticationToken);
-            }
+            sessionId = sessionService.createSession();
             cookieUtil.addSessionCookie(response, sessionId);
         }
-        request.setAttribute(SESSION_ATTRIBUTE, sessionId);//if valid then add an attribute to request
-        filterChain.doFilter(request, response);
 
+        if (auth == null) {
+            GuestAuthenticationToken guestToken = new GuestAuthenticationToken(sessionId);
+            SecurityContextHolder.getContext().setAuthentication(guestToken);
+        }
+        request.setAttribute(SESSION_ATTRIBUTE, sessionId);
+        filterChain.doFilter(request, response);
     }
 }

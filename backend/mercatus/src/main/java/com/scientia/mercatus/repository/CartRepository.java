@@ -43,5 +43,10 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
             """)
     Optional<Cart> findActiveCartForUpdate(@Param("cartId")Long cartId);
 
-
+    @Query("""
+        select c from Cart c
+        left join fetch c.cartItems
+        where c.user.userId = :userId
+    """)
+    Optional<Cart> findCartWithItems(@Param("userId") Long userId);
 }

@@ -16,6 +16,7 @@ public enum ErrorEnum {
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "ADDR_404_01", "Address not found"),
     DEFAULT_ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "ADDR_404_02", "Default Address not found"),
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "CART_404_01", "Cart not found"),
+    NO_CART_ITEMS_FOUND(HttpStatus.NOT_FOUND, "CART_404_02", "No cartItems found"),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CTG_404_01", "Category not found"),
     INVENTORY_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "INV_404_01", "Inventory item not found"),
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RES_404_01", "Reservation not found"),

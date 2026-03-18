@@ -4,6 +4,7 @@ import com.scientia.mercatus.entity.Cart;
 import com.scientia.mercatus.entity.CartItem;
 import com.scientia.mercatus.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,7 +20,11 @@ public interface CartItemsRepository extends JpaRepository<CartItem, Long> {
             """)
     List<CartItem> findByCartWithProduct(@Param("cart") Cart cart);
 
-    void deleteByCart(Cart currentCart);
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        delete from  CartItem ci where ci.cart = :cart
+    """)
+    void deleteByCart(@Param("cart") Cart currentCart);
 
     Cart cart(Cart cart);
 
