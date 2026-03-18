@@ -6,12 +6,11 @@ import com.scientia.mercatus.security.jwt.JwtTokenValidatorFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpMethod;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -25,15 +24,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import static org.springframework.security.config.Customizer.withDefaults;
+
 
 @Slf4j
 @Configuration
@@ -43,11 +43,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class MercatusSecurityConfig {
 
 
-    @Value("${cors.allowed-origins}")
+    @Value("${cors.allowed-origins:default-origins}")
     private String allowedOrigins;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityConfigProperties props, JwtTokenValidatorFilter jwtTokenValidatorFilter) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityConfigProperties props,
+                                            Optional<JwtTokenValidatorFilter> jwtTokenValidatorFilter) throws Exception {
         log.info("Init security filter chain");
         if (props.isDisabled()) {
             return http
@@ -70,7 +71,9 @@ public class MercatusSecurityConfig {
                         .requestMatchers("/api/v1/cart/**").authenticated()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtTokenValidatorFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(jwtTokenValidatorFilter.orElseThrow(() ->
+                        new IllegalStateException("JwtTokenValidatorFilter is required when security is enabled")),
+                        BasicAuthenticationFilter.class)
                 .build();
 
 
@@ -109,5 +112,3 @@ public class MercatusSecurityConfig {
 
 
 }
-
-

@@ -3,6 +3,7 @@ package com.scientia.mercatus.service.InventoryServiceIT;
 import com.scientia.mercatus.entity.InventoryItem;
 import com.scientia.mercatus.entity.ReservationStatus;
 import com.scientia.mercatus.entity.StockReservation;
+import com.scientia.mercatus.exception.BusinessException;
 import com.scientia.mercatus.repository.InventoryItemRepository;
 import com.scientia.mercatus.repository.StockReservationRepository;
 import com.scientia.mercatus.service.IInventoryService;
@@ -61,7 +62,7 @@ public class InventoryServiceConfirmReservationIT {
     @Test
     void shouldFailIfReservationNotInReservedState() {
         assertThrows(
-                ReservationNotExistsException.class,
+                BusinessException.class,
                 () -> inventoryService.confirmReservation("Dummy")
         );
     }

@@ -3,6 +3,7 @@ package com.scientia.mercatus.controller;
 import com.scientia.mercatus.dto.Cart.CartContextDto;
 import com.scientia.mercatus.dto.Order.OrderResponseDto;
 import com.scientia.mercatus.dto.Order.OrderSummaryDto;
+import com.scientia.mercatus.dto.Order.PlaceOrderRequestDto;
 import com.scientia.mercatus.dto.Payment.CreatePaymentResponseDto;
 
 import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
@@ -11,6 +12,7 @@ import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.mapper.OrderMapper;
 import com.scientia.mercatus.security.SpringSecurityAuthContext;
 import com.scientia.mercatus.service.IOrderService;
+import com.scientia.mercatus.service.impl.CheckoutService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -33,6 +35,7 @@ public class OrderController {
 
 
     private final IOrderService orderService;
+    private final CheckoutService checkoutService;
     private final OrderMapper orderMapper;
     private final SpringSecurityAuthContext authContext;
 
@@ -41,11 +44,10 @@ public class OrderController {
 
 
     @PostMapping("/place")
-    public ResponseEntity<OrderResponseDto> placeOrder(@Valid @RequestBody CartContextDto cartContextDto,
-                                        @RequestParam @NotBlank @Size(max = 255) String orderReference){
-        String sessionId = cartContextDto.getSessionId();
-        Long userId = cartContextDto.getUserId();
-        Order order = orderService.placeOrder(sessionId,userId,orderReference);
+    public ResponseEntity<OrderResponseDto> placeOrder(@RequestBody
+                                                           PlaceOrderRequestDto placeOrderRequestDto) {
+        Long userId = authContext.getCurrentUserId();
+        Order order = checkoutService.checkout(userId, placeOrderRequestDto);
         OrderResponseDto responseDto = orderMapper.toResponseDto(order);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }

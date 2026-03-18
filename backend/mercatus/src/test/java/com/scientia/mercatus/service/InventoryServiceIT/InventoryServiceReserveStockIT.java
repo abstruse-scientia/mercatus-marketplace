@@ -4,6 +4,7 @@ package com.scientia.mercatus.service.InventoryServiceIT;
 
 import com.scientia.mercatus.entity.InventoryItem;
 import com.scientia.mercatus.entity.StockReservation;
+import com.scientia.mercatus.exception.BusinessException;
 import com.scientia.mercatus.repository.InventoryItemRepository;
 import com.scientia.mercatus.repository.StockReservationRepository;
 import com.scientia.mercatus.service.IInventoryService;
@@ -74,7 +75,7 @@ public class InventoryServiceReserveStockIT {
 
 
         //Act
-        assertThrows(InsufficientStockException.class, () -> inventoryService.reserveStock(
+        assertThrows(BusinessException.class, () -> inventoryService.reserveStock(
                 "OrderRef-3",
                 "OrderItemRef-3",
                 "SKU-2",

@@ -2,6 +2,7 @@
 
     import com.scientia.mercatus.dto.Cart.CartContextDto;
     import com.scientia.mercatus.entity.User;
+    import com.scientia.mercatus.security.GuestAuthenticationToken;
     import com.scientia.mercatus.security.SpringSecurityAuthContext;
     import jakarta.servlet.http.HttpServletRequest;
     import lombok.RequiredArgsConstructor;
@@ -28,13 +29,13 @@
 
         @Override
         public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-            HttpServletRequest request = (HttpServletRequest)  webRequest.getNativeRequest();
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Long userId = authContext.getCurrentUserIdOrNull();
-            String sessionId = (String) request.getAttribute("SESSION_ATTRIBUTE");
-            if (sessionId == null) {
-                throw new IllegalStateException("Session id not found. Filter is broken");
+            String sessionId = null;
+            if (authentication instanceof GuestAuthenticationToken) {
+                sessionId = authentication.getCredentials().toString();
             }
-            return new CartContextDto(sessionId, userId);
 
+            return new CartContextDto(sessionId, userId);
         }
     }

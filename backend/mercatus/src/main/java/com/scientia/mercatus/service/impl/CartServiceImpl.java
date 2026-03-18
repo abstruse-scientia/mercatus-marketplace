@@ -8,10 +8,10 @@ import com.scientia.mercatus.exception.BusinessException;
 import com.scientia.mercatus.exception.ErrorEnum;
 import com.scientia.mercatus.repository.CartItemsRepository;
 import com.scientia.mercatus.repository.CartRepository;
-import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.service.ICartService;
 import com.scientia.mercatus.service.IProductService;
 import com.scientia.mercatus.service.ISessionService;
+import com.scientia.mercatus.service.IUserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class CartServiceImpl implements ICartService {
 
     private final CartRepository cartRepository;
-    private final UserRepository userRepository;
+    private final IUserService userService;
     private final CartItemsRepository cartItemsRepository;
     private final ISessionService ISessionService;
     private final IProductService productService;
@@ -49,13 +49,13 @@ public class CartServiceImpl implements ICartService {
 
     private Cart resolveUserCart(CartContextDto cartContextDto) {
         Cart userCart = cartRepository.
-                findByUser_UserId(cartContextDto.getUserId()).orElse(null);
-        User user = userRepository.findByUserId(cartContextDto.getUserId());
+                findByUser_UserIdForUpdate(cartContextDto.getUserId()).orElse(null);
+        User user = userService.getUser(cartContextDto.getUserId());
         String sessionId = cartContextDto.getSessionId();
         if  (sessionId == null) {
             throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Session id required.");
         }
-        Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
+        Cart guestCart = cartRepository.findBySessionIdForUpdate(sessionId).orElse(null);
         if (userCart == null && guestCart == null) { // if guest cart and user cart both absent
             return createUserCart(user);
         }
@@ -87,6 +87,10 @@ public class CartServiceImpl implements ICartService {
     }
 
     private Cart createGuestCart(String sessionId) {
+        Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
+        if (guestCart != null) {
+            return guestCart;
+        }
         Cart newCart = new Cart();
         newCart.setSessionId(sessionId);
         cartRepository.save(newCart);
@@ -94,6 +98,10 @@ public class CartServiceImpl implements ICartService {
     }
 
     private Cart createUserCart(User currentUser) {
+        Cart userCart = cartRepository.findByUser(currentUser);
+        if (userCart != null) {
+            return userCart;
+        }
         Cart newCart = new Cart();
         newCart.setUser(currentUser);
         cartRepository.save(newCart);
@@ -125,6 +133,14 @@ public class CartServiceImpl implements ICartService {
         }
 
     }
+
+
+    /*
+     Constraint on cart item allows the addToCart method to remain safe
+     from race condition, at no point will the new cart_item being created
+     will lead to duplication of row in cart table. Since the constraint
+     on cart item (product_id, cart_id) does not allow duplicate rows in cart table.
+     */
 
     @Override
     public void addToCart(CartContextDto ctxDto, Long productId, Integer quantity) {
@@ -163,9 +179,14 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
-    public void clearCart(CartContextDto ctxDto) {
-        Cart currentCart = resolveCart(ctxDto);
-        cartItemsRepository.deleteByCart(currentCart);
+    public void clearCart(CartContextDto contextDto) { // Quick Fix: For External Api call
+        Cart cart = resolveCart(contextDto);
+        cartItemsRepository.deleteByCart(cart);
+    }
+
+    @Override
+    public void clearCartAfterCheckout(Cart Cart) {
+        cartItemsRepository.deleteByCart(Cart);
     }
 
 
@@ -218,8 +239,11 @@ public class CartServiceImpl implements ICartService {
     }
 
     @Override
-    public Cart lockCartForCheckout(Long cartId) {
-        return cartRepository.findActiveCartForUpdate(cartId).orElseThrow(() ->
+    public Cart lockCartForCheckout(Long userId) {
+        Cart currentCart = cartRepository.findCartWithItems(userId).orElseThrow(
+                () -> new BusinessException(ErrorEnum.CART_NOT_FOUND, "Cart not found.")
+        );
+        return cartRepository.findActiveCartForUpdate(currentCart.getCartId()).orElseThrow(() ->
              new BusinessException(ErrorEnum.INVALID_REQUEST, "Cart already checked out or inactive."));
     }
 }

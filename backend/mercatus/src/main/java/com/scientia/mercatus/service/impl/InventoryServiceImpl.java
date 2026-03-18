@@ -11,6 +11,7 @@ import com.scientia.mercatus.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -26,7 +27,7 @@ public class InventoryServiceImpl implements IInventoryService {
     private final StockReservationRepository stockReservationRepository;
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     public StockReservation reserveStock(String orderReference, String reservationKey, String sku, int quantity, Instant expiresAt) {
         StockReservation stockReservation = stockReservationRepository.findByReservationKey(reservationKey);
         if (stockReservation != null) {

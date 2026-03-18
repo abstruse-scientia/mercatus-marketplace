@@ -5,7 +5,8 @@ import com.scientia.mercatus.entity.Order;
 import com.scientia.mercatus.entity.OrderStatus;
 import com.scientia.mercatus.entity.OrderPaymentStatus;
 import com.scientia.mercatus.entity.User;
-import com.scientia.mercatus.exception.UnauthorizedOperationException;
+import com.scientia.mercatus.exception.BusinessException;
+
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.repository.UserRepository;
 import com.scientia.mercatus.service.IOrderService;
@@ -90,7 +91,7 @@ public class OrderServiceCancelOrderIT {
         Long userId = generateUserId();
         Order order = createOrder(userId);
 
-        assertThrows(UnauthorizedOperationException.class, () -> orderService.cancelOrder(order.getId(), 3L));
+        assertThrows(BusinessException.class, () -> orderService.cancelOrder(order.getId(), 3L));
     }
 
 }

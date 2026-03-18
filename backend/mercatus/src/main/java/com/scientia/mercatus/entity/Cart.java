@@ -33,4 +33,8 @@ public class Cart extends BaseEntity{
     private CartStatus cartStatus = CartStatus.ACTIVE;
 
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
 }
