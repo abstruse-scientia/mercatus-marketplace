@@ -12,4 +12,11 @@ public class InventoryItemFactory {
         inventoryItem.setSku("SKU-" + UUID.randomUUID());
         return inventoryItem;
     }
+
+    public static InventoryItem createSingularStock() {
+        InventoryItem inventoryItem = new InventoryItem();
+        inventoryItem.setTotalStock(1);
+        inventoryItem.setSku("SKU-" + UUID.randomUUID());
+        return inventoryItem;
+    }
 }
