@@ -1,7 +1,6 @@
 package com.scientia.mercatus.service.impl;
 
 import com.scientia.mercatus.dto.Order.OrderSummaryDto;
-import com.scientia.mercatus.dto.Order.PlaceOrderRequestDto;
 import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.*;
 
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 
 
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +56,6 @@ public class OrderServiceImpl implements IOrderService {
                 inventoryService.releaseReservation(item.getReservationKey());
             }
             currentOrder.setStatus(OrderStatus.CANCELLED);
-            currentOrder.setOrderPaymentStatus(OrderPaymentStatus.CANCELLED);
             
     }
 
@@ -96,7 +93,6 @@ public class OrderServiceImpl implements IOrderService {
         if(!order.getOrderPaymentStatus().equals(OrderPaymentStatus.PENDING)) {
             throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Order can not be placed in current payment state");
         }
-        order.setStatus(OrderStatus.PAYMENT_PENDING);
         return paymentService.initiatePayment(order.getOrderReference(), "INR", PaymentProvider.RAZORPAY);
     }
 
