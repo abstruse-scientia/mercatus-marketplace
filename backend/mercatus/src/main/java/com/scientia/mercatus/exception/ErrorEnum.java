@@ -19,6 +19,7 @@ public enum ErrorEnum {
     NO_CART_ITEMS_FOUND(HttpStatus.NOT_FOUND, "CART_404_02", "No cartItems found"),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CTG_404_01", "Category not found"),
     INVENTORY_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "INV_404_01", "Inventory item not found"),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAY_404_01", "Payment not found"),
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RES_404_01", "Reservation not found"),
 
     //Related to HttpStatus code 400: Bad request

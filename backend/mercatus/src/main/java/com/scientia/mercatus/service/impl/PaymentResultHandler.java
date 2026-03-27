@@ -10,7 +10,6 @@ import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -22,63 +21,55 @@ public class PaymentResultHandler {
 
     /* Moved  */
     @Transactional
-    public void onPaymentSuccess(String orderReference) {
+    public void handlePaymentSuccess(String orderReference) {
 
         Order order = findOrderForUpdate(orderReference);
 
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.SUCCESS) {
+        // idempotency
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.SUCCESS &&
+                order.getStatus() == OrderStatus.CONFIRMED) {
             return;
         }
 
-        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
-            return;
+        //exception guard
+        if (order.getOrderPaymentStatus() != OrderPaymentStatus.PENDING ||
+                order.getStatus() != OrderStatus.CREATED) {
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST);
         }
 
-        order.setOrderPaymentStatus(OrderPaymentStatus.SUCCESS);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void finalizePaidOrder(String orderReference) {
-
-        Order order = findOrderForUpdate(orderReference);
-
-        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
-            return;
-        }
-
-        for (OrderItem item : order.getOrderItems()) {
-            inventoryService.confirmReservation(item.getReservationKey());
+        //Confirm inventory deduction
+        for (OrderItem orderItem : order.getOrderItems()) {
+            inventoryService.confirmReservation(orderItem.getReservationKey());
         }
 
         order.setStatus(OrderStatus.CONFIRMED);
+        order.setOrderPaymentStatus(OrderPaymentStatus.SUCCESS);
     }
 
     @Transactional
-    public void onPaymentFailure(String orderReference) {
+    public void handlePaymentFailure(String orderReference) {
 
         Order order = findOrderForUpdate(orderReference);
 
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.SUCCESS) {
+        //idempotency
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.FAILED &&
+                order.getStatus() == OrderStatus.CANCELLED) {
             return;
         }
 
-        order.setOrderPaymentStatus(OrderPaymentStatus.FAILED);
-    }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void cancelFailedOrder(String orderReference) {
-
-        Order order = findOrderForUpdate(orderReference);
-
-        if (order.getStatus() != OrderStatus.PAYMENT_PENDING) {
+        //critical guard - user already cancelled
+        if (order.getStatus() == OrderStatus.CANCELLED &&
+                order.getOrderPaymentStatus() ==  OrderPaymentStatus.PENDING) {
             return;
         }
 
-        for (OrderItem item : order.getOrderItems()) {
-            inventoryService.releaseReservation(item.getReservationKey());
+        for (OrderItem orderItem : order.getOrderItems()) {
+            inventoryService.releaseReservation(orderItem.getReservationKey());
         }
 
         order.setStatus(OrderStatus.CANCELLED);
+        order.setOrderPaymentStatus(OrderPaymentStatus.FAILED);
     }
 
 

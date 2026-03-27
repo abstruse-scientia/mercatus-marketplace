@@ -45,7 +45,7 @@ public class PaymentServiceImpl implements IPaymentService {
         if(order.getOrderPaymentStatus() == OrderPaymentStatus.SUCCESS) {
             throw new BusinessException(ErrorEnum.PAYMENT_ALREADY_EXISTS);
         }
-        if (order.getStatus() != OrderStatus.CREATED) {
+        if (order.getOrderPaymentStatus() != OrderPaymentStatus.PENDING) {
             throw new BusinessException(ErrorEnum.INVALID_PAYMENT);
         }
 
@@ -59,6 +59,9 @@ public class PaymentServiceImpl implements IPaymentService {
                 currency
         );
 
+        if (initiationResult == null) {
+            throw new BusinessException(ErrorEnum.PAYMENT_GATEWAY_ERROR);
+        }
         //Persist Payment Instance
         Payment payment = new Payment();
         payment.setOrderReference(orderReference);
@@ -75,18 +78,20 @@ public class PaymentServiceImpl implements IPaymentService {
 
     }
 
-
-
     /*Scenario: Webhook Success */
 
     @Override
+    @Transactional
     public void markPaymentSuccess(PaymentProvider provider, String providerOrderId,
                                    String providerPaymentId, long amountReceived) {
 
 
-        Payment payment = paymentPersistenceService.findPendingPayment(provider, providerOrderId);
-        if (payment == null) {
-            return; // idempotency : either duplicate or already processed
+        Payment payment = findLatestPaymentRow(provider, providerOrderId);
+        if (payment.getStatus() == PaymentStatus.SUCCESS) { // idempotency
+            return;
+        }
+        if (payment.getStatus() == PaymentStatus.FAILED) {
+            return; // out of order success -> ignore
         }
         if (amountReceived != payment.getAmountExpected()) { // amount validation
             log.info("Amount received: {} Expected amount: {}", amountReceived, payment.getAmountExpected());
@@ -102,34 +107,36 @@ public class PaymentServiceImpl implements IPaymentService {
         );
 
         //order transition(tx2)
-        paymentResultHandler.onPaymentSuccess(orderReference);
-        paymentResultHandler.finalizePaidOrder(orderReference);
+        paymentResultHandler.handlePaymentSuccess(orderReference);
     }
 
-
+    /*Scenario: Failure */
     @Override
     public void markPaymentFailed(PaymentProvider provider, String providerOrderId,
                                   String providerPaymentId) {
 
-        Payment payment = paymentPersistenceService.findPendingPayment(provider, providerOrderId);
-        if (payment == null) {
+        Payment payment = findLatestPaymentRow(provider, providerOrderId);
+        if (payment.getStatus() == PaymentStatus.FAILED) {
             return;
         }
-
+        if (payment.getStatus() == PaymentStatus.SUCCESS) {
+            return; //ignore later failure
+        }
         //persist failure tx1
         String orderReference = paymentPersistenceService.persistPaymentFailure(
                 provider,
                 providerOrderId,
                 providerPaymentId
         );
-
-
-
         //order transition tx2
-        paymentResultHandler.onPaymentFailure(orderReference);
-        paymentResultHandler.cancelFailedOrder(orderReference);
+        paymentResultHandler.handlePaymentFailure(orderReference);
+
+    }
+
+    private Payment findLatestPaymentRow(PaymentProvider provider, String providerOrderId) {
 
 
-
+        return paymentRepository.findFirstByProviderAndProviderOrderIdOrderByIdDesc(provider, providerOrderId)
+                .orElseThrow(()-> new BusinessException(ErrorEnum.PAYMENT_NOT_FOUND));
     }
 }

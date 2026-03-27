@@ -3,6 +3,8 @@ package com.scientia.mercatus.service.impl;
 import com.scientia.mercatus.entity.Payment;
 import com.scientia.mercatus.entity.PaymentProvider;
 import com.scientia.mercatus.entity.PaymentStatus;
+import com.scientia.mercatus.exception.BusinessException;
+import com.scientia.mercatus.exception.ErrorEnum;
 import com.scientia.mercatus.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,16 +21,6 @@ public class PaymentPersistenceService {
 
 
 
-    /* Used by payment service implementation to check pending payment for validation purpose */
-
-    @Transactional(readOnly = true)
-    public Payment findPendingPayment(PaymentProvider paymentProvider, String providerOrderId) {
-        return paymentRepository.findFirstByProviderAndProviderOrderIdAndStatusOrderByCreatedAtDesc(
-                paymentProvider,
-                providerOrderId,
-                PaymentStatus.PENDING
-        ).orElse(null);
-    }
 
     @Transactional
     public String persistPaymentSuccess(PaymentProvider provider, String providerOrderId,
@@ -40,11 +32,12 @@ public class PaymentPersistenceService {
             return null; //Duplicate webhook
         }
 
+
         Payment payment = optionalPayment.get();
         payment.setProviderPaymentId(providerPaymentId);
         payment.setAmountReceived(amountReceived);
         payment.setStatus(PaymentStatus.SUCCESS);
-
+        paymentRepository.flush();
         return payment.getOrderReference();
 
     }
