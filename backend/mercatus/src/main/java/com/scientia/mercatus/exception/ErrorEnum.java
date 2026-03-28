@@ -40,6 +40,7 @@ public enum ErrorEnum {
     PAYMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "PAY_409_01", "Payment already exists"),
     RESERVATION_EXISTS(HttpStatus.CONFLICT, "RES_409_01", "Reservation already exists"),
     INSUFFICIENT_STOCK(HttpStatus.CONFLICT, "INV_409_01", "Insufficient stock"),
+    USER_EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "USR_409_01", "Email is already registered"),
 
     //Related to HttpStatus code 401: Unauthorized
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH_401_01", "Token expired"),
