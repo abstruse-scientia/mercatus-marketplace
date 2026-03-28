@@ -54,7 +54,8 @@ public enum ErrorEnum {
     PAYMENT_GATEWAY_ERROR(HttpStatus.BAD_GATEWAY, "PAY_502_01", "Payment gateway error"),
 
     //Related to HttpStatus code 500: Internal Server Error
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SYS_500_01", "Unexpected internal error");
+    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SYS_500_01", "Unexpected internal error"),
+    ROLE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "SYS_500_02", "Required role not found");
 
 
 
