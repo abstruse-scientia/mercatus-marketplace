@@ -9,13 +9,13 @@ import com.scientia.mercatus.dto.Auth.RegisterRequestDto;
 import com.scientia.mercatus.dto.Auth.RegisterResponseDto;
 import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.exception.BusinessException;
+import com.scientia.mercatus.security.UserIdentifierService;
 import com.scientia.mercatus.security.jwt.JwtTokenProvider;
 import com.scientia.mercatus.service.IRefreshTokenService;
 import com.scientia.mercatus.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +25,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
 
-@Profile("!test")
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -42,6 +42,7 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final IRefreshTokenService iRefreshTokenService;
     private final IUserService iUserService;
+    private final UserIdentifierService userIdentifierService;
 
     @PostMapping("/login")
     public ResponseEntity<?> apiLogin(@RequestBody LoginRequestDto loginRequestDto) {
@@ -138,6 +139,24 @@ public class AuthController {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
         } catch (Exception ex) {
             return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Admin registration failed");
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> apiLogout() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.getPrincipal() instanceof User) {
+                User user = (User) authentication.getPrincipal();
+                if (user.getOpaqueIdentifier() != null) {
+                    userIdentifierService.invalidateUserCache(user.getOpaqueIdentifier());
+                }
+            }
+            SecurityContextHolder.clearContext();
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new LoginResponseDto("Logged out successfully", null, null, null));
+        } catch (Exception ex) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Logout failed");
         }
     }
 

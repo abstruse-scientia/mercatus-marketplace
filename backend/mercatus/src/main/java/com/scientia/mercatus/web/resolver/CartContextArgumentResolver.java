@@ -1,13 +1,10 @@
     package com.scientia.mercatus.web.resolver;
 
     import com.scientia.mercatus.dto.Cart.CartContextDto;
-    import com.scientia.mercatus.entity.User;
     import com.scientia.mercatus.security.GuestAuthenticationToken;
     import com.scientia.mercatus.security.SpringSecurityAuthContext;
-    import jakarta.servlet.http.HttpServletRequest;
     import lombok.RequiredArgsConstructor;
     import org.springframework.core.MethodParameter;
-    import org.springframework.security.authentication.AnonymousAuthenticationToken;
     import org.springframework.security.core.Authentication;
     import org.springframework.security.core.context.SecurityContextHolder;
     import org.springframework.stereotype.Component;

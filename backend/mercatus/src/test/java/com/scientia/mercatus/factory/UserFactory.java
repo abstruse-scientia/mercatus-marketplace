@@ -15,6 +15,7 @@ public class UserFactory {
         user.setUserName("John Doe");
         user.setEmail(email);
         user.setPasswordHash("password-hash");
+        user.setOpaqueIdentifier(UUID.randomUUID().toString());
         return user;
     }
 }
