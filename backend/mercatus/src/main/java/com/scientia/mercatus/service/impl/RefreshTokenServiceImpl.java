@@ -18,7 +18,6 @@ import java.time.Duration;
 import java.time.Instant;
 
 
-@Profile("!test")
 @Slf4j
 @Service
 @RequiredArgsConstructor

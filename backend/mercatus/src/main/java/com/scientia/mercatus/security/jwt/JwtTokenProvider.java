@@ -18,7 +18,14 @@ public class JwtTokenProvider {
     private final UserIdentifierService userIdentifierService;
 
     public String generateJwtToken(User userDetail){
-        String opaqueId = userIdentifierService.getOrCreateOpaqueIdentifier(userDetail);
+        // Use the user's existing opaque identifier (set during registration)
+        // This ensures the JWT contains the exact same identifier as stored in the database
+        String opaqueId = userDetail.getOpaqueIdentifier();
+        
+        // If for some reason it's null, generate one (shouldn't happen if user was properly registered)
+        if (opaqueId == null || opaqueId.isEmpty()) {
+            opaqueId = userIdentifierService.getOrCreateOpaqueIdentifier(userDetail);
+        }
 
         return Jwts.builder()
                 .issuer("Mercatus")

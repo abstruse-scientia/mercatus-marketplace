@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class JwtTokenValidatorFilter extends OncePerRequestFilter {

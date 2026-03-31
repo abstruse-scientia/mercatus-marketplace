@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,6 +63,7 @@ class AuthControllerRegistrationTest {
         testUser.setEmail("test@example.com");
         testUser.setUserName("testuser");
         testUser.setPasswordHash("$2a$10$hashed");
+        testUser.setOpaqueIdentifier(UUID.randomUUID().toString());
         
         Role userRole = new Role();
         userRole.setId(1L);
@@ -75,6 +77,7 @@ class AuthControllerRegistrationTest {
         testAdmin.setEmail("admin@example.com");
         testAdmin.setUserName("superadmin");
         testAdmin.setPasswordHash("$2a$10$hashed");
+        testAdmin.setOpaqueIdentifier(UUID.randomUUID().toString());
         
         Role adminRole = new Role();
         adminRole.setId(2L);

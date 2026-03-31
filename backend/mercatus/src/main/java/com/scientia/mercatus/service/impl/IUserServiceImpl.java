@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class IUserServiceImpl implements IUserService {
@@ -43,6 +45,7 @@ public class IUserServiceImpl implements IUserService {
             user.setEmail(email);
             user.setUserName(userName);
             user.setPasswordHash(passwordEncoder.encode(password));  // Hash password with BCrypt
+            user.setOpaqueIdentifier(UUID.randomUUID().toString());  // Generate opaque identifier for GDPR compliance
 
             // Step 3: Get ROLE_USER from database
             Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
@@ -76,6 +79,7 @@ public class IUserServiceImpl implements IUserService {
             user.setEmail(email);
             user.setUserName(userName);
             user.setPasswordHash(passwordEncoder.encode(password));  // Hash password with BCrypt
+            user.setOpaqueIdentifier(UUID.randomUUID().toString());  // Generate opaque identifier for GDPR compliance
 
             // Step 3: Get ROLE_USER from database (admins are also users)
             Role userRole = roleRepository.findByName(RoleName.ROLE_USER)

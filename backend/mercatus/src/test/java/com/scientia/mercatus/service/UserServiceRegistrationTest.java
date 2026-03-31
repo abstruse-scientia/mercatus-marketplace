@@ -18,10 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,6 +65,7 @@ class UserServiceRegistrationTest {
         savedUser.setEmail("test@example.com");
         savedUser.setUserName("testuser");
         savedUser.setPasswordHash("$2a$10$hashed");
+        savedUser.setOpaqueIdentifier(UUID.randomUUID().toString());
         savedUser.getRoles().add(userRole);
 
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
@@ -118,6 +119,7 @@ class UserServiceRegistrationTest {
 
         User savedUser = new User();
         savedUser.setPasswordHash("$2a$10$hashed");
+        savedUser.setOpaqueIdentifier(UUID.randomUUID().toString());
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         userService.registerUser("test@example.com", "SecurePass123!", "testuser");
@@ -137,6 +139,7 @@ class UserServiceRegistrationTest {
         savedAdmin.setEmail("admin@example.com");
         savedAdmin.setUserName("admin");
         savedAdmin.setPasswordHash("$2a$10$hashed");
+        savedAdmin.setOpaqueIdentifier(UUID.randomUUID().toString());
         savedAdmin.getRoles().add(userRole);
         savedAdmin.getRoles().add(adminRole);
 
@@ -201,6 +204,7 @@ class UserServiceRegistrationTest {
         when(roleRepository.findByName(RoleName.ROLE_ADMIN)).thenReturn(Optional.of(adminRole));
 
         User savedAdmin = new User();
+        savedAdmin.setOpaqueIdentifier(UUID.randomUUID().toString());
         savedAdmin.getRoles().add(userRole);
         savedAdmin.getRoles().add(adminRole);
 
