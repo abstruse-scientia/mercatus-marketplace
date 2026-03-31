@@ -2,7 +2,6 @@ package com.scientia.mercatus.dto.Auth;
 
 import com.scientia.mercatus.validator.PasswordMatch;
 import com.scientia.mercatus.validator.StrongPassword;
-import com.scientia.mercatus.validator.UniqueEmail;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -11,7 +10,6 @@ import jakarta.validation.constraints.Size;
 public record RegisterRequestDto(
         @NotBlank(message = "Email is required")
         @Email(message = "Email should be valid")
-        @UniqueEmail(message = "Email is already registered")
         String email,
 
         @NotBlank(message = "Password is required")

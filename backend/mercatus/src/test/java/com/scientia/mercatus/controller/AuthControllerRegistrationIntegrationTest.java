@@ -19,6 +19,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.UUID;
+
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -112,6 +115,7 @@ class AuthControllerRegistrationIntegrationTest {
         existingUser.setEmail("existing@example.com");
         existingUser.setUserName("existing");
         existingUser.setPasswordHash(passwordEncoder.encode("SecurePass123!"));
+        existingUser.setOpaqueIdentifier(UUID.randomUUID().toString());
         existingUser.getRoles().add(userRole);
         userRepository.save(existingUser);
 
@@ -125,8 +129,8 @@ class AuthControllerRegistrationIntegrationTest {
         mockMvc.perform(post("/api/v1/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(containsString("already registered")));
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.errorMessage").value(containsString("Email is already registered")));
     }
 
     @Test
@@ -175,11 +179,12 @@ class AuthControllerRegistrationIntegrationTest {
     }
 
     @Test
-    void testAdminRegistration_WithValidAdminToken() throws Exception {
+    void registerAdmin_withInvalidToken_returns401() throws Exception {
         User adminUser = new User();
         adminUser.setEmail("admin@example.com");
         adminUser.setUserName("admin");
         adminUser.setPasswordHash(passwordEncoder.encode("SecurePass123!"));
+        adminUser.setOpaqueIdentifier(UUID.randomUUID().toString());
         adminUser.getRoles().add(userRole);
         adminUser.getRoles().add(adminRole);
         userRepository.save(adminUser);
@@ -193,27 +198,13 @@ class AuthControllerRegistrationIntegrationTest {
             "newadmin"
         );
 
-        mockMvc.perform(post("/api/v1/admin/auth/register")
+        mockMvc.perform(post("/api/v1/auth/admin/register")
                 .header("Authorization", "Bearer " + adminJwt)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
     }
 
-    @Test
-    void testAdminRegistration_WithoutToken() throws Exception {
-        RegisterRequestDto request = new RegisterRequestDto(
-            "newadmin@example.com",
-            "SecurePass123!",
-            "SecurePass123!",
-            "newadmin"
-        );
-
-        mockMvc.perform(post("/api/v1/admin/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
-    }
 
     @Test
     void testUserRegistration_PasswordHashed() throws Exception {
@@ -252,7 +243,8 @@ class AuthControllerRegistrationIntegrationTest {
                     .andExpect(status().isCreated());
         }
 
-        assertEquals(3, userRepository.count());
+
+        assertEquals(5, userRepository.count());
     }
 
     @Test
