@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RazorpaySignatureVerifier {
 
-    @Value("${razorpay.webhook.secret:razorpay-webhook-secret}")
+    @Value("${razorpay.webhook.secret")
     private String webhookSecret;
 
     public void verify(String payload, String signature) {
