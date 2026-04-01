@@ -71,6 +71,18 @@ public class MercatusSecurityConfig {
                         .requestMatchers("/api/v1/cart/**").authenticated()
                         .anyRequest().authenticated()
                 )
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.deny())
+                        .contentTypeOptions(contentTypeOptions -> contentTypeOptions.disable() == null)
+                        .xssProtection(xss -> xss.headerValue(org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000)
+                                .preload(true)
+                        )
+                        .referrerPolicy(referrer -> referrer.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_NO_REFERRER))
+                        .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"))
+                )
                 .addFilterBefore(jwtTokenValidatorFilter.orElseThrow(() ->
                         new IllegalStateException("JwtTokenValidatorFilter is required when security is enabled")),
                         BasicAuthenticationFilter.class)
@@ -90,7 +102,28 @@ public class MercatusSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
-        List<String> origins = Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList();
+        // Validate CORS configuration at startup
+        if (allowedOrigins == null || allowedOrigins.trim().isEmpty() || "default-origins".equals(allowedOrigins)) {
+            throw new IllegalArgumentException(
+                    "CORS allowed origins not properly configured. " +
+                    "Please set 'cors.allowed-origins' environment variable to a comma-separated list of valid origins. " +
+                    "Example: 'https://yourdomain.com,https://app.yourdomain.com'"
+            );
+        }
+
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .toList();
+
+        if (origins.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "No valid CORS origins found after parsing 'cors.allowed-origins' configuration"
+            );
+        }
+
+        log.info("CORS configuration validated. Allowed origins: {}", origins.size());
+
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

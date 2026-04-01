@@ -32,7 +32,7 @@ public class PaymentWebhookController {
             log.warn("Invalid Razorpay webhook signature");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }catch (Exception e) {
-            log.warn("Error processing Razorpay webhook", e);
+            log.warn("Error processing Razorpay webhook: {}", e.getClass().getSimpleName());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 

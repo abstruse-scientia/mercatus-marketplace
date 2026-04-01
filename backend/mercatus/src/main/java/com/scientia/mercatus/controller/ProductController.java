@@ -4,6 +4,8 @@ import com.scientia.mercatus.dto.Product.ProductResponseDto;
 import com.scientia.mercatus.entity.Product;
 import com.scientia.mercatus.service.IProductService;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -28,7 +30,9 @@ public class ProductController {
     private final IProductService productService;
 
     @GetMapping("/search")
-    public ResponseEntity<Page<ProductResponseDto>> searchActiveProducts(@RequestParam String query, Pageable pageable) {
+    public ResponseEntity<Page<ProductResponseDto>> searchActiveProducts(
+            @RequestParam @NotBlank(message = "Search query cannot be empty") @Size(max = 255, message = "Search query cannot exceed 255 characters") String query, 
+            Pageable pageable) {
         Pageable safePageable = getPageable(pageable);
         Page<Product> pageProduct = productService.searchActiveProductsByNameOrSlug(query,safePageable);
         return ResponseEntity.status(HttpStatus.OK).body(pageProduct.map(ProductResponseDto::from));
