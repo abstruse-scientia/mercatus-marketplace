@@ -22,7 +22,10 @@ public class MercatusApplication {
     @PostConstruct
     public void checkEnv() {
         String secret = env.getProperty("secret.key");
-        System.out.println(">>> Spring sees secret.key: " + secret);
+        if (secret != null && !secret.isEmpty()) {
+            org.slf4j.LoggerFactory.getLogger(MercatusApplication.class)
+                    .debug("JWT secret key configured successfully");
+        }
     }
 
 }
