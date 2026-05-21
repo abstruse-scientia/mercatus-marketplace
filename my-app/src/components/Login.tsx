@@ -1,11 +1,41 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import cameraPic from "../assets/images/camera-pic.jpg";
+import { useAuthStore } from "../store/authStore";
+import type { AxiosError } from "axios";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
+  const isLoading = useAuthStore((state) => state.isLoading);
+
   const [show, setShow] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userEmail || !password) {
+      toast.error("Please fill in both email and password.");
+      return;
+    }
+
+    try {
+      await login({ userEmail, password });
+      toast.success("Successfully logged in!");
+      navigate("/home");
+    } catch (err: unknown) {
+
+      const error = err as AxiosError<{message?: string}>;
+      const message = error.response?.data?.message ||
+          "Failed to login. Please check your credentials.";
+      toast.error(message);
+    }
+  };
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12">
@@ -30,21 +60,20 @@ export default function Login() {
             </p>
           </div>
 
-          <form
-            className="flex flex-col gap-5"
-            onSubmit={(e) => e.preventDefault()}
-          >
+          <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-2">
-              <label htmlFor="username" className="text-sm font-medium">
-                Username
+              <label htmlFor="userEmail" className="text-sm font-medium">
+                Email
               </label>
               <Input
-                id="username"
-                name="username"
-                type="text"
-                placeholder="Enter your username"
-                autoComplete="username"
+                id="userEmail"
+                name="userEmail"
+                type="email"
+                placeholder="Enter your email"
+                autoComplete="email"
                 className="h-11"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
               />
             </div>
 
@@ -60,6 +89,8 @@ export default function Login() {
                   placeholder="••••••••"
                   autoComplete="current-password"
                   className="h-11 pr-11"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -77,10 +108,11 @@ export default function Login() {
             </div>
 
             <Button
-              type="button"
-              className="mt-2 h-11 rounded-lg bg-foreground text-background hover:bg-foreground/90"
+              type="submit"
+              disabled={isLoading}
+              className="mt-2 h-11 rounded-lg bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50"
             >
-              Sign in
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
 
             <p className="text-sm text-foreground/70 text-center">
