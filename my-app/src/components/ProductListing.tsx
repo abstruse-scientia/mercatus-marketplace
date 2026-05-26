@@ -1,85 +1,100 @@
-import React, { useMemo, useState } from "react";
-import { usePagination } from "./usePagination";
 import SearchBar from "./SearchBar";
 import FilterDropdown from "./FilterDropDown";
 import ProductCard from "./ProductCard";
 import PaginationControl from "./PaginationControl";
+import CategoryFilterSidebar from "./CategoryFilterSidebar";
+import type { PageResponse, Product } from "../types";
 
-const sortList = ["Popularity", "Price Low to High", "Price High to Low"];
+const sortOptions = [
+  { label: "Newest", value: "createdAt,desc" },
+  { label: "Price Low to High", value: "price,asc" },
+  { label: "Price High to Low", value: "price,desc" },
+];
 
-export default function ProductListing({ products }) {
-  const [searchText, setSearchText] = useState("");
-  const [selectedSort, setSelectedSort] = useState("Popularity");
+export type ProductListingProps = {
+  pageResponse: PageResponse<Product> | null;
+  page: number;
+  onPageChange: (page: number) => void;
+  sort: string;
+  onSortChange: (sort: string) => void;
+  search: string;
+  onSearchChange: (search: string) => void;
+  category: string | null;
+  onCategoryChange: (category: string | null) => void;
+};
 
-  const filteredAndSortedProducts = useMemo(() => {
-    if (!Array.isArray(products)) {
-      return [];
-    }
-
-    const filteredProducts = products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchText.toLowerCase())
-    );
-
-    return filteredProducts.slice().sort((a, b) => {
-      switch (selectedSort) {
-        case "Price Low to High":
-          return parseFloat(a.price) - parseFloat(b.price);
-        case "Price Hight to Low":
-          return parseFloat(b.price) - parseFloat(a.price);
-        case "Populartiy":
-          return parseFloat(b.popularity) - parseFloat(a.popularity);
-        default:
-          return parseInt(b.popularity) - parseFloat(a.popularity);
-      }
-    });
-  }, [products, searchText, selectedSort]);
-
-  const { page, totalPages, pageItems, go } = usePagination(
-    filteredAndSortedProducts
-  );
+export default function ProductListing({
+  pageResponse,
+  page,
+  onPageChange,
+  sort,
+  onSortChange,
+  search,
+  onSearchChange,
+  category,
+  onCategoryChange,
+}: ProductListingProps) {
+  const selectedSortLabel =
+    sortOptions.find((opt) => opt.value === sort)?.label || "Newest";
 
   function handleSearchChange(inputSearch: string) {
-    setSearchText(inputSearch);
+    onSearchChange(inputSearch);
+    if (page !== 0) onPageChange(0); // Reset to first page on search
   }
 
-  function handleSortChange(sortType: string) {
-    setSelectedSort(sortType);
+  function handleSortChange(sortLabel: string) {
+    const option = sortOptions.find((opt) => opt.label === sortLabel);
+    if (option) {
+      onSortChange(option.value);
+      if (page !== 0) onPageChange(0);
+    }
   }
+
+  function handleCategoryChange(newCategory: string | null) {
+    onSearchChange(""); // reset search when category changes
+    onCategoryChange(newCategory);
+    if (page !== 0) onPageChange(0);
+  }
+
   return (
-    <>
-      <div className="mx-auto max-w-5xl px-4 mt-2">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex-1">
+    <div className="h-full w-full px-4 md:px-8 py-8 flex items-start gap-8">
+      {/* Sidebar - Desktop Only */}
+      <CategoryFilterSidebar
+        selectedCategoryName={category}
+        onCategorySelect={handleCategoryChange}
+      />
+
+      {/* Main Content */}
+      <main className="flex-1 min-w-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
+          <div className="flex-1 w-full">
             <SearchBar
               placeHolder="Search cameras, lenses, accessories..."
-              value={searchText}
+              value={search}
               handleSearch={(value) => handleSearchChange(value)}
             />
           </div>
           <FilterDropdown
-            options={sortList}
-            selectedValue={selectedSort}
+            options={sortOptions.map((opt) => opt.label)}
+            selectedValue={selectedSortLabel}
             handleSort={(value) => handleSortChange(value)}
           />
         </div>
-      </div>
-      <main className="mx-auto max-w-7xl px-4 py-8">
+
         <div
           id="products"
-          className="grid grid-cols-1 gap-6 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4"
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
         >
-          {pageItems.map((p) => (
-            <ProductCard key={p.productId} product={p} />
+          {pageResponse?.content.map((p) => (
+            <ProductCard key={p.id} product={p} />
           ))}
         </div>
         <PaginationControl
-          page={page}
-          totalPages={totalPages}
-          onPageChange={go}
+          page={pageResponse ? pageResponse.pageable.pageNumber + 1 : 1}
+          totalPages={pageResponse?.totalPages || 1}
+          onPageChange={(p) => onPageChange(p - 1)}
         />
       </main>
-    </>
+    </div>
   );
 }

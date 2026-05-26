@@ -26,6 +26,7 @@ export const productsApi = {
     );
     return response.data;
   },
+
   listByCategory: async (
     categoryId: number,
     params?: { page?: number; size?: number; sort?: string },
@@ -36,4 +37,18 @@ export const productsApi = {
     );
     return response.data;
   },
+  listProductsByCategoryName: async(
+    categoryName: string,
+    params?: {page?: number, size?: number; sort?: string},
+  ) => {
+    const response = await apiClient.get<PageResponse<Product>>(
+      `/products/category/name/${encodeURIComponent(categoryName)}`,
+      {params}
+    );
+    return response.data
+  },
+  getCategories: async() => {
+    const response = await apiClient.get<string[]>("products/categories")
+    return response.data
+  }
 };
