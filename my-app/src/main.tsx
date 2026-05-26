@@ -15,12 +15,14 @@ import About from "./components/About.tsx";
 import Contact from "./components/Contact.tsx";
 import Login from "./components/Login.tsx";
 import Register from "./components/Register.tsx";
+import ProductDetail from "./components/ProductDetail.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 const routeDefinitions = createRoutesFromElements(
   <Route path="/" element={<App />} errorElement={<ErrorPage />}>
     <Route index element={<Navigate to="/home" />} />
     <Route path="/home" element={<Home />} />
+    <Route path="/products/:id" element={<ProductDetail />} />
     <Route path="/about" element={<About />} />
 
     <Route path="/contact" element={<Contact />} />

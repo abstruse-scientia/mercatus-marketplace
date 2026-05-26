@@ -4,12 +4,11 @@ export default function Hero() {
       className="relative overflow-hidden"
       aria-labelledby="hero-heading"
     >
-      {/* Decorative subtle radial highlight (not a boxed gradient) */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(circle_at_center,theme(colors.muted/40),transparent_60%)] dark:opacity-40"
       />
-      <div className="relative mx-auto max-w-5xl px-4 py-16 sm:py-20 md:py-24 text-center">
+      <div className="relative mx-auto max-w-5xl px-4 py-12 sm:py-16 md:py-20 text-center">
         <h1
           id="hero-heading"
           className="font-extrabold tracking-tight text-5xl sm:text-6xl md:text-7xl"
