@@ -7,6 +7,8 @@ import com.scientia.mercatus.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface IProductService {
 
 
@@ -44,8 +46,9 @@ public interface IProductService {
     Page<Product> listProductsByCategory(Long categoryId, Pageable pageable);
 
 
+    Page<Product> listActiveProductsByCategoryName(String categoryName, Pageable pageable);
 
-
+    List<String> listAllCategories();
     /*
      Need to fix the list: By reorganizing what should be controlled by admin , and what should
      be client related.
