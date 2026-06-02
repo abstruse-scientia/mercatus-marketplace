@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
@@ -57,6 +59,21 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(pagedProduct.map(ProductResponseDto::from));
     }
 
+
+    @GetMapping("category/name/{categoryName}")
+    public ResponseEntity<Page<ProductResponseDto>> listActiveProductsByCategoryUsingCategoryName(
+            @PathVariable String categoryName, Pageable pageable) {
+        Pageable safePageable = getPageable(pageable);
+        Page<Product> pagedProducts = productService.listActiveProductsByCategoryName(categoryName, safePageable);
+        return ResponseEntity.status(HttpStatus.OK).body(pagedProducts.map(ProductResponseDto::from));
+
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> listCategories() {
+        List<String> categories = productService.listAllCategories();
+        return ResponseEntity.ok(categories);
+    }
 
     private Pageable getPageable(Pageable pageable) {
         int size = Math.min(pageable.getPageSize(), maxPageSize);

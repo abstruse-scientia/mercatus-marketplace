@@ -48,7 +48,8 @@ public class MercatusSecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityConfigProperties props,
-                                            Optional<JwtTokenValidatorFilter> jwtTokenValidatorFilter) throws Exception {
+                                            Optional<JwtTokenValidatorFilter> jwtTokenValidatorFilter,
+                                            com.scientia.mercatus.filter.SessionFilter sessionFilter) throws Exception {
         log.info("Init security filter chain");
         if (props.isDisabled()) {
             return http
@@ -74,6 +75,7 @@ public class MercatusSecurityConfig {
                 .addFilterBefore(jwtTokenValidatorFilter.orElseThrow(() ->
                         new IllegalStateException("JwtTokenValidatorFilter is required when security is enabled")),
                         BasicAuthenticationFilter.class)
+                .addFilterAfter(sessionFilter, BasicAuthenticationFilter.class)
                 .build();
 
 
