@@ -1,10 +1,12 @@
 import Header from "./components/Header";
 import { Outlet, useNavigation } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const navigation = useNavigation();
   return (
     <>
+      <Toaster position="bottom-right" />
       <Header />
       {navigation.state === "loading" ? (
         <div className="flex items-center justify-center min-h-[852px]">
