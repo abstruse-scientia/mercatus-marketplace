@@ -16,12 +16,15 @@ import Contact from "./components/Contact.tsx";
 import Login from "./components/Login.tsx";
 import Register from "./components/Register.tsx";
 import ProductDetail from "./components/ProductDetail.tsx";
+import ProductsPage from "./components/ProductsPage.tsx";
+import Cart from "./components/Cart.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 const routeDefinitions = createRoutesFromElements(
   <Route path="/" element={<App />} errorElement={<ErrorPage />}>
     <Route index element={<Navigate to="/home" />} />
     <Route path="/home" element={<Home />} />
+    <Route path="/products" element={<ProductsPage />} />
     <Route path="/products/:id" element={<ProductDetail />} />
     <Route path="/about" element={<About />} />
 
@@ -29,12 +32,10 @@ const routeDefinitions = createRoutesFromElements(
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
 
+    <Route path="/cart" element={<Cart />} />
+
     {/* Protected Routes */}
     <Route element={<ProtectedRoute />}>
-      <Route
-        path="/cart"
-        element={<div className="p-8 text-center">Cart Placeholder</div>}
-      />
       <Route
         path="/orders"
         element={<div className="p-8 text-center">Orders Placeholder</div>}

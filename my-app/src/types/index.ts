@@ -48,6 +48,7 @@ export interface RegisterRequest {
 
 export interface CartItem {
   id: number;
+  productId: number;
   name: string;
   quantity: number;
   unitPrice: number;

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { productsApi } from "../api/products.api";
 import type { Product } from "../types";
+import { useCartStore } from "@/store/cartStore";
+import toast from "react-hot-toast";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -9,6 +11,9 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+
+  const [isAdding, setIsAdding] = useState(false);
+  const addItem = useCartStore((state) => state.addItem);
 
   useEffect(() => {
     let isMounted = true;
@@ -63,7 +68,7 @@ export default function ProductDetail() {
         </h2>
         <Link
           to="/"
-          className="text-emerald-600 hover:text-emerald-700 font-medium"
+          className = "text-foreground/70 hover:text-foreground font-medium"
         >
           &larr; Back to catalog
         </Link>
@@ -97,14 +102,14 @@ export default function ProductDetail() {
         {/* Product Info */}
         <div className="w-full md:w-1/2 flex flex-col justify-center">
           {product.categoryName && (
-            <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground mb-4 w-fit">
+            <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-foreground/50 mb-4 w-fit">
               {product.categoryName}
             </span>
           )}
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
             {product.name}
           </h1>
-          <div className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400 mb-6">
+          <div className="text-2xl font-semibold text-foreground mb-6">
             ${product.price}
           </div>
 
@@ -130,13 +135,21 @@ export default function ProductDetail() {
             </div>
 
             <button
-              onClick={() => {
-                // TODO: call addToCart API
-                console.log("Add to cart", product.id, quantity);
+              disabled={isAdding}
+              onClick={async () => {
+                try {
+                  setIsAdding(true);
+                  await addItem(product.id, quantity);
+                  toast.success(`Added ${quantity} ${product.name} to cart`);
+                } catch {
+                  toast.error("Failed to add to cart");
+                } finally {
+                  setIsAdding(false);
+                }
               }}
-              className="flex-1 rounded-lg bg-accent px-8 py-3 text-base font-semibold text-background transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent/20 sm:flex-none"
+              className="flex-1 rounded-none bg-foreground px-8 py-3 text-base font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50 sm:flex-none"
             >
-              Add to Cart
+              {isAdding ? "Adding..." : "Add to Cart"}
             </button>
           </div>
         </div>
