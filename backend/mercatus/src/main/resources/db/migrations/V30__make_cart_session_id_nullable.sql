@@ -1,0 +1,1 @@
+ALTER TABLE cart MODIFY session_id VARCHAR(100) NULL;
