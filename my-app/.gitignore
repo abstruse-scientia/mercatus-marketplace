@@ -25,3 +25,6 @@ dist-ssr
 
 # all readme related files
 *.md
+*.env
+
+.env.development

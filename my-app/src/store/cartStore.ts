@@ -60,11 +60,11 @@ export const useCartStore = create<CartState>()(
         set({ isLoading: true, error: null });
         try {
           const userId = useAuthStore.getState().user?.userId;
-          const cart = await cartApi.addToCart(
+          await cartApi.addToCart(
             { productId, quantity },
             { userId },
           );
-          set({ cart, isLoading: false });
+          await get().fetchCart();
         } catch (error: unknown) {
           set({
             error: getErrorMessage(error, "Failed to add item"),
@@ -75,34 +75,85 @@ export const useCartStore = create<CartState>()(
       },
 
       updateQuantity: async (productId: number, quantity: number) => {
-        set({ isLoading: true, error: null });
+        const { cart } = get();
+        if (!cart) return;
+
+        // 1. Save previous state for potential rollback
+        const previousCart = JSON.parse(JSON.stringify(cart)) as CartResponse;
+
+        // 2. Optimistically update local state
+        const updatedItems = cart.items.map((item) => {
+          if (item.productId === productId) {
+            return {
+              ...item,
+              quantity: quantity,
+              totalItemsPrice: item.unitPrice * quantity,
+            };
+          }
+          return item;
+        }).filter(item => item.quantity > 0);
+
+        const newSubtotal = updatedItems.reduce((sum, item) => sum + item.totalItemsPrice, 0);
+        const newItemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+
+        set({
+          cart: {
+            ...cart,
+            items: updatedItems,
+            subtotal: newSubtotal,
+            itemCount: newItemCount,
+          },
+          error: null,
+        });
+
+        // 3. Make API call in background
         try {
           const userId = useAuthStore.getState().user?.userId;
-          const cart = await cartApi.updateQuantity(productId, quantity, {
-            userId,
-          });
-          set({ cart, isLoading: false });
+          if (quantity === 0) {
+            await cartApi.removeFromCart(productId, { userId });
+          } else {
+            await cartApi.updateQuantity(productId, quantity, { userId });
+          }
+          // Fetch server state quietly to ensure exact sync (e.g. dynamic discounts)
+          get().fetchCart();
         } catch (error: unknown) {
+          // 4. Rollback on failure
           set({
+            cart: previousCart,
             error: getErrorMessage(error, "Failed to update quantity"),
-            isLoading: false,
           });
           throw error;
         }
       },
 
       removeItem: async (productId: number) => {
-        set({ isLoading: true, error: null });
+        const { cart } = get();
+        if (!cart) return;
+
+        const previousCart = JSON.parse(JSON.stringify(cart)) as CartResponse;
+
+        const updatedItems = cart.items.filter((item) => item.productId !== productId);
+        const newSubtotal = updatedItems.reduce((sum, item) => sum + item.totalItemsPrice, 0);
+        const newItemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+
+        set({
+          cart: {
+            ...cart,
+            items: updatedItems,
+            subtotal: newSubtotal,
+            itemCount: newItemCount,
+          },
+          error: null,
+        });
+
         try {
           const userId = useAuthStore.getState().user?.userId;
-          const cart = await cartApi.removeFromCart(productId, {
-            userId,
-          });
-          set({ cart, isLoading: false });
+          await cartApi.removeFromCart(productId, { userId });
+          get().fetchCart();
         } catch (error: unknown) {
           set({
+            cart: previousCart,
             error: getErrorMessage(error, "Failed to remove item"),
-            isLoading: false,
           });
           throw error;
         }
@@ -113,7 +164,7 @@ export const useCartStore = create<CartState>()(
         try {
           const userId = useAuthStore.getState().user?.userId;
           await cartApi.clearCart({ userId });
-          set({ cart: null, isLoading: false });
+          await get().fetchCart();
         } catch (error: unknown) {
           set({
             error: getErrorMessage(error, "Failed to clear cart"),
@@ -130,7 +181,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "cart-storage",
-      partialize: (state) => ({}), // We don't need to persist anything anymore, the cookie handles it!
+      partialize: () => ({}), // We don't need to persist anything anymore, the cookie handles it!
     },
   ),
 );
