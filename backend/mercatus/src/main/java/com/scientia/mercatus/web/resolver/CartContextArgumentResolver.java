@@ -1,6 +1,7 @@
     package com.scientia.mercatus.web.resolver;
 
     import com.scientia.mercatus.dto.Cart.CartContextDto;
+    import com.scientia.mercatus.filter.SessionFilter;
     import com.scientia.mercatus.security.GuestAuthenticationToken;
     import com.scientia.mercatus.security.SpringSecurityAuthContext;
     import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@
     import org.springframework.web.context.request.NativeWebRequest;
     import org.springframework.web.method.support.HandlerMethodArgumentResolver;
     import org.springframework.web.method.support.ModelAndViewContainer;
+    import jakarta.servlet.http.HttpServletRequest;
 
     @Component
     @RequiredArgsConstructor
@@ -26,12 +28,10 @@
 
         @Override
         public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Long userId = authContext.getCurrentUserIdOrNull();
-            String sessionId = null;
-            if (authentication instanceof GuestAuthenticationToken) {
-                sessionId = authentication.getCredentials().toString();
-            }
+            
+            HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+            String sessionId = (String) request.getAttribute(SessionFilter.SESSION_ATTRIBUTE);
 
             return new CartContextDto(sessionId, userId);
         }

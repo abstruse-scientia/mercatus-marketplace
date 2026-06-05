@@ -35,10 +35,11 @@ public class RazorpayPaymentGateWay implements IPaymentGateway {
 
 
 
+            Number amountNum = razorpayOrder.get("amount");
             return new PaymentInitiationResultDto(
                     PaymentProvider.RAZORPAY,
                     razorpayOrder.get("id"),
-                    razorpayOrder.get("amount"),
+                    amountNum.longValue(),
                     razorpayOrder.get("currency")
             );
 
