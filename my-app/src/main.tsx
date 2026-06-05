@@ -19,6 +19,10 @@ import ProductDetail from "./components/ProductDetail.tsx";
 import ProductsPage from "./components/ProductsPage.tsx";
 import Cart from "./components/Cart.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import Checkout from "./components/Checkout.tsx";
+import OrderConfirmation from "./components/OrderConfirmation.tsx";
+
+import Orders from "./components/Orders.tsx";
 
 const routeDefinitions = createRoutesFromElements(
   <Route path="/" element={<App />} errorElement={<ErrorPage />}>
@@ -38,11 +42,15 @@ const routeDefinitions = createRoutesFromElements(
     <Route element={<ProtectedRoute />}>
       <Route
         path="/orders"
-        element={<div className="p-8 text-center">Orders Placeholder</div>}
+        element={<Orders />}
+      />
+      <Route
+        path="/orders/:orderId"
+        element={<OrderConfirmation />}
       />
       <Route
         path="/checkout"
-        element={<div className="p-8 text-center">Checkout Placeholder</div>}
+        element={<Checkout />}
       />
       <Route
         path="/account/*"

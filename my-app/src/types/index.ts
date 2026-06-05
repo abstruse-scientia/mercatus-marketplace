@@ -53,6 +53,8 @@ export interface CartItem {
   quantity: number;
   unitPrice: number;
   totalItemsPrice: number;
+  primaryImageUrl?: string;
+  categoryName?: string;
 }
 
 export interface CartResponse {
@@ -77,7 +79,7 @@ export interface OrderItem {
   productId: number;
   productName: string;
   quantity: number;
-  price: number;
+  unitPrice: number;
 }
 
 export interface OrderResponse {
@@ -98,8 +100,8 @@ export interface OrderSummary {
 }
 
 export interface PlaceOrderRequest {
-  sessionId: string;
-  userId: number;
+  orderReference: string;
+  addressId: number;
 }
 
 export interface AddressRequest {
@@ -127,7 +129,7 @@ export interface ErrorResponse {
 }
 
 export interface PaymentResponse {
-  orderId: number;
+  orderId: string;
   amount: number;
   currency: string;
   paymentProvider: string;
