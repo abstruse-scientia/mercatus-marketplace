@@ -44,4 +44,7 @@ public class OrderItem extends BaseEntity{
     @Column(name = "reservation_key", nullable = false, length = 100, unique = true)
     private String reservationKey;
 
+
+    @Column(name = "primary_image_url")
+    private String primaryImageUrl;
 }

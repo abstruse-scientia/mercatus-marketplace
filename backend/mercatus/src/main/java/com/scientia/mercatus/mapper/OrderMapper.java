@@ -27,7 +27,7 @@ public class OrderMapper {
         orderItem.setProductId(cartItem.getProduct().getProductId());
         orderItem.setProductName(cartItem.getProduct().getName());
         orderItem.setOrder(order);
-
+        orderItem.setPrimaryImageUrl(product.getPrimaryImageUrl());
         return orderItem;
 
     }

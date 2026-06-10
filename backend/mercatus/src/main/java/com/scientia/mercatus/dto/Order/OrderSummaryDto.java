@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,15 +20,16 @@ public class OrderSummaryDto {
     OrderStatus orderStatus;
     String orderReference;
     Instant createdAt;
+    List<OrderItemSummaryDto> orderSummaryList;
 
     public OrderSummaryDto(Long id,  BigDecimal totalAmount, OrderPaymentStatus orderPaymentStatus,
-                           OrderStatus orderStatus, String orderReference, Instant createdAt) {
+                           OrderStatus orderStatus, String orderReference, Instant createdAt, List<OrderItemSummaryDto> orderSummaryList) {
         this.id = id;
         this.totalAmount = totalAmount;
         this.orderPaymentStatus = orderPaymentStatus;
         this.orderStatus = orderStatus;
         this.orderReference = orderReference;
         this.createdAt = createdAt;
-
+        this.orderSummaryList = orderSummaryList;
     }
 }

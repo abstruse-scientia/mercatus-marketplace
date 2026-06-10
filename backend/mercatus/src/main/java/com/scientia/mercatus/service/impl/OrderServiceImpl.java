@@ -1,5 +1,6 @@
 package com.scientia.mercatus.service.impl;
 
+import com.scientia.mercatus.dto.Order.OrderItemSummaryDto;
 import com.scientia.mercatus.dto.Order.OrderSummaryDto;
 import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.*;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 
 import java.util.*;
+
 
 
 @Service
@@ -67,19 +69,26 @@ public class OrderServiceImpl implements IOrderService {
 
         Page<Order> orders = orderRepository.findByUser_UserId(userId, pageable);
 
-        Page<OrderSummaryDto> pageDto = orders.map(order ->
-               new OrderSummaryDto(
-                       order.getId(),
-                       order.getTotalAmount(),
-                       order.getOrderPaymentStatus(),
-                       order.getStatus(),
-                       order.getOrderReference(),
-                       order.getCreatedAt()
-               )
-        );
+        Page<OrderSummaryDto> pageDto = orders.map(order -> {
+
+                List<OrderItemSummaryDto> itemSummaries = order.getOrderItems().stream()
+                        .map(item -> new OrderItemSummaryDto(
+                                item.getProductId(),
+                                item.getProductName(),
+                                item.getPrimaryImageUrl()
+                        )).toList();
+                return new OrderSummaryDto(
+                        order.getId(),
+                        order.getTotalAmount(),
+                        order.getOrderPaymentStatus(),
+                        order.getStatus(),
+                        order.getOrderReference(),
+                        order.getCreatedAt(),
+                        itemSummaries
+                );
+
+        });
         return pageDto;
-
-
     }
 
 

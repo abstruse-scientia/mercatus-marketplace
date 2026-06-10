@@ -61,7 +61,10 @@ public class CheckoutService {
                 newOrder
         );
         BigDecimal totalPrice = calculateTotal(orderItems);
-        newOrder.setOrderItems(orderItems);
+        
+        newOrder.getOrderItems().clear();
+        newOrder.getOrderItems().addAll(orderItems);
+        
         newOrder.setTotalAmount(totalPrice);
         cartService.clearCartAfterCheckout(currentCart);
         return newOrder;
