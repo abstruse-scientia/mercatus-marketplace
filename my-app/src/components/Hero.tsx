@@ -1,42 +1,80 @@
 export default function Hero() {
   return (
     <section
-      className="relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center bg-background border-b border-border"
       aria-labelledby="hero-heading"
     >
-      {/* Decorative subtle radial highlight (not a boxed gradient) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(circle_at_center,theme(colors.muted/40),transparent_60%)] dark:opacity-40"
-      />
-      <div className="relative mx-auto max-w-5xl px-4 py-16 sm:py-20 md:py-24 text-center">
+      <div className="px-6 text-center flex flex-col items-center w-full max-w-4xl">
+
+        {/* Heading */}
         <h1
           id="hero-heading"
-          className="font-extrabold tracking-tight text-5xl sm:text-6xl md:text-7xl"
+          className="text-[clamp(4rem,9vw,9rem)] font-light tracking-[-0.03em] leading-[0.95] text-foreground"
         >
-          <span className="bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
-            Mercatus
-          </span>
+          Mer<em className="italic">ca</em>tus
         </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-balance text-base leading-relaxed text-muted-foreground sm:text-lg">
-          Curated antique and vintage cameras from the golden age of
-          photography. Discover 20th‑century film cameras, classic lenses, and
-          accessories— carefully inspected and ready for your next roll.
+
+        {/* Tagline */}
+        <p
+          className="mx-auto mt-9 text-[clamp(14px,1.4vw,16px)] leading-[1.7] text-foreground/50"
+          style={{ maxWidth: "44ch" }}
+        >
+          Antique and vintage cameras from the golden age of photography — each
+          piece inspected and ready for your next roll.
         </p>
-        <div className="mt-8 flex items-center justify-center gap-3">
+
+        {/* Buttons */}
+        <div className="mt-12 flex items-center justify-center gap-3">
           <a
             href="#products"
-            className="inline-flex items-center rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background shadow hover:opacity-90 transition"
+            className="inline-flex items-center rounded-none bg-foreground text-background px-7 py-[13px] text-[13px] font-medium tracking-wide transition-opacity hover:opacity-85"
           >
-            Shop the collection
+            Shop the Collection
           </a>
           <a
             href="#learn"
-            className="inline-flex items-center rounded-md border border-input bg-transparent px-4 py-2 text-sm font-medium hover:bg-muted/60 transition"
+            className="inline-flex items-center rounded-none border border-border bg-transparent text-foreground px-7 py-[13px] text-[13px] tracking-wide transition-colors hover:bg-muted"
           >
             Learn more
           </a>
         </div>
+
+        {/* Stats row */}
+        <div className="mt-12 pt-12 border-t border-border flex items-start justify-center gap-14 w-full">
+
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[28px] font-light tracking-tight text-foreground block mb-1">
+              340+
+            </span>
+            <span className="text-[11px] uppercase tracking-[0.08em] text-foreground/40">
+              Items in stock
+            </span>
+          </div>
+
+          <div className="w-px self-stretch bg-border" />
+
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[28px] font-light tracking-tight text-foreground block mb-1">
+              12 yrs
+            </span>
+            <span className="text-[11px] uppercase tracking-[0.08em] text-foreground/40">
+              Curating since 2013
+            </span>
+          </div>
+
+          <div className="w-px self-stretch bg-border" />
+
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[28px] font-light tracking-tight text-foreground block mb-1">
+              4.9 ★
+            </span>
+            <span className="text-[11px] uppercase tracking-[0.08em] text-foreground/40">
+              Avg. buyer rating
+            </span>
+          </div>
+
+        </div>
+
       </div>
     </section>
   );

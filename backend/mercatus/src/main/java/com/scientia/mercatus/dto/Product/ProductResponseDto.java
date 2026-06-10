@@ -18,6 +18,8 @@ public class ProductResponseDto {
     private String slug;
     private String primaryImageUrl;
     private String categoryName;
+    private String sku;
+
 
     public static ProductResponseDto from(Product product) {
         return new ProductResponseDto(
@@ -27,7 +29,9 @@ public class ProductResponseDto {
                 product.getPrice(),
                 product.getSlug(),
                 product.getPrimaryImageUrl(),
-                product.getCategory().getCategoryName()
+                product.getCategory() != null ?
+                        product.getCategory().getCategoryName() : null,
+                product.getSku()
         );
     }
 }

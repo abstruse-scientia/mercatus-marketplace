@@ -226,10 +226,13 @@ public class CartServiceImpl implements ICartService {
             BigDecimal totalItemPrice = BigDecimal.valueOf(item.getQuantity()).multiply(item.getProduct().getPrice());
             CartItemDto cartItemDto = new CartItemDto(
                     item.getCartItemId(),
+                    product.getProductId(),
                     product.getName(),
                     item.getQuantity(),
                     itemPrice,
-                    totalItemPrice
+                    totalItemPrice,
+                    product.getPrimaryImageUrl(),
+                    product.getCategory() != null ? product.getCategory().getCategoryName() : null
             );
             cartItemList.add(cartItemDto);
             totalPrice =  totalPrice.add(totalItemPrice);

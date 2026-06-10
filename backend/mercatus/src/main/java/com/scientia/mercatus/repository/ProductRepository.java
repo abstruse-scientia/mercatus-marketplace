@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -48,5 +50,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         select p from Product p where p.category.categoryId = :categoryId and p.isActive = true
     """)
     Page<Product> findActiveProductsByCategory(@Param("categoryId")Long categoryId, Pageable pageable);
+
+    @Query("""
+    select p from Product p where p.category.categoryName = :categoryName and p.isActive = true
+    """)
+    Page<Product> findActiveProductsByCategoryName(@Param("categoryName")String categoryName, Pageable pageable);
+
+    @Query("""
+        select distinct p.category.categoryName from Product p where p.isActive = true
+    """)
+    List<String> findDistinctCategoryNames();
 }
+
 

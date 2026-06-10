@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -134,6 +136,20 @@ public class ProductServiceImpl implements IProductService {
         validatePageable(pageable);
 
         return productRepository.findByCategoryCategoryId(categoryId, pageable);
+    }
+
+    @Override
+    public List<String> listAllCategories() {
+        return productRepository.findDistinctCategoryNames();
+    }
+
+    @Override
+    public Page<Product> listActiveProductsByCategoryName(String categoryName, Pageable pageable) {
+        if(categoryName.isBlank()) {
+            throw new  BusinessException(ErrorEnum.INVALID_REQUEST, "Category name cannot be blank");
+        }
+        validatePageable(pageable);
+        return productRepository.findActiveProductsByCategoryName(categoryName, pageable);
     }
 
     @Override
