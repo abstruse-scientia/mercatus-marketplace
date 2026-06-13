@@ -1,6 +1,7 @@
 package com.scientia.mercatus.controller;
 
 import com.scientia.mercatus.dto.Product.Admin.AdminProductResponseDto;
+import com.scientia.mercatus.dto.Product.Admin.CreateProductRequestDto;
 import com.scientia.mercatus.dto.Product.Admin.UpdateProductRequestDto;
 import com.scientia.mercatus.entity.Product;
 import com.scientia.mercatus.mapper.AdminMapper;
@@ -78,6 +79,13 @@ public class AdminProductController {
         Page<Product> categoryProducts = productService.listProductsByCategory(categoryId, safePageable);
         Page<AdminProductResponseDto> pagedResponse = categoryProducts.map(adminMapper::toAdminProductResponseDto);
         return ResponseEntity.status(HttpStatus.OK).body(pagedResponse);
+    }
+
+
+    @PostMapping()
+    public ResponseEntity<AdminProductResponseDto> createProduct(@Valid @RequestBody CreateProductRequestDto createProductRequestDto) {
+        Product product = productService.createProduct(createProductRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminMapper.toAdminProductResponseDto(product));
     }
 
     private Pageable getSafePageable(Pageable pageable) {
