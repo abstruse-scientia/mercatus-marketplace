@@ -7,6 +7,7 @@ import com.scientia.mercatus.dto.Payment.CreatePaymentResponseDto;
 
 import com.scientia.mercatus.dto.Payment.PaymentInitiationResultDto;
 import com.scientia.mercatus.entity.Order;
+import com.scientia.mercatus.entity.OrderStatus;
 import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.mapper.OrderMapper;
 import com.scientia.mercatus.security.SpringSecurityAuthContext;
@@ -56,7 +57,7 @@ public class OrderController {
     }
 
     @GetMapping()
-    public ResponseEntity<Page<OrderSummaryDto>> getOrders(Pageable pageable){
+    public ResponseEntity<Page<OrderSummaryDto>> getOrders(@RequestParam(required = false) OrderStatus status, Pageable pageable){
         Long userId = getAuthenticatedUser().getUserId();
         int size = Math.min(pageable.getPageSize(),maxPageSize);
         Pageable safePageable = PageRequest.of(
@@ -64,7 +65,7 @@ public class OrderController {
                 size,
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
-        Page<OrderSummaryDto> pageDto = orderService.getOrdersForUser(userId, safePageable);
+        Page<OrderSummaryDto> pageDto = orderService.getOrdersForUser(userId, status, safePageable);
         return ResponseEntity.status(HttpStatus.OK).body(pageDto);
     }
 
@@ -77,7 +78,7 @@ public class OrderController {
     @PostMapping("/{orderId}/pay")
     public ResponseEntity<CreatePaymentResponseDto> makePayment(@PathVariable Long orderId){
         Long userId = authContext.getCurrentUserId();
-        PaymentInitiationResultDto initiationResult= orderService.initiatePayment(orderId, userId);
+        PaymentInitiationResultDto initiationResult = orderService.initiatePayment(orderId, userId);
         CreatePaymentResponseDto createPaymentResponseDto = new CreatePaymentResponseDto(
                 initiationResult.orderId(),
                 initiationResult.amount(),
@@ -85,5 +86,12 @@ public class OrderController {
                 initiationResult.paymentProvider()
         );
         return ResponseEntity.ok().body(createPaymentResponseDto);
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponseDto> getOrder(@PathVariable Long orderId){
+        Long userId = getAuthenticatedUser().getUserId();
+        OrderResponseDto response = orderService.getOrderById(orderId, userId);
+        return ResponseEntity.ok().body(response);
     }
 }

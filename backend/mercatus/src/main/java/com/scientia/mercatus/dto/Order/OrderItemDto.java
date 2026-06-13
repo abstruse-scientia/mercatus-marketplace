@@ -8,5 +8,6 @@ import java.math.BigDecimal;
 public record OrderItemDto(@NotNull(message = "Product Id required.")Long productId,
                            int quantity,
                            @Positive(message = "Positive price required") BigDecimal unitPrice,
-                           @NotNull(message = "Product name required.") String productName) {
+                           @NotNull(message = "Product name required.") String productName,
+                           String primaryImageUrl) {
 }

@@ -14,6 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderResponseDto {
     private Long orderId;
+    private String orderReference;
+    private com.scientia.mercatus.entity.OrderPaymentStatus orderPaymentStatus;
     private BigDecimal orderTotal;
     private OrderStatus orderStatus;
     private Instant placedAt;

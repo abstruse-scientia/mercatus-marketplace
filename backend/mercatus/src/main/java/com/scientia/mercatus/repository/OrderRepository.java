@@ -1,6 +1,7 @@
 package com.scientia.mercatus.repository;
 
 import com.scientia.mercatus.entity.Order;
+import com.scientia.mercatus.entity.OrderStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 
@@ -35,4 +36,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByOrderReferenceForUpdate(@Param("orderReference") String orderReference);
 
     Optional<Order> findByOrderReferenceAndUser_UserId(String orderRef, Long userId);
+
+
+    @Query("""
+        select o from Order o where o.id = :userId and o.status = :status
+    """)
+    Page<Order> findByUserIdAndStatus(@Param("userId") Long userId, @Param("status") OrderStatus status, Pageable pageable);
 }

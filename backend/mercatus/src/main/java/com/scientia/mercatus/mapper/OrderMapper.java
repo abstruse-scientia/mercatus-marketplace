@@ -38,10 +38,13 @@ public class OrderMapper {
                         item.getProductId(),
                     item.getQuantity(),
                     item.getPriceSnapshot(),
-                    item.getProductName()
+                    item.getProductName(),
+                    item.getPrimaryImageUrl()
                 )).toList();
         return new OrderResponseDto(
                 order.getId(),
+                order.getOrderReference(),
+                order.getOrderPaymentStatus(),
                 order.getTotalAmount(),
                 order.getStatus(),
                 order.getCreatedAt(),
