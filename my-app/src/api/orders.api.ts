@@ -12,10 +12,14 @@ export const ordersApi = {
     const response = await apiClient.post<OrderResponse>("/order/place", data);
     return response.data;
   },
-  getOrders: async (params?: { page?: number; size?: number }) => {
+  getOrders: async (params?: { page?: number; size?: number; status?: string }) => {
     const response = await apiClient.get<PageResponse<OrderSummary>>("/order", {
       params,
     });
+    return response.data;
+  },
+  getOrderById: async (orderId: number) => {
+    const response = await apiClient.get<OrderResponse>(`/order/${orderId}`);
     return response.data;
   },
   cancelOrder: async (orderId: number) => {

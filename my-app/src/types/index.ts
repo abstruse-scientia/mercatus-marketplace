@@ -80,23 +80,33 @@ export interface OrderItem {
   productName: string;
   quantity: number;
   unitPrice: number;
+  primaryImageUrl?: string;
 }
 
 export interface OrderResponse {
   orderId: number;
+  orderReference: string;
+  orderPaymentStatus: OrderPaymentStatus;
   orderTotal: number;
   orderStatus: OrderStatus;
   placedAt: string;
   items: OrderItem[];
 }
 
+export interface OrderItemSummary {
+  productId: number;
+  productName: string;
+  primaryImageUrl: string;
+}
+
 export interface OrderSummary {
   id: number;
   totalAmount: number;
-  orderPaymentStatus: OrderPaymentStatus;
-  orderStatus: OrderStatus;
+  orderPaymentStatus: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED' | 'CANCELLED';
+  orderStatus: 'CREATED' | 'PAYMENT_PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
   orderReference: string;
   createdAt: string;
+  orderSummaryList?: OrderItemSummary[];
 }
 
 export interface PlaceOrderRequest {
