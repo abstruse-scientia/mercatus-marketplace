@@ -30,6 +30,8 @@ public class AdminProductController {
     private final IProductService productService;
     private final AdminMapper adminMapper;
 
+
+
     @GetMapping
     public ResponseEntity<Page<AdminProductResponseDto>> listProducts(Pageable pageable) {
         Pageable safePageable = getSafePageable(pageable);

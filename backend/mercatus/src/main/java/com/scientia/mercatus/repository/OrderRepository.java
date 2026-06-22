@@ -42,4 +42,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         select o from Order o where o.id = :userId and o.status = :status
     """)
     Page<Order> findByUserIdAndStatus(@Param("userId") Long userId, @Param("status") OrderStatus status, Pageable pageable);
+
+    @Query("""
+        select o from Order o  where o.status = :status
+    """)
+    Page<Order> listAllOrdersByStatus(@Param("status") OrderStatus status, Pageable pageable);
+
+
+
+
+
 }
