@@ -18,4 +18,7 @@ public interface IOrderService {
     Optional<Order> getExistingOrder(Long userId, String orderReference);
     Order makeOrderSkeleton(Long userId, String orderReference, AddressSnapshot addressSnapshot);
     OrderResponseDto getOrderById(Long orderId, Long userId);
+    Page<Order> listAllOrders(OrderStatus status, Pageable pageable);
+    Order getOrderByOrderId(Long orderId);
+    Order updateOrderStatus(Long orderId, OrderStatus orderStatus);
 }

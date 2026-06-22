@@ -16,7 +16,7 @@ import com.scientia.mercatus.service.*;
 import lombok.RequiredArgsConstructor;
 
 
-
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -42,10 +42,20 @@ public class OrderServiceImpl implements IOrderService {
     private final IPaymentService paymentService;
     private final OrderMapper mapper;
 
-
-
-
-
+    @Override
+    @Transactional
+    public Order updateOrderStatus(Long orderId, OrderStatus newOrderStatus) {
+        if (orderId == null) {
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Order Id can not be null");
+        }
+        Order order = orderRepository.findById(orderId).orElseThrow(()-> new BusinessException(ErrorEnum.ORDER_NOT_FOUND));
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Order status can not be changed in cancelled state");
+        }
+        order.setStatus(newOrderStatus);
+        orderRepository.save(order);
+        return order;
+    }
 
     @Transactional
     @Override
@@ -157,6 +167,22 @@ public class OrderServiceImpl implements IOrderService {
         newOrder.setAddressSnapshot(addressSnapshot);
         newOrder.setTotalAmount(BigDecimal.ZERO);
         return orderRepository.save(newOrder);
+    }
+
+    @Override
+    public Page<Order> listAllOrders(OrderStatus status, Pageable pageable) {
+        if (status != null) {
+            return orderRepository.listAllOrdersByStatus(status, pageable);
+        }
+        return orderRepository.findAll(pageable);
+    }
+
+    @Override
+    public Order getOrderByOrderId(Long orderId) {
+        if (orderId == null) {
+            throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Order Id can not be null");
+        }
+        return orderRepository.findById(orderId).orElseThrow(() -> new BusinessException(ErrorEnum.ORDER_NOT_FOUND));
     }
 
     /*----------------------------- Helper Functions ------------------------------------------- */
