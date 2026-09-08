@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Confirmed - Mercatus</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #111; padding: 20px;">
+
+<h2>Thank you for your purchase, <span th:text="${customerName}">Customer</span>.</h2>
+
+<p th:text="${standardMessage}">Your order was placed successfully.</p>
+
+<hr style="border: 1px solid #eee; margin: 20px 0;">
+
+<p><strong>Order Reference:</strong> <span th:text="${orderReference}">#000000</span></p>
+
+</body>
+</html>
