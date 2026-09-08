@@ -6,6 +6,7 @@ import com.scientia.mercatus.entity.OrderPaymentStatus;
 import com.scientia.mercatus.entity.OrderStatus;
 import com.scientia.mercatus.exception.BusinessException;
 import com.scientia.mercatus.exception.ErrorEnum;
+import com.scientia.mercatus.messaging.EmailPublisher;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class PaymentResultHandler {
 
     private final OrderRepository orderRepository;
     private final IInventoryService inventoryService;
+    private final EmailPublisher emailPublisher;
 
     /* Moved  */
     @Transactional
@@ -43,6 +45,7 @@ public class PaymentResultHandler {
         }
 
         order.setStatus(OrderStatus.CONFIRMED);
+        emailPublisher.publishEmail(order.getOrderReference());
         order.setOrderPaymentStatus(OrderPaymentStatus.SUCCESS);
     }
 
@@ -78,4 +81,6 @@ public class PaymentResultHandler {
                 .findByOrderReferenceForUpdate(orderReference)
                 .orElseThrow(() -> new BusinessException(ErrorEnum.ORDER_NOT_FOUND, "No order found for the order reference provide."));
     }
+
+
 }
