@@ -24,14 +24,14 @@ public class EmailConsumer{
     private final JavaMailSender mailSender;
 
     @RabbitListener(queues = RabbitMQConfig.EMAIL_QUEUE)
-    public void handleEmailDeliver(EmailEvent emailEvent,
-                                   Channel channel,
-                                   @Header(AmqpHeaders.DELIVERY_TAG) long tag){
+    public void handleEmailDelivery(EmailEvent emailEvent,
+                                    Channel channel,
+                                    @Header(AmqpHeaders.DELIVERY_TAG) long tag){
 
         try{
             Context ctx = new Context();
-            ctx.setVariable("customer", emailEvent.getCustomerName());
-            ctx.setVariable("order", emailEvent.getOrderReference());
+            ctx.setVariable("customerName", emailEvent.getCustomerName());
+            ctx.setVariable("orderReference", emailEvent.getOrderReference());
             ctx.setVariable("message", emailEvent.getMessage());
 
             String htmlBody = templateEngine.process("order-notification", ctx);
@@ -39,6 +39,7 @@ public class EmailConsumer{
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
+            helper.setFrom("noreply@mercatus.com");
             helper.setTo(emailEvent.getEmailAddress());
             helper.setSubject("Order Confirmed");
             helper.setText(htmlBody);
@@ -46,7 +47,9 @@ public class EmailConsumer{
             channel.basicAck(tag, false);
         } catch (Exception e) {
             try {
-                channel.basicReject(tag, false);
+
+                // Reject the message and requeue it (with DLQ routing enabled)
+                channel.basicReject(tag, true);
             }
             catch (Exception ex) {
                 log.error("Error rejecting message: {}", ex.getMessage());

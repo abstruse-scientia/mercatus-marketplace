@@ -1,6 +1,5 @@
 package com.scientia.mercatus.inventory.scheduler;
 
-import com.scientia.mercatus.repository.StockReservationRepository;
 import com.scientia.mercatus.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

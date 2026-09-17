@@ -42,7 +42,7 @@ public class EmailPublisher {
     // It is to avoid working on cached object or outdated data.
     public void publishEmail(String orderReference) {
         EmailEvent emailEventPayload = getEmailEvent(orderReference);
-        // The if block executes if the publishEmail method is called within a transaction.
+        // The "if" block executes if the publishEmail method is called within a transaction.
         // It ensures the email is published only if the transaction is committed successfully
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {

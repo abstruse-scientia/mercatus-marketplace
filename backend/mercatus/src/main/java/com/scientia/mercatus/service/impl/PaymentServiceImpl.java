@@ -18,6 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+/**
+ * Note:- Divide amount by 10 to bypass amount test limit.
+ * Should be corrected in prod.
+ * Used reducedAmount variable in initiatePayment.
+ * Did / 10 division in markPaymentSuccess for amount validation.
+ */
 
 @Slf4j
 @Service
@@ -51,11 +57,14 @@ public class PaymentServiceImpl implements IPaymentService {
 
         long amountExpected = currencyConversion.toINRMinor(order.getTotalAmount());
 
+        // Quick fix to bypass Razorpay's 50,000 test limit (not to be used in real production environment)
+        long reducedAmount = amountExpected / 10;
+
         IPaymentGateway gateway = gatewayRegistry.get(provider);
 
         PaymentInitiationResultDto initiationResult = gateway.initiatePayment(
                 orderReference,
-                amountExpected,
+                reducedAmount,
                 currency
         );
 
@@ -93,7 +102,9 @@ public class PaymentServiceImpl implements IPaymentService {
         if (payment.getStatus() == PaymentStatus.FAILED) {
             return; // out of order success -> ignore
         }
-        if (amountReceived != payment.getAmountExpected()) { // amount validation
+
+        // Change done here too.
+        if (amountReceived != (payment.getAmountExpected() / 10)) { // amount validation
             log.info("Amount received: {} Expected amount: {}", amountReceived, payment.getAmountExpected());
             throw new BusinessException(ErrorEnum.AMOUNT_MISMATCH);
         }
