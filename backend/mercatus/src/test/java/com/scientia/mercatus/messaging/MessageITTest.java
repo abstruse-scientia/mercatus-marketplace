@@ -56,6 +56,9 @@ public class MessageITTest {
     @Autowired
     private EmailPublisher emailPublisher;
 
+    @Autowired
+    private EmailConsumer emailConsumer;
+
     @MockitoBean
     private OrderRepository orderRepository;
 
