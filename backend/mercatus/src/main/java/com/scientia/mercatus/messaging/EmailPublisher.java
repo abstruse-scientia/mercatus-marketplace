@@ -44,6 +44,8 @@ public class EmailPublisher {
         EmailEvent emailEventPayload = getEmailEvent(orderReference);
         // The "if" block executes if the publishEmail method is called within a transaction.
         // It ensures the email is published only if the transaction is committed successfully
+
+
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
