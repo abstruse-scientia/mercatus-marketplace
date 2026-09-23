@@ -7,13 +7,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.Delivery;
 
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 
 import java.io.IOException;
 import java.util.Map;
+
+import static org.springframework.amqp.support.AmqpHeaders.DELIVERY_TAG;
 
 
 @Slf4j
@@ -26,26 +30,32 @@ public class EmailConsumer{
     private static final int MAX_RETRIES = 4;
 
     @RabbitListener(queues = RabbitMQConfig.EMAIL_QUEUE)
-    public void handleEmailDelivery(EmailEvent emailEvent,
+    public void handleEmailDelivery(@Payload EmailEvent emailEvent,
                                     Channel channel,
-                                    Delivery delivery) throws IOException {
+                                    @Header(DELIVERY_TAG) long tag,
+                                    @Headers Map<String, Object> headers) throws IOException {
 
-        long tag = delivery.getEnvelope().getDeliveryTag();
         try{
+            log.info("Received email event payload");
             emailService.sendEmail(emailEvent);
             channel.basicAck(tag, false);
         } catch (Exception e) {
-            Map<String, Object> headers = delivery.getProperties().getHeaders();
-            int retryCount = headers.get("retry-count") == null ? 0 : (int) headers.get("retry-count");
+            log.info("Executing the catch part due to error while sending email");
+            int retryCount = headers.get("retryCount") == null ? 0 : (Integer) headers.get("retryCount");
             if (retryCount < MAX_RETRIES) {
-                headers.put("retry-count", retryCount + 1);
-                rabbitTemplate.convertAndSend(RabbitMQConfig.DELAY_QUEUE,
+                rabbitTemplate.convertAndSend(RabbitMQConfig.DELAY_EXCHANGE,
                         RabbitMQConfig.DELAY_ROUTING_KEY,
-                        emailEvent
+                        emailEvent,
+                        message-> {
+                                message.getMessageProperties().setHeader("retryCount", retryCount + 1);
+                                return message;
+                        }
                 );
             } else {
-                rabbitTemplate.convertAndSend(RabbitMQConfig.DEAD_LETTER_QUEUE,
-                        RabbitMQConfig.DLQ_ROUTING_KEY);
+                log.debug("Inside the else part of catch block.");
+                rabbitTemplate.convertAndSend(RabbitMQConfig.DEAD_LETTER_EXCHANGE,
+                        RabbitMQConfig.DLQ_ROUTING_KEY,
+                        emailEvent);
             }
 
             channel.basicAck(tag, false);
