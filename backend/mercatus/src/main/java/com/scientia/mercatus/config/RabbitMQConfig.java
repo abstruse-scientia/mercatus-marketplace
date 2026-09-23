@@ -32,7 +32,7 @@ public class RabbitMQConfig {
 
 
     // Dead letter queue constant declaration
-    public static final String DEAD_LETTER_X = "ecommerce.email.deadLetter.x";
+    public static final String DEAD_LETTER_EXCHANGE = "ecommerce.email.deadLetter.exchange";
     public static final String DEAD_LETTER_QUEUE = "ecommerce.email.deadLetter.queue";
     public static final String DLQ_ROUTING_KEY = "mercatus.email.dlq.routing";
 
@@ -86,11 +86,11 @@ public class RabbitMQConfig {
 
     @Bean
     public DirectExchange deadLetterQueueExchange() {
-        return new DirectExchange(DEAD_LETTER_QUEUE);
+        return new DirectExchange(DEAD_LETTER_EXCHANGE);
     }
 
     @Bean
-    public DirectExchange delayQueueExchange() {return new  DirectExchange(DELAY_QUEUE);}
+    public DirectExchange delayQueueExchange() {return new  DirectExchange(DELAY_EXCHANGE);}
 
     @Bean
     public TopicExchange emailExchange() {

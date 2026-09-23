@@ -2,12 +2,6 @@ package com.scientia.mercatus.messaging;
 
 
 import com.scientia.mercatus.config.RabbitMQConfig;
-import com.scientia.mercatus.entity.Order;
-import com.scientia.mercatus.entity.User;
-import com.scientia.mercatus.exception.BusinessException;
-import com.scientia.mercatus.exception.ErrorEnum;
-import com.scientia.mercatus.repository.OrderRepository;
-import com.scientia.mercatus.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -35,13 +29,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class EmailPublisher {
 
     private final RabbitTemplate rabbitTemplate;
-    private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
+    private final EmailEventPayloadUtility emailEventPayloadUtility;
+
 
     // Order object or any kind of jpa bound object should not be passed directly
     // It is to avoid working on cached object or outdated data.
     public void publishEmail(String orderReference) {
-        EmailEvent emailEventPayload = getEmailEvent(orderReference);
+        EmailEvent emailEventPayload = emailEventPayloadUtility.getEmailEvent(orderReference);
         // The "if" block executes if the publishEmail method is called within a transaction.
         // It ensures the email is published only if the transaction is committed successfully
 
@@ -66,18 +60,4 @@ public class EmailPublisher {
         }
     }
 
-
-    private  EmailEvent getEmailEvent(String orderReference) {
-        Order order = orderRepository.findByOrderReference(orderReference)
-                .orElseThrow(() -> new BusinessException(ErrorEnum.ORDER_NOT_FOUND));
-        User user = userRepository.findByUserId(order.getUser().getUserId());
-        EmailEvent emailEvent = new EmailEvent();
-        emailEvent.setOrderReference(orderReference);
-        emailEvent.setCustomerName(user.getUserName());
-        emailEvent.setEmailAddress(user.getEmail());
-        emailEvent.setMessage("Your order has been confirmed!");
-
-        return emailEvent;
-
-    }
 }
