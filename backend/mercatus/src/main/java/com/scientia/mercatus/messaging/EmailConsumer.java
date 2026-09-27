@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.springframework.amqp.support.AmqpHeaders.DELIVERY_TAG;
 
@@ -25,9 +27,11 @@ import static org.springframework.amqp.support.AmqpHeaders.DELIVERY_TAG;
 @RequiredArgsConstructor
 public class EmailConsumer{
 
+    private final StringRedisTemplate redisTemplate;
     private final EmailService emailService;
     private final RabbitTemplate rabbitTemplate;
     private static final int MAX_RETRIES = 4;
+    private static final int EVICTION_DURATION = 6;
 
     @RabbitListener(queues = RabbitMQConfig.EMAIL_QUEUE)
     public void handleEmailDelivery(@Payload EmailEvent emailEvent,
@@ -35,12 +39,24 @@ public class EmailConsumer{
                                     @Header(DELIVERY_TAG) long tag,
                                     @Headers Map<String, Object> headers) throws IOException {
 
+        String dedupKey = "dedup_key:" + emailEvent.getOrderReference();
+        Boolean if_Absent = redisTemplate.opsForValue().setIfAbsent(dedupKey, "duplication_key",
+                EVICTION_DURATION,
+                TimeUnit.HOURS);
+
+        if(!Boolean.TRUE.equals(if_Absent)){
+            log.info("Deduplication key already exists.{}" ,  dedupKey);
+            channel.basicAck(tag, false); // remove the message from the queue.
+            return;
+        }
+
         try{
             log.info("Received email event payload");
             emailService.sendEmail(emailEvent);
             channel.basicAck(tag, false);
         } catch (Exception e) {
             log.info("Executing the catch part due to error while sending email");
+            redisTemplate.delete(dedupKey); // Evict the key in case of retries.
             int retryCount = headers.get("retryCount") == null ? 0 : (Integer) headers.get("retryCount");
             if (retryCount < MAX_RETRIES) {
                 rabbitTemplate.convertAndSend(RabbitMQConfig.DELAY_EXCHANGE,
