@@ -1,4 +1,4 @@
-package com.scientia.mercatus.inventory.scheduler;
+package com.scientia.mercatus.scheduler;
 
 import com.scientia.mercatus.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ReservationCleanupScheduler {
+public class InventoryReservationCleanupScheduler {
 
     private final IInventoryService inventoryService;
 

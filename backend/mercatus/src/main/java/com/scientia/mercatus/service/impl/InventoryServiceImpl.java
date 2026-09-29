@@ -116,6 +116,9 @@ public class InventoryServiceImpl implements IInventoryService {
         if (stockReservation == null) {
             throw new BusinessException(ErrorEnum.RESERVATION_NOT_FOUND);
         }
+        if (stockReservation.getStatus().equals(ReservationStatus.RELEASED)) {
+            return;
+        }
         if (!stockReservation.getStatus().equals(ReservationStatus.RESERVED)) {
             throw new BusinessException(ErrorEnum.INVALID_RESERVATION);
         }

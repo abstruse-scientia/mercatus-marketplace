@@ -21,4 +21,5 @@ public interface IOrderService {
     Page<Order> listAllOrders(OrderStatus status, Pageable pageable);
     Order getOrderByOrderId(Long orderId);
     Order updateOrderStatus(Long orderId, OrderStatus orderStatus);
+    void cancelExpiredOrders();
 }

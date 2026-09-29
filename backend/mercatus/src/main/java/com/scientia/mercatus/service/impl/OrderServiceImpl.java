@@ -16,6 +16,7 @@ import com.scientia.mercatus.service.*;
 import lombok.RequiredArgsConstructor;
 
 
+import org.springframework.core.env.Environment;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 
@@ -41,6 +44,7 @@ public class OrderServiceImpl implements IOrderService {
     private final IInventoryService inventoryService;
     private final IPaymentService paymentService;
     private final OrderMapper mapper;
+    private final Environment env;
 
     @Override
     @Transactional
@@ -56,6 +60,8 @@ public class OrderServiceImpl implements IOrderService {
         orderRepository.save(order);
         return order;
     }
+
+
 
     @Transactional
     @Override
@@ -183,6 +189,25 @@ public class OrderServiceImpl implements IOrderService {
             throw new BusinessException(ErrorEnum.INVALID_REQUEST, "Order Id can not be null");
         }
         return orderRepository.findById(orderId).orElseThrow(() -> new BusinessException(ErrorEnum.ORDER_NOT_FOUND));
+    }
+
+
+
+    @Override
+    @Transactional
+    public void cancelExpiredOrders() {
+        long reservationInterval = env.getProperty("inventory.reservation.expiry-minutes", Long.class, 1L);
+        List<Order> orders = orderRepository.listAllExpiredOrders(OrderStatus.CREATED,
+                Instant.now().minus(reservationInterval, ChronoUnit.MINUTES)
+        );
+        if (orders.isEmpty()) {
+            return;
+        }
+        for(Order order: orders) {
+            order.setStatus(OrderStatus.CANCELLED);
+            order.setOrderPaymentStatus(OrderPaymentStatus.CANCELLED);
+            orderRepository.save(order);
+        }
     }
 
     /*----------------------------- Helper Functions ------------------------------------------- */
