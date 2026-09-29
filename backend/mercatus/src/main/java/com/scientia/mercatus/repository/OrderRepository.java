@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -48,8 +50,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     """)
     Page<Order> listAllOrdersByStatus(@Param("status") OrderStatus status, Pageable pageable);
 
-
-
+    @Query("""
+    select o from Order o where o.status = :status and o.createdAt <= :time
+    """)
+    List<Order> listAllExpiredOrders(@Param("status") OrderStatus status, Instant time);
 
 
 }
