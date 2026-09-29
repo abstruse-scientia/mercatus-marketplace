@@ -55,7 +55,7 @@ public class EmailConsumer{
             emailService.sendEmail(emailEvent);
             channel.basicAck(tag, false);
         } catch (Exception e) {
-            log.info("Executing the catch part due to error while sending email");
+            log.info("Executing the catch part due to {} while sending email", e.getMessage());
             redisTemplate.delete(dedupKey); // Evict the key in case of retries.
             int retryCount = headers.get("retryCount") == null ? 0 : (Integer) headers.get("retryCount");
             if (retryCount < MAX_RETRIES) {
