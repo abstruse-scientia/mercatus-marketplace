@@ -37,7 +37,7 @@ public class EmailService {
             helper.setFrom("noreply@mercatus.com");
             helper.setTo(emailEvent.getEmailAddress());
             helper.setSubject("Order Confirmed");
-            helper.setText(htmlBody);
+            helper.setText(htmlBody, true);
             mailSender.send(mimeMessage);
         } catch (Exception e) {
             log.error("Failed to send email for order reference: {}. Error: {}", emailEvent.getOrderReference(), e.getMessage());
