@@ -110,7 +110,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding deadLetterBinding(Queue deadLetterQueue, DirectExchange deadLetterQueueExchange){
-        return BindingBuilder.bind(deadLetterQueue).to(deadLetterQueueExchange).with(DEAD_LETTER_QUEUE);
+        return BindingBuilder.bind(deadLetterQueue).to(deadLetterQueueExchange).with(DLQ_ROUTING_KEY);
     }
 
 
