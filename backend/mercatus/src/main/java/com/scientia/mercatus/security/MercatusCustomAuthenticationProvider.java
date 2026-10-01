@@ -29,7 +29,7 @@ public class MercatusCustomAuthenticationProvider implements AuthenticationProvi
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-         String userEmail = authentication.getName();
+        String userEmail = authentication.getName();
         String password = authentication.getCredentials().toString();
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found"));

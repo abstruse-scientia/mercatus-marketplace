@@ -13,7 +13,7 @@ public class CancelExpiredOrders {
 
     private final IOrderService orderService;
 
-    @Scheduled(fixedDelayString = "${order.cleanup-interval-minutes:60s}")
+    @Scheduled(cron="${order.cleanup-cron}")
     public void cleanupExpiredOrders() {
         log.debug("Running scheduler for all expired orders cleanup");
         orderService.cancelExpiredOrders();

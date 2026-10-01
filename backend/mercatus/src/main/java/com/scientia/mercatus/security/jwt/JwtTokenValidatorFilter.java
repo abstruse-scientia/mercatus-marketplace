@@ -1,5 +1,6 @@
 package com.scientia.mercatus.security.jwt;
 
+import com.scientia.mercatus.config.PublicEndPoints;
 import com.scientia.mercatus.entity.Role;
 import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.security.UserIdentifierService;
@@ -22,12 +23,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 
 import java.io.IOException;
 
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +41,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
     private final UserIdentifierService userIdentifierService;
     private final JwtTokenValidator jwtTokenValidator;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 
     @Override
@@ -98,5 +102,16 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return Arrays.stream(PublicEndPoints.AUTH).anyMatch(pattern ->
+                pathMatcher.match(pattern, path))
+                || Arrays.stream(PublicEndPoints.PRODUCTS).anyMatch(pattern ->
+                pathMatcher.match(pattern, path))
+                || Arrays.stream(PublicEndPoints.WEBHOOKS).anyMatch(pattern ->
+                pathMatcher.match(pattern, path));
+
+    }
 
 }
