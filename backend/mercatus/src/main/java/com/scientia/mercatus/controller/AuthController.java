@@ -14,6 +14,9 @@ import com.scientia.mercatus.security.UserIdentifierService;
 import com.scientia.mercatus.security.jwt.JwtTokenProvider;
 import com.scientia.mercatus.service.IRefreshTokenService;
 import com.scientia.mercatus.service.IUserService;
+import io.github.abstruse_scientia.custos.annotations.RateLimit;
+import io.github.abstruse_scientia.custos.core.model.Algorithm;
+import io.github.abstruse_scientia.custos.resolver.KeyType;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -43,6 +46,12 @@ public class AuthController {
     private final UserIdentifierService userIdentifierService;
     private final UserMapper userMapper;
 
+    @RateLimit(
+            keytype = KeyType.USER,
+            algorithm = Algorithm.SLIDING_WINDOW,
+            capacity = 120,
+            rate = 20
+    )
     @PostMapping("/login")
     public ResponseEntity<?> apiLogin(@RequestBody LoginRequestDto loginRequestDto) {
         try{

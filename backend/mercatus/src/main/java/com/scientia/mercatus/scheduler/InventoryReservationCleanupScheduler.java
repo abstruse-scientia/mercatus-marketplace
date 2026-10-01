@@ -15,7 +15,7 @@ public class InventoryReservationCleanupScheduler {
     private final IInventoryService inventoryService;
 
     @Transactional
-    @Scheduled(fixedDelayString = "${reservation.cleanup-interval:60s}")
+    @Scheduled(cron = "${reservation.cleanup-interval}")
     public void cleanupReservations() {
         log.debug("Running scheduler for reservation cleanup");
         inventoryService.expireReservations();
