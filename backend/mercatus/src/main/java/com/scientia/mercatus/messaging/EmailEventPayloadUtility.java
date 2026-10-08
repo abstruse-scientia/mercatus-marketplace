@@ -2,33 +2,50 @@ package com.scientia.mercatus.messaging;
 
 import com.scientia.mercatus.entity.Order;
 import com.scientia.mercatus.entity.User;
-import com.scientia.mercatus.exception.BusinessException;
-import com.scientia.mercatus.exception.ErrorEnum;
-import com.scientia.mercatus.repository.OrderRepository;
-import com.scientia.mercatus.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.UUID;
+
 
 @Component
 @RequiredArgsConstructor
 public class EmailEventPayloadUtility {
 
-    private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
+    private static final String orderTemplate = "order-notification";
+    private static final String resetTemplate = "verification-notification";
+
+    // Do not mutate Entity Object; I repeat do not mutate Entity object
+    // It should be always use for read operations.
 
 
-    public EmailEvent getEmailEvent(String orderReference) {
-        Order order = orderRepository.findByOrderReference(orderReference)
-                .orElseThrow(() -> new BusinessException(ErrorEnum.ORDER_NOT_FOUND));
-        User user = userRepository.findByUserId(order.getUser().getUserId());
-        EmailEvent emailEvent = new EmailEvent();
-        emailEvent.setOrderReference(orderReference);
-        emailEvent.setCustomerName(user.getUserName());
-        emailEvent.setEmailAddress(user.getEmail());
-        emailEvent.setMessage("Your order has been confirmed!");
-
-        return emailEvent;
-
+    public EmailEvent forOrderConfirmation(Order order) {
+        User user = order.getUser();
+        String dedupKey = "dedupKey:" + order.getOrderReference();
+        return new EmailEvent.Builder()
+                .templateName(orderTemplate)
+                .toEmailAddress(user.getEmail())
+                .dedupKey(dedupKey)
+                .variables(Map.of(
+                        "customerName", user.getUserName(),
+                        "orderReference", order.getOrderReference(),
+                        "message" , "Your order has been confirmed"
+                )).build();
     }
+
+    public EmailEvent forForgotPassword(User user, String verificationUrl ) {
+        String randomUUID = UUID.randomUUID().toString();
+        String dedupKey = "dedupKey:" + randomUUID;
+        return new EmailEvent.Builder()
+                .templateName(resetTemplate)
+                .toEmailAddress(user.getEmail())
+                .dedupKey(dedupKey)
+                .variables(Map.of(
+                        "customerName", user.getUserName(),
+                        "verificationUrl", verificationUrl
+                )).build();
+    }
+
 
 }
