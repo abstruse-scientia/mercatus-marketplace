@@ -14,5 +14,9 @@ public interface IUserManagementService {
     void deleteUser(Long userId);
     
     void updateUserPassword(Long userId, String newPassword);
+
+    void forgotUserPassword(String email);
+
+    void resetPassword(String accessToken, String newPassword);
 }
 

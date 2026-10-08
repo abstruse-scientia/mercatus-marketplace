@@ -20,6 +20,7 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.*;
@@ -63,12 +64,16 @@ public class RabbitRetryTest {
     @Test
     public void shouldTriggerCatchPartOfConsumerClass(){
 
-        EmailEvent payload = new EmailEvent();
-        payload.setOrderReference("order-ref-01");
-        payload.setCustomerName("customer-name-01");
-        payload.setMessage("Test-message");
-        payload.setEmailAddress("test@example.com");
 
+        EmailEvent payload = new EmailEvent.Builder().
+                templateName("order-notification.html")
+                .toEmailAddress("test@example.com")
+                .dedupKey("dedupKey:0X40")
+                .variables(Map.of(
+                        "customer-name", "customer-name-01",
+                        "order-reference", "ord-ref-01",
+                        "message", "test-message"
+                )).build();
         doThrow(new RuntimeException("Sabotaging try part of consumer class")).
                 when(emailService).sendEmail(any(EmailEvent.class));
 
@@ -87,11 +92,15 @@ public class RabbitRetryTest {
     public void shouldTriggerDLQAfterMaximumRetry(){
 
 
-        EmailEvent payload = new EmailEvent();
-        payload.setOrderReference("order-ref-02");
-        payload.setCustomerName("customer-name-02");
-        payload.setMessage("Test-message-2");
-        payload.setEmailAddress("test@example.com");
+        EmailEvent payload = new EmailEvent.Builder().
+                templateName("order-notification.html")
+                .toEmailAddress("test2@example.com")
+                .dedupKey("dedupKey:0X402")
+                .variables(Map.of(
+                        "customer-name", "customer-name-02",
+                        "order-reference", "ord-ref-02",
+                        "message", "test-message2"
+                )).build();
 
 
         doThrow(new RuntimeException("Sabotaging try part of consumer class")).

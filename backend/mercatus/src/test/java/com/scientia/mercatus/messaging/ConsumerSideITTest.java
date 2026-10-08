@@ -29,6 +29,7 @@ import org.testcontainers.utility.DockerImageName;
 import org.thymeleaf.TemplateEngine;
 
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -84,11 +85,21 @@ public class ConsumerSideITTest {
     private EmailEvent payload;
     @BeforeEach
     void beforeEach() {
-        payload = new EmailEvent();
-        payload.setOrderReference("order-ref-01");
-        payload.setCustomerName("customer-name-01");
-        payload.setMessage("Test-message");
-        payload.setEmailAddress("test@example.com");
+//        payload = new EmailEvent();
+//        payload.setOrderReference("order-ref-01");
+//        payload.setCustomerName("customer-name-01");
+//        payload.setMessage("Test-message");
+//        payload.setEmailAddress("test@example.com");
+        payload = new EmailEvent.Builder().
+                templateName("order-notification.html")
+                .toEmailAddress("test@example.com")
+                .dedupKey("dedupKey:0X40")
+                .variables(Map.of(
+                        "customer-name", "customer-name-01",
+                        "order-reference", "ord-ref-01",
+                        "message", "test-message"
+                )).build();
+
     }
 
 
@@ -113,7 +124,8 @@ public class ConsumerSideITTest {
         rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_QUEUE, payload);
         rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_QUEUE, payload);
 
-        String key = "dedup_key:" + payload.getOrderReference();
+//        String key = "dedup_key:" + payload.getOrderReference();
+        String key = payload.getDedupKey();
         System.out.println("The test key is: " + key);
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {

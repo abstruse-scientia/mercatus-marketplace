@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.thymeleaf.TemplateEngine;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.*;
@@ -35,10 +36,20 @@ public class EmailServiceUnitTest {
     @Test
     void shouldSendEmailWhenMessageIsSent() {
 
-        EmailEvent event = new EmailEvent();
-        event.setOrderReference("order-ref-01");
-        event.setEmailAddress("test@example.com");
-        event.setMessage("test message");
+//        EmailEvent event = new EmailEvent();
+//        event.setOrderReference("order-ref-01");
+//        event.setEmailAddress("test@example.com");
+//        event.setMessage("test message");
+
+        EmailEvent event = new EmailEvent.Builder().
+                templateName("order-notification.html")
+                .toEmailAddress("test@example.com")
+                .dedupKey("dedupKey:0X40")
+                .variables(Map.of(
+                        "customer-name", "customer-name-01",
+                        "order-reference", "ord-ref-01",
+                        "message", "test-message"
+                )).build();
 
         MimeMessage message = new MimeMessage((Session.getDefaultInstance(System.getProperties())));
         when(javaMailSender.createMimeMessage()).thenReturn(message);
