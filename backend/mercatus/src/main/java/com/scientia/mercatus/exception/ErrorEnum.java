@@ -9,6 +9,7 @@ public enum ErrorEnum {
     //Related to HttpStatus code 404: Not found.
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "GEN_404_01", "Resource not found"),
     NO_LOGGED_IN_USER_FOUND(HttpStatus.NOT_FOUND, "USR_404_01", "No logged in user found"),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USR_404_02", "User not found"),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORD_404_01", "Order not found"),
     PRODUCT_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "PRD_404_01", "Product image not found"),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "PRD_404_02", "Product not found"),
@@ -43,9 +44,10 @@ public enum ErrorEnum {
     USER_EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "USR_409_01", "Email is already registered"),
 
     //Related to HttpStatus code 401: Unauthorized
-    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH_401_01", "Token expired"),
-    TOKEN_REVOKED(HttpStatus.UNAUTHORIZED, "AUTH_401_02", "Token revoked"),
-    UNAUTHENTICATED_USER(HttpStatus.UNAUTHORIZED, "AUTH_401_03", "Unauthenticated user"),
+    UNAUTHORIZED_REQUEST(HttpStatus.UNAUTHORIZED, "AUTH_401_01", "Unauthorized request"),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH_401_02", "Token expired"),
+    TOKEN_REVOKED(HttpStatus.UNAUTHORIZED, "AUTH_401_03", "Token revoked"),
+    UNAUTHENTICATED_USER(HttpStatus.UNAUTHORIZED, "AUTH_401_04", "Unauthenticated user"),
 
     //Related to HttpStatus code 403: Forbidden
     FORBIDDEN_OPERATION(HttpStatus.FORBIDDEN, "GEN_403_01", "Operation not allowed"),
