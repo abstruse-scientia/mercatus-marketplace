@@ -7,11 +7,10 @@ import com.scientia.mercatus.exception.*;
 import com.scientia.mercatus.repository.RefreshTokenRepository;
 import com.scientia.mercatus.security.jwt.JwtTokenProvider;
 import com.scientia.mercatus.service.IRefreshTokenService;
-import com.scientia.mercatus.util.IRefreshTokenUtil;
+import com.scientia.mercatus.util.ISecureTokenUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -27,7 +26,7 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
 
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final IRefreshTokenUtil refreshTokenUtil;
+    private final ISecureTokenUtil refreshTokenUtil;
     private final JwtTokenProvider jwtTokenProvider;
 
 
