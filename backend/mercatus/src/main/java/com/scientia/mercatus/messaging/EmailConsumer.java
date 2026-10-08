@@ -39,7 +39,7 @@ public class EmailConsumer{
                                     @Header(DELIVERY_TAG) long tag,
                                     @Headers Map<String, Object> headers) throws IOException {
 
-        String dedupKey = "dedup_key:" + emailEvent.getOrderReference();
+        String dedupKey = emailEvent.getDedupKey(); // get dedup direct from emailPayload
         Boolean if_Absent = redisTemplate.opsForValue().setIfAbsent(dedupKey, "duplication_key",
                 EVICTION_DURATION,
                 TimeUnit.HOURS);

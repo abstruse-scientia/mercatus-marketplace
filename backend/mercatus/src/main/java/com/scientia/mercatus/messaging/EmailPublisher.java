@@ -29,17 +29,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class EmailPublisher {
 
     private final RabbitTemplate rabbitTemplate;
-    private final EmailEventPayloadUtility emailEventPayloadUtility;
 
 
     // Order object or any kind of jpa bound object should not be passed directly
     // It is to avoid working on cached object or outdated data.
-    public void publishEmail(String orderReference) {
-        EmailEvent emailEventPayload = emailEventPayloadUtility.getEmailEvent(orderReference);
+    public void publishEmail(EmailEvent emailEventPayload) {
+
+
         // The "if" block executes if the publishEmail method is called within a transaction.
         // It ensures the email is published only if the transaction is committed successfully
-
-
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override

@@ -21,28 +21,31 @@ public class EmailService {
     private final JavaMailSender mailSender;
 
 
+    // sendEmail is initiated via EmailConsumer passing emailEvent payload.
     public void sendEmail(EmailEvent emailEvent) {
 
+        String orderReference = emailEvent.getVariables().get("orderReference");
         try {
             Context ctx = new Context();
-            ctx.setVariable("customerName", emailEvent.getCustomerName());
-            ctx.setVariable("orderReference", emailEvent.getOrderReference());
-            ctx.setVariable("message", emailEvent.getMessage());
+//            ctx.setVariable("customerName", emailEvent.getCustomerName());
+//            ctx.setVariable("orderReference", emailEvent.getOrderReference());
+//            ctx.setVariable("message", emailEvent.getMessage());
+            emailEvent.getVariables().forEach(ctx::setVariable);
 
-            String htmlBody = templateEngine.process("order-notification", ctx);
+            String htmlBody = templateEngine.process(emailEvent.getTemplateName(), ctx);
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             helper.setFrom("noreply@mercatus.com");
-            helper.setTo(emailEvent.getEmailAddress());
+            helper.setTo(emailEvent.getToEmailAddress());
             helper.setSubject("Order Confirmed");
             helper.setText(htmlBody, true);
             mailSender.send(mimeMessage);
         } catch (Exception e) {
-            log.error("Failed to send email for order reference: {}. Error: {}", emailEvent.getOrderReference(), e.getMessage());
+            log.error("Failed to send email for order reference: {}. Error: {}", orderReference, e.getMessage());
             throw new BusinessException(ErrorEnum.FORBIDDEN_OPERATION,
-                    "Failed to send email for order reference: " + emailEvent.getOrderReference());
+                    "Failed to send email for order reference: " + orderReference);
         }
 
     }
