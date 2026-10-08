@@ -10,7 +10,7 @@ import java.util.Base64;
 
 
 @Component
-public class IRefreshTokenUtil implements RefreshTokenUtil{
+public class ISecureTokenUtil implements SecureTokenUtil {
     @Override
     public String hashToken(String token) {
         try {
