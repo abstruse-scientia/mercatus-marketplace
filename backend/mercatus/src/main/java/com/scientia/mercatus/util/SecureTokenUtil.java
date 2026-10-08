@@ -1,6 +1,6 @@
 package com.scientia.mercatus.util;
 
-public interface RefreshTokenUtil {
+public interface SecureTokenUtil {
     String hashToken(String token);
     String generateRawToken();
 }
