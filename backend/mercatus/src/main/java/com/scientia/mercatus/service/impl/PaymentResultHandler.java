@@ -6,6 +6,7 @@ import com.scientia.mercatus.entity.OrderPaymentStatus;
 import com.scientia.mercatus.entity.OrderStatus;
 import com.scientia.mercatus.exception.BusinessException;
 import com.scientia.mercatus.exception.ErrorEnum;
+import com.scientia.mercatus.messaging.EmailEventPayloadUtility;
 import com.scientia.mercatus.messaging.EmailPublisher;
 import com.scientia.mercatus.repository.OrderRepository;
 import com.scientia.mercatus.service.IInventoryService;
@@ -20,6 +21,7 @@ public class PaymentResultHandler {
     private final OrderRepository orderRepository;
     private final IInventoryService inventoryService;
     private final EmailPublisher emailPublisher;
+    private final EmailEventPayloadUtility payloadCreation;
 
     /* Moved  */
     @Transactional
@@ -45,7 +47,7 @@ public class PaymentResultHandler {
         }
 
         order.setStatus(OrderStatus.CONFIRMED);
-        emailPublisher.publishEmail(order.getOrderReference());
+        emailPublisher.publishEmail(payloadCreation.forOrderConfirmation(order));
         order.setOrderPaymentStatus(OrderPaymentStatus.SUCCESS);
     }
 
