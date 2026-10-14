@@ -2,6 +2,7 @@ package com.scientia.mercatus.mapper;
 
 import com.scientia.mercatus.dto.Order.Admin.AdminOrderSummaryDto;
 import com.scientia.mercatus.dto.Product.Admin.AdminProductResponseDto;
+import com.scientia.mercatus.dto.Product.Admin.AdminUserSummaryDto;
 import com.scientia.mercatus.entity.Order;
 import com.scientia.mercatus.entity.Product;
 import com.scientia.mercatus.entity.User;
@@ -38,5 +39,14 @@ public class AdminMapper {
                 order.getOrderPaymentStatus(),
                 order.getCreatedAt()
         );
+    }
+
+    public AdminUserSummaryDto toAdminUserSummaryDto(User user) {
+        AdminUserSummaryDto dto =  new AdminUserSummaryDto();
+        dto.setUserName(user.getUserName());
+        dto.setEmail(user.getEmail());
+        dto.setRoles(user.getRoles());
+        dto.setActive(user.getActive());
+        return dto;
     }
 }
