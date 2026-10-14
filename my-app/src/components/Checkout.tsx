@@ -307,11 +307,15 @@ export default function Checkout() {
               {cart.items.map((item) => (
                 <div key={item.productId} className="flex items-center gap-4">
                   <div className="relative">
-                    <img 
-                      src={item.primaryImageUrl || "https://placehold.co/100x100"} 
-                      alt={item.name} 
-                      className="w-16 h-16 rounded-lg object-cover border border-border"
-                    />
+                    {item.primaryImageUrl ? (
+                      <img 
+                        src={item.primaryImageUrl} 
+                        alt={item.name} 
+                        className="w-16 h-16 rounded-lg object-cover border border-border"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-lg border border-border bg-muted flex items-center justify-center text-[10px] text-muted-foreground">IMG</div>
+                    )}
                     <span className="absolute -top-2 -right-2 bg-foreground text-background text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
                       {item.quantity}
                     </span>

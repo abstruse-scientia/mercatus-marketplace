@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { Input } from "./ui/input";
@@ -75,7 +75,7 @@ export default function Register() {
 
       const error = err as AxiosError<{message?: string}>;
       const message = error.response?.data?.message ||
-          "Failed to login. Please check your credentials.";
+          "Registration failed. Please try again.";
       toast.error(message);
     }
   };
@@ -119,7 +119,7 @@ export default function Register() {
                 onChange={handleChange}
               />
               {errors.userName && (
-                <span className="text-xs text-red-500">{errors.userName}</span>
+                <span className="text-xs text-destructive">{errors.userName}</span>
               )}
             </div>
 
@@ -138,7 +138,7 @@ export default function Register() {
                 onChange={handleChange}
               />
               {errors.email && (
-                <span className="text-xs text-red-500">{errors.email}</span>
+                <span className="text-xs text-destructive">{errors.email}</span>
               )}
             </div>
 
@@ -171,7 +171,7 @@ export default function Register() {
                 </button>
               </div>
               {errors.password && (
-                <span className="text-xs text-red-500">{errors.password}</span>
+                <span className="text-xs text-destructive">{errors.password}</span>
               )}
             </div>
 
@@ -206,7 +206,7 @@ export default function Register() {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <span className="text-xs text-red-500">
+                <span className="text-xs text-destructive">
                   {errors.confirmPassword}
                 </span>
               )}
@@ -222,9 +222,9 @@ export default function Register() {
 
             <p className="text-sm text-foreground/70 text-center">
               Already have an account?{" "}
-              <a href="/login" className="font-medium hover:underline">
+              <Link to="/login" className="font-medium hover:underline">
                 Sign in
-              </a>
+              </Link>
             </p>
           </form>
         </div>

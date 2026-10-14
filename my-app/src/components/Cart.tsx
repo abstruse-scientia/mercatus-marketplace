@@ -73,7 +73,7 @@ export default function Cart() {
 
       <div className="grid lg:grid-cols-[1fr_400px] gap-12 xl:gap-20">
         {/* Left Column - Items */}
-        <div className="bg-[#F8F9FA] dark:bg-muted/20 rounded-[20px] p-8 space-y-8">
+        <div className="bg-secondary dark:bg-muted/20 rounded-[20px] p-8 space-y-8">
           {items.map((item) => (
             <div key={item.id} className="flex gap-6 pb-8 border-b border-foreground/10 last:border-0 relative">
               {/* Product Image */}
@@ -152,7 +152,7 @@ export default function Cart() {
 
         {/* Right Column - Order Summary */}
         <div>
-          <div className="bg-[#F8F9FA] dark:bg-muted/20 rounded-[20px] p-8 lg:sticky lg:top-24">
+          <div className="bg-secondary dark:bg-muted/20 rounded-[20px] p-8 lg:sticky lg:top-24">
             <h2 className="text-[22px] font-semibold mb-8 tracking-tight">Order Summary</h2>
 
             <div className="space-y-4 mb-8">
@@ -176,7 +176,7 @@ export default function Cart() {
             </div>
 
             <Button 
-              className="w-full h-[52px] text-[15px] font-medium bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 rounded-xl" 
+              className="w-full h-[52px] text-[15px] font-medium bg-foreground text-background hover:bg-foreground/90 rounded-xl" 
               asChild
             >
               <Link to="/checkout">Checkout</Link>

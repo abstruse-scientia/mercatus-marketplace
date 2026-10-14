@@ -64,11 +64,11 @@ export default function Orders() {
   const lifetimeTotal = orders.reduce((sum, o) => sum + o.totalAmount, 0); // Mock for current page
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans pt-24 pb-20 px-4 md:px-8 transition-colors duration-200">
+    <div className="w-full font-sans">
       
       {/* Page Header */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight uppercase mb-8">
+      <div className="w-full mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase mb-8">
           ORDER HISTORY
         </h1>
 
@@ -95,7 +95,7 @@ export default function Orders() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8">
+      <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-8">
         
         {/* Left Column: Orders Accordion */}
         <div className="flex-1">
@@ -146,11 +146,15 @@ export default function Orders() {
                             <div className="flex flex-wrap gap-2 mb-6">
                               {realItems.slice(0, 4).map((item, idx) => (
                                 <div key={idx} className="w-20 h-20 md:w-24 md:h-24 rounded-xl border border-border bg-secondary flex items-center justify-center p-1 overflow-hidden">
-                                    <img 
-                                      src={item.primaryImageUrl || "https://placehold.co/100x100?text=IMG"} 
-                                      alt={item.productName || "Product"} 
-                                      className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal rounded-lg"
-                                    />
+                                    {item.primaryImageUrl ? (
+                                      <img 
+                                        src={item.primaryImageUrl} 
+                                        alt={item.productName || "Product"} 
+                                        className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal rounded-lg"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full bg-muted flex items-center justify-center text-[10px] text-muted-foreground rounded-lg">IMG</div>
+                                    )}
                                 </div>
                               ))}
                               {realItems.length > 4 && (

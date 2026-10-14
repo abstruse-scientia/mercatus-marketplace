@@ -1,5 +1,6 @@
 /* Tailwind preflight + utilities */
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* -------------------------------
    Theme tokens
@@ -8,7 +9,7 @@
   --background: #ffffff;
   --foreground: #0a0a0a;
   --border: #d4d4d4;
-  --accent: #111111;
+  --accent: #f4f4f5;
   --muted: rgba(0, 0, 0, 0.1);
 
   --card: #ffffff;
@@ -21,7 +22,7 @@
   --muted-foreground: #71717a;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --accent-foreground: #0a0a0a;
+  --accent-foreground: #18181b;
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
   --input: #e4e4e7;
@@ -35,7 +36,7 @@
   --background: #0a0a0a;
   --foreground: #fafafa;
   --border: #404040;
-  --accent: #ffffff;
+  --accent: #27272a;
   --muted: rgba(255, 255, 255, 0.1);
 
   --card: #18181b; /* slightly lighter than background */
@@ -122,7 +123,7 @@
   }
 
   a:hover {
-    color: var(--accent);
+    color: var(--accent-foreground);
   }
 
   button {

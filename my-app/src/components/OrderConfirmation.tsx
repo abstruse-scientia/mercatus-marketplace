@@ -114,7 +114,7 @@ export default function OrderConfirmation() {
   const shipping = 9.00; // Hardcoded matching checkout
   const tax = 5.00; // Hardcoded matching checkout
   const total = subtotal + shipping + tax;
-  const isPaid = order.orderStatus !== "CREATED" && order.orderStatus !== "PENDING"; // Assuming CREATED/PENDING means unpaid
+  const isPaid = order.orderStatus !== "CREATED"; // Assuming CREATED means unpaid
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans pt-24 pb-20 px-4 md:px-8 transition-colors duration-200">
@@ -155,11 +155,15 @@ export default function OrderConfirmation() {
               {order.items.map((item, idx) => (
                 <div key={idx} className="flex gap-4 sm:gap-6 items-center">
                   <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-secondary border border-border overflow-hidden shrink-0">
-                     <img 
-                       src={item.primaryImageUrl || "https://placehold.co/100x100?text=IMG"} 
-                       alt={item.productName || "Product"} 
-                       className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
-                     />
+                     {item.primaryImageUrl ? (
+                       <img 
+                         src={item.primaryImageUrl} 
+                         alt={item.productName || "Product"} 
+                         className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
+                       />
+                     ) : (
+                       <div className="w-full h-full bg-muted flex items-center justify-center text-[10px] text-muted-foreground">IMG</div>
+                     )}
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-sm sm:text-base uppercase mb-1 line-clamp-1">{item.productName}</h3>

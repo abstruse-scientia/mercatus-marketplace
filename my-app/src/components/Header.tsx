@@ -3,6 +3,7 @@ import {
   NavLink,
   Link,
   useNavigate,
+  useSearchParams,
   createSearchParams,
 } from "react-router-dom";
 import { ShoppingCart, User, Box, Sun, Moon, Search } from "lucide-react";
@@ -19,8 +20,14 @@ import {
 
 export default function Header() {
   const [dark, setDark] = useState(false);
-  const [query, setQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("search") || "");
   const navigate = useNavigate();
+
+  // Sync query state if URL changes externally
+  useEffect(() => {
+    setQuery(searchParams.get("search") || "");
+  }, [searchParams]);
 
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
@@ -111,7 +118,14 @@ export default function Header() {
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setQuery(value);
+                // Auto-clear search if input is completely emptied
+                if (value.trim() === "" && searchParams.get("search")) {
+                  navigate("/products");
+                }
+              }}
               placeholder="SEARCH"
               aria-label="Search products"
               spellCheck={false}
