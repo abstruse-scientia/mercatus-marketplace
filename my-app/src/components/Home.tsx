@@ -5,24 +5,36 @@ import type { Product } from "../types";
 import ProductCard from "./ProductCard";
 
 export default function Home() {
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<{name: string, imageUrl: string}[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     let isMounted = true;
     const fetchHomeData = async () => {
       try {
-        const [cats, prods] = await Promise.all([
-          productsApi.getCategories(),
-          productsApi.listProducts({
+        const prods = await productsApi.listProducts({
             page: 0,
-            size: 3,
+            size: 20,
             sort: "createdAt,desc",
-          }),
-        ]);
+        });
+        
         if (isMounted) {
-          setCategories(cats.slice(0, 3));
-          setFeaturedProducts(prods.content);
+          setFeaturedProducts(prods.content.slice(0, 3));
+          
+          // Extract unique categories and their images
+          const uniqueCats = new Map<string, string>();
+          prods.content.forEach((p) => {
+            if (p.categoryName && !uniqueCats.has(p.categoryName)) {
+              uniqueCats.set(p.categoryName, p.primaryImageUrl || "");
+            }
+          });
+          
+          const categoryList = Array.from(uniqueCats.entries()).map(([name, imageUrl]) => ({
+            name,
+            imageUrl
+          })).slice(0, 3);
+          
+          setCategories(categoryList);
         }
       } catch (error) {
         console.error("Failed to load home data", error);
@@ -86,20 +98,26 @@ export default function Home() {
         <div className="grid grid-cols-3 gap-[24px] mt-[64px]">
           {categories.map((cat, idx) => (
             <Link
-              to={`/products?category=${encodeURIComponent(cat)}`}
+              to={`/products?category=${encodeURIComponent(cat.name)}`}
               key={idx}
               className="group block"
             >
-              <div className="aspect-[3/4] w-full overflow-hidden bg-[var(--muted)] m-0 p-0 border-0 shadow-none rounded-none">
-                <img
-                  src={`https://source.unsplash.com/random/400x533?camera,${cat}`}
-                  alt={cat}
-                  className="w-full h-full object-cover origin-center transition-transform duration-[600ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-[1.04]"
-                />
+              <div className="aspect-[3/4] w-full overflow-hidden bg-[var(--muted)] m-0 p-0 border-0 shadow-none rounded-none flex items-center justify-center relative">
+                {cat.imageUrl ? (
+                  <img
+                    src={cat.imageUrl}
+                    alt={cat.name}
+                    className="w-full h-full object-cover origin-center transition-transform duration-[600ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-[1.04]"
+                  />
+                ) : (
+                  <div className="text-[var(--foreground)] opacity-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                  </div>
+                )}
               </div>
               <div className="flex justify-between items-baseline pt-[20px]">
                 <span className="text-[12px] font-medium tracking-[0.12em] uppercase">
-                  {cat}
+                  {cat.name}
                 </span>
                 <span className="text-[11px] text-[var(--foreground)] opacity-35">
                   10+ pieces

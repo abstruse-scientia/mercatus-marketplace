@@ -5,14 +5,14 @@ import { Link } from "react-router-dom";
 export default function ErrorPage() {
   return (
     <div
-      className="min-h-screen bg-gray-900 bg-cover bg-center bg-no-repeat flex items-center justify-start p-4 sm:p-8 relative"
+      className="min-h-screen bg-background bg-cover bg-center bg-no-repeat flex items-center justify-start p-4 sm:p-8 relative"
       style={{
         // First layer: gradient, second layer: image resolved by Vite
         backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0.4) 100%), url(${errorImage})`,
       }}
     >
       <div className="max-w-lg relative z-10 w-full sm:w-auto">
-        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-red-500 font-mono leading-none mb-3 sm:mb-4 drop-shadow-2xl">
+        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-destructive font-mono leading-none mb-3 sm:mb-4 drop-shadow-2xl">
           404
         </h1>
 

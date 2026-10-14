@@ -3,6 +3,20 @@ import { useSearchParams, Link } from "react-router-dom";
 import { productsApi } from "../api/products.api";
 import type { Product, PageResponse } from "../types";
 import ProductCard from "./ProductCard";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+
+const SORT_OPTIONS = [
+  { value: "createdAt,desc", label: "NEWEST TO OLDEST" },
+  { value: "createdAt,asc", label: "OLDEST TO NEWEST" },
+  { value: "price,desc", label: "PRICE: HIGH TO LOW" },
+  { value: "price,asc", label: "PRICE: LOW TO HIGH" },
+];
 
 export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -63,7 +77,7 @@ export default function ProductsPage() {
       } catch (err) {
         console.error("Failed to fetch products", err);
         if (mounted) {
-          console.log("CATCH - setting isInitialMount false");
+
           setIsInitialMount(false);
         }
       } finally {
@@ -140,16 +154,23 @@ export default function ProductsPage() {
         </div>
 
         <div className="flex items-center gap-4 pb-4 border-b border-border/40">
-          <select
-            value={sort}
-            onChange={(e) => updateParams({ sort: e.target.value, page: "0" })}
-            className="bg-transparent border-none text-xs font-mono uppercase focus:ring-0 cursor-pointer appearance-none outline-none text-foreground/80 hover:text-foreground transition-colors"
-          >
-            <option value="createdAt,desc">NEWEST TO OLDEST</option>
-            <option value="createdAt,asc">OLDEST TO NEWEST</option>
-            <option value="price,desc">PRICE: HIGH TO LOW</option>
-            <option value="price,asc">PRICE: LOW TO HIGH</option>
-          </select>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 bg-transparent border-none text-xs font-mono uppercase focus:ring-0 cursor-pointer outline-none text-foreground/80 hover:text-foreground transition-colors">
+              {SORT_OPTIONS.find((opt) => opt.value === sort)?.label || "SORT BY"}
+              <ChevronDown className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48 rounded-none border border-border shadow-none bg-popover text-popover-foreground">
+              {SORT_OPTIONS.map((opt) => (
+                <DropdownMenuItem
+                  key={opt.value}
+                  onClick={() => updateParams({ sort: opt.value, page: "0" })}
+                  className="cursor-pointer rounded-none py-2.5 px-3 text-xs font-mono uppercase tracking-wider"
+                >
+                  {opt.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

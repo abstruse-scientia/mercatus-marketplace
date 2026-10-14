@@ -23,6 +23,16 @@ import Checkout from "./components/Checkout.tsx";
 import OrderConfirmation from "./components/OrderConfirmation.tsx";
 
 import Orders from "./components/Orders.tsx";
+import AccountLayout from "./components/AccountLayout.tsx";
+import AddressBook from "./components/AddressBook.tsx";
+
+// Admin Imports
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute.tsx";
+import AdminLayout from "./components/admin/AdminLayout.tsx";
+import AdminProducts from "./components/admin/AdminProducts.tsx";
+import AdminProductForm from "./components/admin/AdminProductForm.tsx";
+import AdminCategories from "./components/admin/AdminCategories.tsx";
+import AdminOrders from "./components/admin/AdminOrders.tsx";
 
 const routeDefinitions = createRoutesFromElements(
   <Route path="/" element={<App />} errorElement={<ErrorPage />}>
@@ -52,10 +62,23 @@ const routeDefinitions = createRoutesFromElements(
         path="/checkout"
         element={<Checkout />}
       />
-      <Route
-        path="/account/*"
-        element={<div className="p-8 text-center">Account Placeholder</div>}
-      />
+      <Route path="/account" element={<AccountLayout />}>
+        <Route index element={<Navigate to="addresses" replace />} />
+        <Route path="addresses" element={<AddressBook />} />
+        <Route path="orders" element={<Orders />} />
+      </Route>
+    </Route>
+
+    {/* Admin Routes */}
+    <Route element={<AdminProtectedRoute />}>
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Navigate to="products" replace />} />
+        <Route path="products" element={<AdminProducts />} />
+        <Route path="products/new" element={<AdminProductForm />} />
+        <Route path="products/:id" element={<AdminProductForm />} />
+        <Route path="categories" element={<AdminCategories />} />
+        <Route path="orders" element={<AdminOrders />} />
+      </Route>
     </Route>
   </Route>,
 );

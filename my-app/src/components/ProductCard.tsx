@@ -4,11 +4,11 @@ import type { Product } from "@/types";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
-interface PropductCardProps {
+interface ProductCardProps {
   product: Product;
 }
 
-export default function ProductCard({ product }: PropductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
   const [isAdding, setIsAdding] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
   const cartItems = useCartStore((state) => state.cart?.items) || [];
@@ -55,7 +55,7 @@ export default function ProductCard({ product }: PropductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={isAdding || isInCart}
-            className="text-[11px] font-semibold tracking-[0.06em] uppercase bg-black text-white px-4 py-2 hover:bg-black/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="text-[11px] font-semibold tracking-[0.06em] uppercase bg-foreground text-background px-4 py-2 hover:bg-foreground/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isAdding ? "Adding..." : isInCart ? "In Cart" : "Add to Cart"}
           </button>

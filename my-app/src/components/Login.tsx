@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { Input } from "./ui/input";
@@ -117,9 +117,9 @@ export default function Login() {
 
             <p className="text-sm text-foreground/70 text-center">
               Don’t have an account?{" "}
-              <a href="/register" className="font-medium hover:underline">
+              <Link to="/register" className="font-medium hover:underline">
                 Sign up
-              </a>
+              </Link>
             </p>
           </form>
         </div>

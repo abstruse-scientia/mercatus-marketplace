@@ -1,4 +1,5 @@
 import { Camera, Shield, Users, Leaf, Globe2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function About() {
   return (
@@ -96,12 +97,12 @@ export default function About() {
               Reach out and we’ll help you pick the right kit.
             </p>
           </div>
-          <a
-            href="/contact"
+          <Link
+            to="/contact"
             className="inline-flex items-center rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background shadow hover:opacity-90 transition"
           >
             Contact us
-          </a>
+          </Link>
         </div>
       </section>
     </main>

@@ -69,9 +69,9 @@ export interface AddToCartRequest {
 }
 
 
-export type OrderStatus = "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+export type OrderStatus = "CREATED" | "CONFIRMED" | "CANCELLED" | "SHIPPED" | "DELIVERED" | "RETURNED";
 
-export type OrderPaymentStatus = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+export type OrderPaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED" | "CANCELLED";
 
 
 export interface OrderItem {
@@ -102,8 +102,8 @@ export interface OrderItemSummary {
 export interface OrderSummary {
   id: number;
   totalAmount: number;
-  orderPaymentStatus: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED' | 'CANCELLED';
-  orderStatus: 'CREATED' | 'PAYMENT_PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  orderPaymentStatus: OrderPaymentStatus;
+  orderStatus: OrderStatus;
   orderReference: string;
   createdAt: string;
   orderSummaryList?: OrderItemSummary[];
@@ -144,3 +144,65 @@ export interface PaymentResponse {
   currency: string;
   paymentProvider: string;
 }
+
+// Admin Product (mirrors AdminProductResponseDto)
+export interface AdminProduct {
+  productId: number;
+  name: string;
+  description?: string;
+  price: number;
+  sku: string;
+  slug: string;
+  primaryImageUrl: string;
+  categoryId: number;
+  categoryName: string;
+  isActive: boolean;
+}
+
+// Admin Product Requests
+export interface CreateProductRequest {
+  name: string;
+  description?: string;
+  price: number;
+  sku: string;
+  categoryId: number;
+}
+
+export interface UpdateProductRequest {
+  name: string;
+  description?: string;
+  price: number;
+  sku: string;
+  slug?: string;
+  categoryId: number;
+  primaryImageUrl?: string;
+}
+
+// Category (mirrors CategoryResponseDto)
+export interface Category {
+  categoryId: number;
+  categoryName: string;
+  slug: string;
+}
+
+export interface CreateCategoryRequest { name: string; }
+export interface UpdateCategoryRequest { categoryName: string; slug: string; }
+
+// Product Image (mirrors ProductImageResponseDto)
+export interface ProductImage {
+  id: number;
+  url: string;
+  sortOrder: number;
+  isPrimary: boolean;
+}
+
+export interface AddProductImageRequest { url: string; isPrimary?: boolean; sortOrder?: number; }
+
+// Admin Order (for the new admin endpoints)
+export interface AdminOrderSummary extends OrderSummary {
+  userName: string;
+  userEmail: string;
+}
+
+// Order Status Update
+export interface UpdateOrderStatusRequest { status: OrderStatus; }
