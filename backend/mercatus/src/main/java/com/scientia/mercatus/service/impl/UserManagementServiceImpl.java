@@ -1,19 +1,24 @@
 package com.scientia.mercatus.service.impl;
 
+import com.scientia.mercatus.dto.Product.Admin.AdminUserSummaryDto;
 import com.scientia.mercatus.entity.Role;
 import com.scientia.mercatus.entity.User;
 import com.scientia.mercatus.exception.BusinessException;
 import com.scientia.mercatus.exception.ErrorEnum;
+import com.scientia.mercatus.mapper.AdminMapper;
 import com.scientia.mercatus.messaging.EmailEvent;
 import com.scientia.mercatus.messaging.EmailEventPayloadUtility;
 import com.scientia.mercatus.messaging.EmailPublisher;
 import com.scientia.mercatus.repository.UserRepository;
+import com.scientia.mercatus.security.AuthContext;
 import com.scientia.mercatus.security.UserIdentifierService;
 import com.scientia.mercatus.service.IUserManagementService;
 import com.scientia.mercatus.util.ISecureTokenUtil;
 import com.scientia.mercatus.util.VerificationServiceUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,6 +44,8 @@ public class UserManagementServiceImpl implements IUserManagementService {
     private final ISecureTokenUtil secureTokenUtil;
     private final EmailEventPayloadUtility payload;
     private final EmailPublisher emailPublisher;
+    private final AdminMapper mapper;
+    private final AuthContext authContext;
 
 
 
@@ -152,6 +159,23 @@ public class UserManagementServiceImpl implements IUserManagementService {
         if (user.getOpaqueIdentifier() != null) {
             userIdentifierService.invalidateUserCache(user.getOpaqueIdentifier());
             log.debug("Cache invalidated for user after password reset: {}", user.getUserName());
+        }
+    }
+
+    @Override
+    public Page<AdminUserSummaryDto> listAllUsers(Pageable pageable) {
+        if (pageable == null) {
+            throw new RuntimeException("Page cannot be null");
+        }
+        Page<User> users= userRepository.findAll(pageable);
+        return users.map(mapper::toAdminUserSummaryDto);
+    }
+
+    @Override
+    public void validateAction(Long userId, String message) {
+        Long id = authContext.getCurrentUserId();
+        if (Objects.equals(id, userId)) {
+            throw new BusinessException(ErrorEnum.UNAUTHORIZED_REQUEST, message);
         }
     }
 }
