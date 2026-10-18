@@ -1,7 +1,6 @@
 import Header from "./components/Header";
 import { Outlet, useNavigation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-
 function App() {
   const navigation = useNavigation();
   return (
