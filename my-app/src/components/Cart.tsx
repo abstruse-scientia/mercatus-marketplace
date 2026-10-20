@@ -73,11 +73,11 @@ export default function Cart() {
 
       <div className="grid lg:grid-cols-[1fr_400px] gap-12 xl:gap-20">
         {/* Left Column - Items */}
-        <div className="bg-secondary dark:bg-muted/20 rounded-[20px] p-8 space-y-8">
+        <div className="bg-secondary dark:bg-muted/20 rounded-[20px] p-4 sm:p-8 space-y-6 sm:space-y-8">
           {items.map((item) => (
-            <div key={item.id} className="flex gap-6 pb-8 border-b border-foreground/10 last:border-0 relative">
+            <div key={item.id} className="flex gap-4 sm:gap-6 pb-6 sm:pb-8 border-b border-foreground/10 last:border-0 relative">
               {/* Product Image */}
-              <div className="w-[140px] aspect-[4/5] bg-muted/50 rounded-lg overflow-hidden shrink-0">
+              <div className="w-24 sm:w-[140px] aspect-[4/5] bg-muted/50 rounded-lg overflow-hidden shrink-0">
                 {item.primaryImageUrl ? (
                   <img
                     src={item.primaryImageUrl}
@@ -92,11 +92,11 @@ export default function Cart() {
               </div>
 
               {/* Product Details */}
-              <div className="flex-1 flex justify-between items-start pt-1 pr-12">
+              <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:justify-between sm:items-start pt-1 pr-8 sm:pr-12 gap-3 sm:gap-4">
                 
                 {/* Info (Left) */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-[17px] leading-tight text-foreground">
+                <div className="space-y-2 sm:space-y-4 min-w-0">
+                  <h3 className="font-semibold text-[17px] leading-tight text-foreground truncate">
                     <Link to={`/products/${item.productId}`} className="hover:underline">
                       {item.name}
                     </Link>
@@ -112,11 +112,11 @@ export default function Cart() {
                 </div>
                 
                 {/* Price & Quantity (Right) */}
-                <div className="flex flex-col items-center gap-5 mt-0.5">
+                <div className="flex items-center justify-between sm:flex-col sm:items-end gap-3 sm:gap-5 w-full sm:w-auto mt-2 sm:mt-0.5">
                   <span className="font-semibold text-[17px]">
                     ${item.unitPrice.toFixed(2)}
                   </span>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     <button
                       onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                       disabled={item.quantity <= 1 || isLoading}

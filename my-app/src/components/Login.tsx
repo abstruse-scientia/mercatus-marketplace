@@ -41,7 +41,7 @@ export default function Login() {
     <main className="mx-auto w-full max-w-5xl px-4 py-12">
       <section className="card-modern grid min-h-[580px] md:grid-cols-[2.5fr_2.75fr] overflow-hidden">
         {/* Left: Image (larger, elongated) */}
-        <div className="relative bg-muted/20">
+        <div className="hidden md:block relative bg-muted/20">
           <img
             src={cameraPic}
             alt="Vintage camera in grass"
