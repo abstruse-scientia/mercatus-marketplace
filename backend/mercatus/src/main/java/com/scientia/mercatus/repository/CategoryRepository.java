@@ -1,5 +1,6 @@
 package com.scientia.mercatus.repository;
 
+import com.scientia.mercatus.dto.Category.CategorySummaryDto;
 import com.scientia.mercatus.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -41,8 +42,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
 
     // Get categories with product count by doing left join
-    @Query("Select c, count(p) from Category c left join c.products p group by c")
-    List<Object[]> findAllWithProductCount();
+    @Query("select new com.scientia.mercatus.dto.Category.CategorySummaryDto(c.categoryId, c.categoryName, c.slug, size(c.products)) from Category c")
+    List<CategorySummaryDto> findAllWithProductCount();
+
 
 
     //check if category has products by querying product and checking categoryId given in parameter

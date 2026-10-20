@@ -1,5 +1,6 @@
 package com.scientia.mercatus.controller;
 
+import com.scientia.mercatus.dto.Category.CategorySummaryDto;
 import com.scientia.mercatus.dto.Product.ProductResponseDto;
 import com.scientia.mercatus.entity.Product;
 import com.scientia.mercatus.service.IProductService;
@@ -24,7 +25,7 @@ public class ProductController {
 
 
 
-    @Value("${pagination.max-size:10}")
+    @Value("${pagination.max-size:50}")
     private int maxPageSize;
 
     private final IProductService productService;
@@ -73,6 +74,11 @@ public class ProductController {
     public ResponseEntity<List<String>> listCategories() {
         List<String> categories = productService.listAllCategories();
         return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/category/summary")
+    public ResponseEntity<List<CategorySummaryDto>> listCategorySummaries() {
+        return ResponseEntity.status(HttpStatus.OK).body(productService.listCategorySummaries());
     }
 
     private Pageable getPageable(Pageable pageable) {
