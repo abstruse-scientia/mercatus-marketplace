@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import type { PageResponse, Product } from "../types";
+import type { PageResponse, Product, CategorySummary} from "../types";
 
 export const productsApi = {
   listProducts: async (params?: {
@@ -47,6 +47,11 @@ export const productsApi = {
     );
     return response.data
   },
+  getCategorySummaries: async()=> {
+    const response = await apiClient.get<CategorySummary[]>("/products/category/summary");
+    return response.data
+  },
+  
   getCategories: async() => {
     const response = await apiClient.get<string[]>("products/categories")
     return response.data

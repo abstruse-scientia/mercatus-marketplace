@@ -8,6 +8,14 @@ export interface Product {
   categoryName: string;
 }
 
+export interface CategorySummary {
+  id: number;
+  categoryName: string;
+  slug: string;
+  productCount: number;
+  previewImageURL?: string;
+}
+
 export interface PageResponse<T> {
   content: T[];
   totalElements: number;
@@ -68,11 +76,20 @@ export interface AddToCartRequest {
   quantity: number;
 }
 
+export type OrderStatus =
+  | "CREATED"
+  | "CONFIRMED"
+  | "CANCELLED"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "RETURNED";
 
-export type OrderStatus = "CREATED" | "CONFIRMED" | "CANCELLED" | "SHIPPED" | "DELIVERED" | "RETURNED";
-
-export type OrderPaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED" | "CANCELLED";
-
+export type OrderPaymentStatus =
+  | "PENDING"
+  | "SUCCESS"
+  | "FAILED"
+  | "REFUNDED"
+  | "CANCELLED";
 
 export interface OrderItem {
   id: number;
@@ -185,8 +202,13 @@ export interface Category {
   slug: string;
 }
 
-export interface CreateCategoryRequest { name: string; }
-export interface UpdateCategoryRequest { categoryName: string; slug: string; }
+export interface CreateCategoryRequest {
+  name: string;
+}
+export interface UpdateCategoryRequest {
+  categoryName: string;
+  slug: string;
+}
 
 // Product Image (mirrors ProductImageResponseDto)
 export interface ProductImage {
@@ -196,7 +218,11 @@ export interface ProductImage {
   isPrimary: boolean;
 }
 
-export interface AddProductImageRequest { url: string; isPrimary?: boolean; sortOrder?: number; }
+export interface AddProductImageRequest {
+  url: string;
+  isPrimary?: boolean;
+  sortOrder?: number;
+}
 
 // Admin Order (for the new admin endpoints)
 export interface AdminOrderSummary extends OrderSummary {
@@ -205,4 +231,6 @@ export interface AdminOrderSummary extends OrderSummary {
 }
 
 // Order Status Update
-export interface UpdateOrderStatusRequest { status: OrderStatus; }
+export interface UpdateOrderStatusRequest {
+  status: OrderStatus;
+}
