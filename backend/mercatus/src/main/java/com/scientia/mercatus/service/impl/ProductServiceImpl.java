@@ -1,5 +1,6 @@
 package com.scientia.mercatus.service.impl;
 
+import com.scientia.mercatus.dto.Category.CategorySummaryDto;
 import com.scientia.mercatus.dto.Product.Admin.CreateProductRequestDto;
 import com.scientia.mercatus.dto.Product.Admin.UpdateProductRequestDto;
 import com.scientia.mercatus.entity.Category;
@@ -141,6 +142,11 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<String> listAllCategories() {
         return productRepository.findDistinctCategoryNames();
+    }
+
+    @Override
+    public List<CategorySummaryDto> listCategorySummaries() {
+        return categoryRepository.findAllWithProductCount();
     }
 
     @Override

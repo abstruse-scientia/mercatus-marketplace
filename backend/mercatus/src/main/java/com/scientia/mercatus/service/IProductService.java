@@ -1,6 +1,7 @@
 package com.scientia.mercatus.service;
 
 
+import com.scientia.mercatus.dto.Category.CategorySummaryDto;
 import com.scientia.mercatus.dto.Product.Admin.CreateProductRequestDto;
 import com.scientia.mercatus.dto.Product.Admin.UpdateProductRequestDto;
 import com.scientia.mercatus.entity.Product;
@@ -49,6 +50,8 @@ public interface IProductService {
     Page<Product> listActiveProductsByCategoryName(String categoryName, Pageable pageable);
 
     List<String> listAllCategories();
+
+    List<CategorySummaryDto> listCategorySummaries();
     /*
      Need to fix the list: By reorganizing what should be controlled by admin , and what should
      be client related.
