@@ -1,11 +1,10 @@
 package com.scientia.mercatus.controller;
 
-
-
+import com.scientia.mercatus.dto.Auth.ForgotPasswordRequestDto;
 import com.scientia.mercatus.dto.Auth.ResetPasswordContextDto;
 import com.scientia.mercatus.security.SpringSecurityAuthContext;
-
 import com.scientia.mercatus.service.IUserManagementService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,6 @@ public class UserController {
     private final IUserManagementService userManagementService;
     private final SpringSecurityAuthContext springSecurityAuthContext;
 
-
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestParam String newPassword) {
         Long id = springSecurityAuthContext.getCurrentUserId();
@@ -27,11 +25,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
-        userManagementService.forgotUserPassword(email);
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDto request) {
+        userManagementService.forgotUserPassword(request.email());
         return ResponseEntity.status(HttpStatus.OK).build();
-
     }
 
     @PostMapping("/reset-password")

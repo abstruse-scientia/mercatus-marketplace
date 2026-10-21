@@ -17,6 +17,9 @@ public final class PublicEndPoints {
             "/api/v1/products/**"
     };
 
-
+    public static final String[] USER_PUBLIC = {
+            "/api/v1/user/forgot-password",
+            "/api/v1/user/reset-password"
+    };
 
 }

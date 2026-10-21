@@ -68,6 +68,7 @@ public class MercatusSecurityConfig {
                         .requestMatchers(PublicEndPoints.AUTH).permitAll()
                         .requestMatchers(PublicEndPoints.PRODUCTS).permitAll()
                         .requestMatchers(PublicEndPoints.WEBHOOKS).permitAll()
+                        .requestMatchers(PublicEndPoints.USER_PUBLIC).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/cart/**").authenticated()
                         .anyRequest().authenticated()

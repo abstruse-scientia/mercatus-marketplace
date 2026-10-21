@@ -110,6 +110,8 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
                 || Arrays.stream(PublicEndPoints.PRODUCTS).anyMatch(pattern ->
                 pathMatcher.match(pattern, path))
                 || Arrays.stream(PublicEndPoints.WEBHOOKS).anyMatch(pattern ->
+                pathMatcher.match(pattern, path))
+                || Arrays.stream(PublicEndPoints.USER_PUBLIC).anyMatch(pattern ->
                 pathMatcher.match(pattern, path));
 
     }
