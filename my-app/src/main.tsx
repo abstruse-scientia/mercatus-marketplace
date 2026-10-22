@@ -16,6 +16,7 @@ import Contact from "./components/Contact.tsx";
 import Login from "./components/Login.tsx";
 import Register from "./components/Register.tsx";
 import ForgotPassword from "./components/ForgotPassword.tsx";
+import ResetPassword from "./components/ResetPassword.tsx";
 import ProductDetail from "./components/ProductDetail.tsx";
 import ProductsPage from "./components/ProductsPage.tsx";
 import Cart from "./components/Cart.tsx";
@@ -47,6 +48,8 @@ const routeDefinitions = createRoutesFromElements(
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
     <Route path="/forgot-password" element={<ForgotPassword/>}/>
+    <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/verify" element={<ResetPassword />} />
 
     <Route path="/cart" element={<Cart />} />
 
