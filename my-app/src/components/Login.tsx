@@ -29,7 +29,6 @@ export default function Login() {
       toast.success("Successfully logged in!");
       navigate("/home");
     } catch (err: unknown) {
-
       const error = err as AxiosError<{message?: string}>;
       const message = error.response?.data?.message ||
           "Failed to login. Please check your credentials.";
@@ -78,9 +77,17 @@ export default function Login() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <Input
                   id="password"
