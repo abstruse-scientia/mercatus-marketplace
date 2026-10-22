@@ -16,7 +16,7 @@ const AccountLayout: React.FC = () => {
               My Account
             </h1>
             <p className="text-sm text-neutral-500 mt-1">
-              Manage your orders, addresses, and preferences.
+              Manage your profile, orders, and addresses.
             </p>
           </div>
           {user && (
@@ -30,6 +30,18 @@ const AccountLayout: React.FC = () => {
 
         {/* Horizontal Tab Strip */}
         <nav className="flex items-center gap-2 overflow-x-auto pb-2 hide-scrollbar">
+          <NavLink
+            to="/account/profile"
+            className={({ isActive }) =>
+              `px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${
+                isActive
+                  ? "bg-black text-white dark:bg-white dark:text-black"
+                  : "bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800"
+              }`
+            }
+          >
+            Profile
+          </NavLink>
           <NavLink
             to="/account/addresses"
             className={({ isActive }) =>

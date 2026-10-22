@@ -27,6 +27,7 @@ import OrderConfirmation from "./components/OrderConfirmation.tsx";
 import Orders from "./components/Orders.tsx";
 import AccountLayout from "./components/AccountLayout.tsx";
 import AddressBook from "./components/AddressBook.tsx";
+import UserProfile from "./components/UserProfile.tsx";
 
 // Admin Imports
 import AdminProtectedRoute from "./components/admin/AdminProtectedRoute.tsx";
@@ -47,7 +48,7 @@ const routeDefinitions = createRoutesFromElements(
     <Route path="/contact" element={<Contact />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
-    <Route path="/forgot-password" element={<ForgotPassword/>}/>
+    <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/verify" element={<ResetPassword />} />
 
@@ -68,7 +69,8 @@ const routeDefinitions = createRoutesFromElements(
         element={<Checkout />}
       />
       <Route path="/account" element={<AccountLayout />}>
-        <Route index element={<Navigate to="addresses" replace />} />
+        <Route index element={<Navigate to="profile" replace />} />
+        <Route path="profile" element={<UserProfile />} />
         <Route path="addresses" element={<AddressBook />} />
         <Route path="orders" element={<Orders />} />
       </Route>
