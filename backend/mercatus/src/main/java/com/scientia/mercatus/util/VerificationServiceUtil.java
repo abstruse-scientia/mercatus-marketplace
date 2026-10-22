@@ -7,13 +7,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class VerificationServiceUtil {
 
-    @Value("${frontend-url}")
-    private static String frontendBaseURL;
+    @Value("${frontend-url:http://localhost:5173}")
+    private String frontendBaseURL;
 
-    public  String generateVerificationLink(String accessToken){
-
+    public String generateVerificationLink(String accessToken) {
         return UriComponentsBuilder.fromUriString(frontendBaseURL)
-                .path("verify")
+                .path("reset-password")
                 .queryParam("token", accessToken)
                 .build()
                 .toUriString();

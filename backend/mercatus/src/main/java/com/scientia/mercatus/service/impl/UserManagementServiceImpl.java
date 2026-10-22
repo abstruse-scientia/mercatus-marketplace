@@ -64,6 +64,7 @@ public class UserManagementServiceImpl implements IUserManagementService {
                 email, ACCESS_TOKEN_TTL,
                 TimeUnit.MINUTES);
         String verificationUrl = verificationService.generateVerificationLink(accessToken);
+        log.info(">> PASSWORD RESET LINK FOR{}: {} ", email, verificationUrl);
         EmailEvent event = payload.forForgotPassword(user, verificationUrl);
         emailPublisher.publishEmail(event);
 

@@ -25,7 +25,8 @@ import static org.springframework.amqp.support.AmqpHeaders.DELIVERY_TAG;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EmailConsumer{
+public class
+EmailConsumer{
 
     private final StringRedisTemplate redisTemplate;
     private final EmailService emailService;
