@@ -48,7 +48,7 @@ export default function ForgotPassword() {
           <p className="text-xs sm:text-[13px] leading-relaxed text-muted-foreground">
             {isSubmitted
               ? `If an account exists for ${email}, a password reset link has been sent.`
-              : "Enter your email to receive a password reset link."}
+              : "Enter your email and we'll send you a link to reset your password."}
           </p>
         </div>
 
