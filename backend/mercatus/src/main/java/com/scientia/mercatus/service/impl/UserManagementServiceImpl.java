@@ -28,6 +28,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import com.scientia.mercatus.repository.RoleRepository;
 
 @Slf4j
 @Service
@@ -46,6 +48,7 @@ public class UserManagementServiceImpl implements IUserManagementService {
     private final EmailPublisher emailPublisher;
     private final AdminMapper mapper;
     private final AuthContext authContext;
+    private final RoleRepository roleRepository;
 
 
 
@@ -76,14 +79,21 @@ public class UserManagementServiceImpl implements IUserManagementService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        if (newRoles != null && !newRoles.equals(user.getRoles())) {
-            log.info("Updating roles for user: {}", userId);
-            user.setRoles(newRoles);
-            userRepository.save(user);
-            
-            if (user.getOpaqueIdentifier() != null) {
-                userIdentifierService.invalidateUserCache(user.getOpaqueIdentifier());
-                log.debug("Cache invalidated for user after role update: {}", userId);
+        if (newRoles != null) {
+            Set<Role> managedRoles = newRoles.stream()
+                    .map(r -> roleRepository.findByName(r.getName())
+                            .orElseThrow(() -> new BusinessException(ErrorEnum.ROLE_NOT_FOUND)))
+                    .collect(Collectors.toSet());
+
+            if (!managedRoles.equals(user.getRoles())) {
+                log.info("Updating roles for user: {}", userId);
+                user.setRoles(managedRoles);
+                userRepository.save(user);
+
+                if (user.getOpaqueIdentifier() != null) {
+                    userIdentifierService.invalidateUserCache(user.getOpaqueIdentifier());
+                    log.debug("Cache invalidated for user after role update: {}", userId);
+                }
             }
         }
     }
@@ -101,6 +111,22 @@ public class UserManagementServiceImpl implements IUserManagementService {
         if (user.getOpaqueIdentifier() != null) {
             userIdentifierService.invalidateUserCache(user.getOpaqueIdentifier());
             log.debug("Cache invalidated for deactivated user: {}", userId);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void reactivateUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        log.info("Reactivating user: {}", userId);
+        user.setActive(true);
+        userRepository.save(user);
+        
+        if (user.getOpaqueIdentifier() != null) {
+            userIdentifierService.invalidateUserCache(user.getOpaqueIdentifier());
+            log.debug("Cache invalidated for reactivated user: {}", userId);
         }
     }
 
@@ -180,4 +206,3 @@ public class UserManagementServiceImpl implements IUserManagementService {
         }
     }
 }
-

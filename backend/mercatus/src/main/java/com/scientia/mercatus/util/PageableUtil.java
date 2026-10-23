@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class PageableUtil {
 
-    @Value("${pagination.max-size:10}")
-    private static int maxPageSize;
+    @Value("${pagination.max-size:50}")
+    private int maxPageSize;
 
-    public static Pageable getSafePageable(Pageable pageable) {
+    public Pageable getSafePageable(Pageable pageable) {
         int size = Math.min(pageable.getPageSize(), maxPageSize);
         Sort sort = pageable.getSort().isSorted()
                 ? pageable.getSort() : Sort.by(Sort.Direction.DESC, "createdAt");

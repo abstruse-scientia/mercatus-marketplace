@@ -13,6 +13,8 @@ public interface IUserManagementService {
     void updateUserRoles(Long userId, Set<Role> newRoles);
     
     void deactivateUser(Long userId);
+
+    void reactivateUser(Long userId);
     
     void deleteUser(Long userId);
     
@@ -26,4 +28,3 @@ public interface IUserManagementService {
 
     void validateAction(Long userId, String message);
 }
-
