@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { adminApi } from "../../api/admin.api";
 import type { AdminOrderSummary, OrderStatus } from "../../types";
@@ -13,7 +13,7 @@ const orderStatusColors: Record<OrderStatus, string> = {
   RETURNED: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20",
 };
 
-const AdminOrders: React.FC = () => {
+const AdminOrders = () => {
   const [orders, setOrders] = useState<AdminOrderSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   

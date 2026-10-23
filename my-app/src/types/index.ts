@@ -234,3 +234,18 @@ export interface AdminOrderSummary extends OrderSummary {
 export interface UpdateOrderStatusRequest {
   status: OrderStatus;
 }
+
+
+// Admin User Management
+export interface RoleObject {
+  id?: number;
+  name: string;
+}
+
+export interface AdminUserSummary {
+  userId: number;
+  userName: string;
+  email: string;
+  roles: RoleObject[];
+  isActive: boolean;
+}

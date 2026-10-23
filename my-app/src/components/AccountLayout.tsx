@@ -1,8 +1,7 @@
-import React from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 
-const AccountLayout: React.FC = () => {
+const AccountLayout = () => {
   const user = useAuthStore((state: any) => state.user);
 
   return (

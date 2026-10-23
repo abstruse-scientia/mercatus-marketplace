@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, Save, X, Loader2 } from "lucide-react";
 import { adminApi } from "../../api/admin.api";
 import type { Category } from "../../types";
 import toast from "react-hot-toast";
 
-const AdminCategories: React.FC = () => {
+const AdminCategories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

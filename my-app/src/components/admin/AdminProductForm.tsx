@@ -6,7 +6,7 @@ import type { Category, CreateProductRequest, UpdateProductRequest } from "../..
 import toast from "react-hot-toast";
 import AdminProductImages from "./AdminProductImages";
 
-const AdminProductForm: React.FC = () => {
+const AdminProductForm = () => {
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
   const navigate = useNavigate();

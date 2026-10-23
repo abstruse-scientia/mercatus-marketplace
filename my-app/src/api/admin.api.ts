@@ -9,6 +9,8 @@ import type {
   ProductImage,
   AddProductImageRequest,
   AdminOrderSummary,
+  AdminUserSummary,
+  RoleObject,
   PageResponse,
   OrderStatus,
 } from "../types";
@@ -114,6 +116,28 @@ export const adminApi = {
   },
   updateOrderStatus: async (id: number, status: OrderStatus) => {
     const response = await apiClient.patch<OrderStatus>(`/admin/orders/${id}/status`, { status });
+    return response.data;
+  },
+
+  listUsers: async (page = 0, size = 10) => {
+    const params = new URLSearchParams({ page: page.toString(), size: size.toString() });
+    const response = await apiClient.post<PageResponse<AdminUserSummary>>(`/admin/user/all?${params.toString()}`);
+    return response.data;
+  },
+  deactivateUser: async (userId: number) => {
+    const response = await apiClient.post<void>(`/admin/user/${userId}/deactivate`);
+    return response.data;
+  },
+  reactivateUser: async (userId: number) => {
+    const response = await apiClient.post<void>(`/admin/user/${userId}/reactivate`);
+    return response.data;
+  },
+  updateUserRoles: async (userId: number, roles: RoleObject[]) => {
+    const response = await apiClient.post<void>(`/admin/user/${userId}/roles`, roles);
+    return response.data;
+  },
+  deleteUser: async (userId: number) => {
+    const response = await apiClient.delete<void>(`/admin/user/${userId}`);
     return response.data;
   },
 };
