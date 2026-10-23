@@ -36,6 +36,7 @@ import AdminProducts from "./components/admin/AdminProducts.tsx";
 import AdminProductForm from "./components/admin/AdminProductForm.tsx";
 import AdminCategories from "./components/admin/AdminCategories.tsx";
 import AdminOrders from "./components/admin/AdminOrders.tsx";
+import AdminUsers from "./components/admin/AdminUsers.tsx";
 
 const routeDefinitions = createRoutesFromElements(
   <Route path="/" element={<App />} errorElement={<ErrorPage />}>
@@ -85,6 +86,7 @@ const routeDefinitions = createRoutesFromElements(
         <Route path="products/:id" element={<AdminProductForm />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="orders" element={<AdminOrders />} />
+        <Route path="users" element={<AdminUsers />} />
       </Route>
     </Route>
   </Route>,

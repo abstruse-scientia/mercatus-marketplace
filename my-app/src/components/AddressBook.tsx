@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { addressesApi } from "../api/addresses.api";
 import AddressCard from "./AddressCard";
@@ -6,7 +6,7 @@ import AddressForm from "./AddressForm";
 import type { Address, AddressRequest } from "../types";
 import toast from "react-hot-toast";
 
-const AddressBook: React.FC = () => {
+const AddressBook = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   

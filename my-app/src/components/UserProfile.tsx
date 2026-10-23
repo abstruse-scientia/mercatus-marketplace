@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "../store/authStore";
 import { userApi } from "../api/user.api";
 
-const UserProfile: React.FC = () => {
+const UserProfile = () => {
   const user = useAuthStore((state) => state.user);
 
   const [newPassword, setNewPassword] = useState("");

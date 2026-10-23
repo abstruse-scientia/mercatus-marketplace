@@ -1,12 +1,13 @@
-import React from "react";
-import { NavLink, Outlet } from "react-router-dom";
-import { Package, Tags, ShoppingCart, LayoutDashboard } from "lucide-react";
 
-const AdminLayout: React.FC = () => {
+import { NavLink, Outlet } from "react-router-dom";
+import { Package, Tags, ShoppingCart, LayoutDashboard, Users } from "lucide-react";
+
+const AdminLayout = () => {
   const navItems = [
     { to: "/admin/products", label: "Products", icon: <Package className="w-5 h-5" /> },
     { to: "/admin/categories", label: "Categories", icon: <Tags className="w-5 h-5" /> },
     { to: "/admin/orders", label: "Orders", icon: <ShoppingCart className="w-5 h-5" /> },
+    { to: "/admin/users", label: "Users", icon: <Users className="w-5 h-5" /> },
   ];
 
   return (

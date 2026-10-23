@@ -1,8 +1,8 @@
-import React from "react";
+
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 
-const AdminProtectedRoute: React.FC = () => {
+const AdminProtectedRoute = () => {
   const user = useAuthStore((state: any) => state.user);
   
   if (!user) {

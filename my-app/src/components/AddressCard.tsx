@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Star, Pencil, Trash2 } from "lucide-react";
 import type { Address } from "../types";
 
@@ -11,14 +11,14 @@ interface AddressCardProps {
   isDeleting?: boolean;
 }
 
-const AddressCard: React.FC<AddressCardProps> = ({
+const AddressCard = ({
   address,
   onEdit,
   onDelete,
   onSetDefault,
   isSettingDefault,
   isDeleting,
-}) => {
+}: AddressCardProps) => {
   return (
     <div className="border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 relative flex flex-col gap-4">
       {/* Top Header Row */}

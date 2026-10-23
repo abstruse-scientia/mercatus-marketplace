@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search, Pencil, Power, PowerOff, Image as ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { adminApi } from "../../api/admin.api";
 import type { AdminProduct } from "../../types";
 import toast from "react-hot-toast";
 
-const AdminProducts: React.FC = () => {
+const AdminProducts = () => {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   

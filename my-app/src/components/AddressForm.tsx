@@ -9,12 +9,12 @@ interface AddressFormProps {
   isSaving: boolean;
 }
 
-const AddressForm: React.FC<AddressFormProps> = ({
+const AddressForm = ({
   initialData,
   onClose,
   onSave,
   isSaving,
-}) => {
+}: AddressFormProps) => {
   const [formData, setFormData] = useState<AddressRequest>({
     fullName: "",
     mobileNumber: "",

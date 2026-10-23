@@ -8,7 +8,7 @@ interface AdminProductImagesProps {
   productId: number;
 }
 
-const AdminProductImages: React.FC<AdminProductImagesProps> = ({ productId }) => {
+const AdminProductImages = ({ productId }: AdminProductImagesProps) => {
   const [images, setImages] = useState<ProductImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
