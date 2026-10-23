@@ -13,6 +13,8 @@ import java.util.stream.IntStream;
 @Setter
 public class AdminUserSummaryDto {
 
+    private Long userId;
+
     private String userName;
 
     @Setter(AccessLevel.NONE)
@@ -29,7 +31,7 @@ public class AdminUserSummaryDto {
 
         // Uses IntStream of Stream API to create a number of "*";
         String repeatedString = IntStream.range(0, atIndex - 2)
-                .mapToObj(i -> "*").collect(Collectors.joining());
+                .mapToObj(_ -> "*").collect(Collectors.joining());
         // Leave the first two character of email as it is and add remaining "*" for masking;
         String maskedPart = email.substring(0, atIndex - repeatedString.length()) + repeatedString;
 
@@ -39,5 +41,4 @@ public class AdminUserSummaryDto {
     Set<Role> roles;
 
     boolean isActive;
-
 }

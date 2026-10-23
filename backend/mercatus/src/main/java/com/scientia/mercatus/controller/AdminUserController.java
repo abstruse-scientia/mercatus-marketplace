@@ -20,15 +20,14 @@ import java.util.Set;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUserController {
 
-
-    private final  IUserManagementService userManagementService;
+    private final IUserManagementService userManagementService;
+    private final PageableUtil pageableUtil;
 
     @PostMapping("/all")
     public ResponseEntity<Page<AdminUserSummaryDto>> listUsers(Pageable pageable){
-        Pageable pages = PageableUtil.getSafePageable(pageable);
+        Pageable pages = pageableUtil.getSafePageable(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(userManagementService.listAllUsers(pages));
     }
-
 
     @PostMapping("/{userId}/deactivate")
     public ResponseEntity<Void> deactivateUser(@PathVariable Long userId){
@@ -37,6 +36,14 @@ public class AdminUserController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @PostMapping("/{userId}/reactivate")
+    public ResponseEntity<Void> reactivateUser(@PathVariable Long userId){
+        userManagementService.validateAction(userId, "You cannot modify your own ID.");
+        userManagementService.reactivateUser(userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PostMapping("/{userId}/roles")
     public ResponseEntity<Void> updateUserRoles(@PathVariable Long userId, @RequestBody Set<Role> roles) {
         userManagementService.validateAction(userId, "You cannot modify your own roles.");
         userManagementService.updateUserRoles(userId, roles);

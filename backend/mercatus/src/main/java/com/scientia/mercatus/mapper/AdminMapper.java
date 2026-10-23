@@ -42,7 +42,8 @@ public class AdminMapper {
     }
 
     public AdminUserSummaryDto toAdminUserSummaryDto(User user) {
-        AdminUserSummaryDto dto =  new AdminUserSummaryDto();
+        AdminUserSummaryDto dto = new AdminUserSummaryDto();
+        dto.setUserId(user.getUserId());
         dto.setUserName(user.getUserName());
         dto.setEmail(user.getEmail());
         dto.setRoles(user.getRoles());
