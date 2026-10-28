@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { Input } from "./ui/input";
@@ -10,6 +10,9 @@ import type { AxiosError } from "axios";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as {from? : {pathname: string }} | null;
+  const from = state?.from?.pathname || "/home";
   const login = useAuthStore((state) => state.login);
   const isLoading = useAuthStore((state) => state.isLoading);
 
@@ -27,7 +30,7 @@ export default function Login() {
     try {
       await login({ userEmail, password });
       toast.success("Successfully logged in!");
-      navigate("/home");
+      navigate(from, {replace: true});
     } catch (err: unknown) {
       const error = err as AxiosError<{message?: string}>;
       const message = error.response?.data?.message ||

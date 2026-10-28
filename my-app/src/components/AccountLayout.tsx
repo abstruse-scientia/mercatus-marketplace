@@ -2,7 +2,7 @@ import { Outlet, NavLink } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 
 const AccountLayout = () => {
-  const user = useAuthStore((state: any) => state.user);
+  const user = useAuthStore((state) => state.user);
 
   return (
     <div className="w-full bg-neutral-50 dark:bg-[#0a0a0a] min-h-screen py-12 px-4 sm:px-6 lg:px-8">
