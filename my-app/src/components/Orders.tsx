@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ordersApi } from "../api/orders.api";
 import type { OrderSummary } from "../types";
 import toast from "react-hot-toast";
-import { ChevronDown, ChevronUp, Package, CheckCircle, Truck, XCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Package, CheckCircle, Truck, XCircle, AlertTriangle, Loader2 } from "lucide-react";
 
 export default function Orders() {
   const [orders, setOrders] = useState<OrderSummary[]>([]);
@@ -13,6 +13,23 @@ export default function Orders() {
   const [totalElements, setTotalElements] = useState(0);
   const [activeTab, setActiveTab] = useState<"ALL" | "CONFIRMED" | "CANCELLED">("ALL");
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
+  const [orderToCancel, setOrderToCancel] = useState<OrderSummary | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  const handleConfirmCancel = async () => {
+    if (!orderToCancel) return;
+    try {
+      setIsCancelling(true);
+      await ordersApi.cancelOrder(orderToCancel.id);
+      toast.success("Order cancelled successfully");
+      setOrderToCancel(null);
+      await fetchOrders(page, activeTab);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.errorMessage || "Failed to cancel order");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   const fetchOrders = async (pageNumber: number, status: string) => {
     setIsLoading(true);
@@ -22,7 +39,8 @@ export default function Orders() {
       setOrders(response.content);
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
-    } catch (error) {
+    } catch (err) {
+      console.error("Order history load failed.", err);
       toast.error("Failed to load orders history.");
     } finally {
       setIsLoading(false);
@@ -197,6 +215,18 @@ export default function Orders() {
                             >
                               View Order Details
                             </Link>
+                            {order.orderStatus === "CREATED" && order.orderPaymentStatus === "PENDING" && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOrderToCancel(order);
+                                }}
+                                className="inline-block px-5 py-3 rounded-lg font-bold text-xs tracking-widest uppercase text-destructive border border-destructive/30 hover:bg-destructive/10 transition-colors ml-3"
+                              >
+                                Cancel Order
+                              </button>
+                            )}
                           </div>
 
                         </div>
@@ -307,6 +337,46 @@ export default function Orders() {
         </div>
 
       </div>
+
+      {/* Cancel Order Confirmation Modal */}
+      {orderToCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full shadow-xl">
+            <div className="flex items-center gap-3 text-destructive mb-4">
+              <div className="p-2 rounded-full bg-destructive/10">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">Cancel Order</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+              Are you sure you want to cancel order{" "}
+              <strong className="text-foreground">
+                #{orderToCancel.orderReference.toUpperCase()}
+              </strong>
+              ? This will release all reserved items and cancel pending payment.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setOrderToCancel(null)}
+                disabled={isCancelling}
+                className="px-4 py-2 text-sm font-medium border border-border rounded-lg hover:bg-muted text-foreground transition-colors disabled:opacity-50"
+              >
+                Keep Order
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancel}
+                disabled={isCancelling}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors disabled:opacity-50"
+              >
+                {isCancelling && <Loader2 className="w-4 h-4 animate-spin" />}
+                Confirm Cancellation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -108,6 +108,7 @@ export interface OrderResponse {
   orderStatus: OrderStatus;
   placedAt: string;
   items: OrderItem[];
+  addressSnapshot?: AddressRequest;
 }
 
 export interface OrderItemSummary {
