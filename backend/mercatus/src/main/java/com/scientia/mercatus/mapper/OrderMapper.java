@@ -41,14 +41,15 @@ public class OrderMapper {
                     item.getProductName(),
                     item.getPrimaryImageUrl()
                 )).toList();
-        return new OrderResponseDto(
+        return  new OrderResponseDto(
                 order.getId(),
                 order.getOrderReference(),
                 order.getOrderPaymentStatus(),
                 order.getTotalAmount(),
                 order.getStatus(),
                 order.getCreatedAt(),
-                itemDtos
+                itemDtos,
+                order.getAddressSnapshot()
         );
     }
 }
