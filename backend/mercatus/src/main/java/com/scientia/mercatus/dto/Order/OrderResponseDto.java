@@ -1,6 +1,10 @@
 package com.scientia.mercatus.dto.Order;
 
+import com.scientia.mercatus.entity.AddressSnapshot;
+import com.scientia.mercatus.entity.OrderPaymentStatus;
 import com.scientia.mercatus.entity.OrderStatus;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,9 +19,11 @@ import java.util.List;
 public class OrderResponseDto {
     private Long orderId;
     private String orderReference;
-    private com.scientia.mercatus.entity.OrderPaymentStatus orderPaymentStatus;
+    private OrderPaymentStatus orderPaymentStatus;
     private BigDecimal orderTotal;
     private OrderStatus orderStatus;
     private Instant placedAt;
     private List<OrderItemDto> items;
+    private AddressSnapshot addressSnapshot;
+    
 }
