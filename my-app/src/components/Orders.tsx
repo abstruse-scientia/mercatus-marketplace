@@ -67,6 +67,14 @@ export default function Orders() {
         </div>
       );
     }
+    if (order.orderStatus === 'CREATED') {
+      return (
+        <div className="flex items-center gap-2 px-3 py-1 bg-background text-amber-600 dark:text-amber-400 rounded-full text-[11px] font-bold tracking-widest border border-border">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          PENDING PAYMENT
+        </div>
+      );
+    }
     return (
       <div className="flex items-center gap-2 px-3 py-1 bg-background text-emerald-600 dark:text-emerald-400 rounded-full text-[11px] font-bold tracking-widest border border-border">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
