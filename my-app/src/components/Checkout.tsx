@@ -91,23 +91,78 @@ export default function Checkout() {
         return;
       }
 
-      // 2. Place Order
-      const orderReference = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      // 2. Place Order Skeleton
+      const orderReference = `ORD-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
       const orderResponse = await ordersApi.placeOrder({
         orderReference,
         addressId: finalAddressId,
       });
 
-      // 3. Clear cart (done automatically by backend checkout, but we update frontend state)
-      useCartStore.getState().fetchCart();
-      toast.success("Order placed successfully!");
-      
-      // 4. Redirect to order confirmation
-      navigate(`/orders/${orderResponse.orderId}`, { state: { order: orderResponse } });
+      // 3. Initiate Razorpay Payment
+      const paymentInfo = await ordersApi.initiatePayment(orderResponse.orderId);
+
+      const loadRazorpayScript = () =>
+        new Promise<boolean>((resolve) => {
+          if ((window as any).Razorpay) {
+            resolve(true);
+            return;
+          }
+          const script = document.createElement("script");
+          script.src = "https://checkout.razorpay.com/v1/checkout.js";
+          script.onload = () => resolve(true);
+          script.onerror = () => resolve(false);
+          document.body.appendChild(script);
+        });
+
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        toast.error("Failed to load Razorpay SDK. Please check your connection.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const selectedAddress = addresses.find((a) => a.addressId === finalAddressId);
+      const prefillName = selectedAddress?.fullName || `${formData.firstName} ${formData.lastName}`.trim();
+      const prefillContact = selectedAddress?.mobileNumber || formData.phoneNumber;
+
+      const options = {
+        key: import.meta.env.VITE_API_RAZORPAY_KEY_ID,
+        amount: paymentInfo.amount,
+        currency: paymentInfo.currency,
+        name: "MERCATUS",
+        description: "Order Payment",
+        order_id: paymentInfo.orderId,
+        handler: async function () {
+          toast.success("Payment Successful! Order Confirmed.");
+          await useCartStore.getState().fetchCart();
+          navigate(`/orders/${orderResponse.orderId}`, { replace: true });
+        },
+        modal: {
+          ondismiss: function () {
+            setIsSubmitting(false);
+            toast("Payment window closed. Your items are safe in your cart.", { icon: "ℹ️" });
+          },
+        },
+        prefill: {
+          name: prefillName,
+          contact: prefillContact,
+          email: formData.email || undefined,
+        },
+        theme: {
+          color: "#000000",
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on("payment.failed", function (response: any) {
+        setIsSubmitting(false);
+        toast.error(`Payment Failed: ${response.error?.description || "Transaction declined"}`);
+      });
+      rzp.open();
 
     } catch (error: unknown) {
       const err = error as any;
-      toast.error(err?.response?.data?.errorMessage || "Failed to place order");
+      toast.error(err?.response?.data?.errorMessage || "Failed to initiate payment");
       setIsSubmitting(false);
     }
   };
@@ -367,17 +422,27 @@ export default function Checkout() {
               <span className="text-2xl font-bold text-foreground">${total.toFixed(2)}</span>
             </div>
 
+            {/* This button is doing a lot of thing. Some of which needs explanation.
+                Encountered during fixing frontend phase.
+                Its a checkout button which remains otherwise disable if isSubmitting or new AddressForm is opened
+                It also works as form submit button in case no default address is found . Leading user to type new address which is sent to the backend
+                to be stored.
+                
+             */}
             <button
-              onClick={showNewAddressForm ? undefined : () => handleCheckout()}
+              onClick={showNewAddressForm ? undefined : () => handleCheckout()} 
               form={showNewAddressForm ? "checkout-form" : undefined}
               type={showNewAddressForm ? "submit" : "button"}
               disabled={isSubmitting || (!showNewAddressForm && !selectedAddressId)}
               className="w-full bg-foreground text-background font-medium py-4 rounded-lg hover:bg-foreground/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center"
             >
               {isSubmitting ? (
-                <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin"></div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin"></div>
+                  <span>Opening Payment Gateway...</span>
+                </div>
               ) : (
-                "Continue to Payment"
+                `Pay ${total.toFixed(2)}`
               )}
             </button>
           </div>
