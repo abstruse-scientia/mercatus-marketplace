@@ -11,7 +11,6 @@ export default function OrderConfirmation() {
 
   const [order, setOrder] = useState<OrderResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
@@ -34,82 +33,37 @@ export default function OrderConfirmation() {
   const address = order?.addressSnapshot || null;
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
       try {
         setIsLoading(true);
         const fetchedOrder = await ordersApi.getOrderById(Number(orderId));
+        if (!isMounted) return;
         setOrder(fetchedOrder);
+        // If still CREATED right after checkout, retry once after 1.5s to catch webhook update
+        if (fetchedOrder.orderStatus === "CREATED") {
+          setTimeout(async () => {
+            if (!isMounted) return;
+            try {
+              const refreshed = await ordersApi.getOrderById(Number(orderId));
+              if (isMounted) setOrder(refreshed);
+            } catch {}
+          }, 1500);
+        }
       } catch (err) {
         console.error("Failed to fetch order details", err);
         toast.error("Order not found");
         navigate("/orders");
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchData();
+    return () => {
+      isMounted = false;
+    };
   }, [orderId, navigate]);
 
-  const handleAuthorizePayment = async () => {
-    if (!orderId) return;
-    try {
-      setIsProcessingPayment(true);
-      const paymentInfo = await ordersApi.initiatePayment(Number(orderId));
-
-      const loadScript = () =>
-        new Promise((resolve) => {
-          const script = document.createElement("script");
-          script.src = "https://checkout.razorpay.com/v1/checkout.js";
-          script.onload = () => resolve(true);
-          script.onerror = () => resolve(false);
-          document.body.appendChild(script);
-        });
-
-      const isLoaded = await loadScript();
-      if (!isLoaded) {
-        toast.error(
-          "Failed to load Razorpay SDK. Please check your connection.",
-        );
-        return;
-      }
-
-      const options = {
-        key: import.meta.env.VITE_API_RAZORPAY_KEY_ID,
-        amount: paymentInfo.amount,
-        currency: paymentInfo.currency,
-        name: "THE ARCHIVE",
-        description: "Order Payment",
-        order_id: paymentInfo.orderId,
-        handler: function () {
-          toast.success("Payment Successful!");
-          // Reload the page to get the updated status
-          window.location.reload();
-        },
-        prefill: {
-          name: address?.fullName || "",
-          contact: address?.mobileNumber || "",
-        },
-        theme: {
-          color: "#ffffff",
-        },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-
-      rzp.on("payment.failed", function (response: any) {
-        toast.error(`Payment Failed: ${response.error.description}`);
-      });
-
-      rzp.open();
-    } catch (error: unknown) {
-      const err = error as any;
-      toast.error(
-        err?.response?.data?.errorMessage || "Failed to initiate payment",
-      );
-    } finally {
-      setIsProcessingPayment(false);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -311,29 +265,28 @@ export default function OrderConfirmation() {
               </div>
             </div>
 
-            {!isPaid && order.orderStatus !== "CANCELLED" ? (
+            {order.orderStatus === "CANCELLED" ? (
+              <div className="w-full bg-destructive/10 text-destructive border border-destructive/20 py-3.5 rounded-lg font-bold text-xs tracking-widest uppercase flex justify-center items-center">
+                ORDER CANCELLED
+              </div>
+            ) : !isPaid ? (
               <div className="space-y-3">
-                <button
-                  onClick={handleAuthorizePayment}
-                  disabled={isProcessingPayment || isCancelling}
-                  className="w-full bg-foreground text-background py-4 rounded-lg font-bold text-xs tracking-widest uppercase hover:opacity-90 transition-opacity flex justify-center items-center"
-                >
-                  {isProcessingPayment ? "PROCESSING..." : "AUTHORIZE PAYMENT →"}
-                </button>
+                <div className="w-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 py-3 rounded-lg font-bold text-xs tracking-widest uppercase flex justify-center items-center">
+                  PENDING PAYMENT
+                </div>
                 <button
                   type="button"
                   onClick={() => setShowCancelModal(true)}
-                  disabled={isProcessingPayment || isCancelling}
+                  disabled={isCancelling}
                   className="w-full py-3 rounded-lg font-bold text-xs tracking-widest uppercase text-destructive border border-destructive/30 hover:bg-destructive/10 transition-colors flex justify-center items-center"
                 >
                   Cancel Order
                 </button>
               </div>
             ) : (
-              <div className="w-full bg-muted text-muted-foreground py-4 rounded-lg font-bold text-xs tracking-widest uppercase flex justify-center items-center cursor-not-allowed">
-                {order.orderStatus === "CANCELLED"
-                  ? "ORDER CANCELLED"
-                  : "PAYMENT COMPLETED ✓"}
+              <div className="w-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 py-3.5 rounded-lg font-bold text-xs tracking-widest uppercase flex justify-center items-center gap-2">
+                <span>PAYMENT COMPLETED</span>
+                <span>✓</span>
               </div>
             )}
 
