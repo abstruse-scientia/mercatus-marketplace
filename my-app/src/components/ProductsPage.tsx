@@ -136,11 +136,11 @@ export default function ProductsPage() {
 
         <div className="flex flex-wrap gap-2 mb-6">
           {allCategories.map((cat) => {
-            const isActive = category === cat;
+            const isActive = (category === cat) && !search;
             return (
               <button
                 key={cat}
-                onClick={() => updateParams({ category: cat, page: "0" })}
+                onClick={() => updateParams({ category: cat, search: null, page: "0" })}
                 className={`rounded-none text-xs font-semibold tracking-wider uppercase px-4 py-2 border border-border transition-colors ${
                   isActive
                     ? "bg-foreground text-background"
@@ -152,6 +152,19 @@ export default function ProductsPage() {
             );
           })}
         </div>
+
+        {search && (
+          <div className="flex items-center gap-3 mb-6 p-3 bg-muted/40 border border-border rounded-lg text-sm">
+            <span className="text-muted-foreground">Search results for:</span>
+            <span className="font-bold text-foreground">"{search}"</span>
+            <button
+              onClick={() => updateParams({ search: null, category: "all", page: "0" })}
+              className="ml-auto text-xs uppercase font-mono tracking-wider underline hover:text-foreground text-muted-foreground cursor-pointer"
+            >
+              Clear search
+            </button>
+          </div>
+        )}
 
         <div className="flex items-center gap-4 pb-4 border-b border-border/40">
           <DropdownMenu>
