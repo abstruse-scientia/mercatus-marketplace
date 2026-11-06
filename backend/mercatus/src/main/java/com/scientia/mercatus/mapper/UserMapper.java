@@ -23,7 +23,7 @@ public class UserMapper {
         userDto.setRoles(user.getRoles().stream()
                 .map(Role::getName)
                 .map(Enum::toString)
-                .collect(Collectors.joining(",")));
+                .toList());
 
         return userDto;
     }
