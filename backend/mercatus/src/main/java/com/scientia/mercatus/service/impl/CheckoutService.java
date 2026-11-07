@@ -66,7 +66,7 @@ public class CheckoutService {
         newOrder.getOrderItems().addAll(orderItems);
         
         newOrder.setTotalAmount(totalPrice);
-        cartService.clearCartAfterCheckout(currentCart);
+        newOrder.setCartId(currentCart.getCartId());
         return newOrder;
     }
 
