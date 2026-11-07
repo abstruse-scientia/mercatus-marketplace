@@ -9,6 +9,9 @@ import com.scientia.mercatus.exception.ErrorEnum;
 import com.scientia.mercatus.messaging.EmailEventPayloadUtility;
 import com.scientia.mercatus.messaging.EmailPublisher;
 import com.scientia.mercatus.repository.OrderRepository;
+import com.scientia.mercatus.entity.Cart;
+import com.scientia.mercatus.repository.CartItemsRepository;
+import com.scientia.mercatus.repository.CartRepository;
 import com.scientia.mercatus.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -22,6 +25,8 @@ public class PaymentResultHandler {
     private final IInventoryService inventoryService;
     private final EmailPublisher emailPublisher;
     private final EmailEventPayloadUtility payloadCreation;
+    private final CartRepository cartRepository;
+    private final CartItemsRepository cartItemsRepository;
 
     /* Moved  */
     @Transactional
@@ -44,6 +49,14 @@ public class PaymentResultHandler {
         //Confirm inventory deduction
         for (OrderItem orderItem : order.getOrderItems()) {
             inventoryService.confirmReservation(orderItem.getReservationKey());
+        }
+
+        // Clear cart for the user upon payment success
+        if (order.getUser() != null) {
+            Cart userCart = cartRepository.findByUser(order.getUser());
+            if (userCart != null) {
+                cartItemsRepository.deleteByCart(userCart);
+            }
         }
 
         order.setStatus(OrderStatus.CONFIRMED);
