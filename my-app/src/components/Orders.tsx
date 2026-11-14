@@ -337,9 +337,9 @@ export default function Orders() {
             <p className="text-sm text-muted-foreground mb-6">
               If you have any questions about your order, our support team is here to help.
             </p>
-            <Link to="/contact" className="text-xs font-bold tracking-widest uppercase text-foreground hover:underline flex items-center gap-2">
+            <a href="mailto:support@thearchive.store" className="text-xs font-bold tracking-widest uppercase text-foreground hover:underline flex items-center gap-2">
               Contact Support →
-            </Link>
+            </a>
           </div>
 
         </div>

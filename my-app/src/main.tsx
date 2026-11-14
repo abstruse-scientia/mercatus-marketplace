@@ -12,7 +12,6 @@ import App from "./App.tsx";
 import ErrorPage from "./components/ErrorPage.tsx";
 import Home from "./components/Home.tsx";
 import About from "./components/About.tsx";
-import Contact from "./components/Contact.tsx";
 import Login from "./components/Login.tsx";
 import Register from "./components/Register.tsx";
 import ForgotPassword from "./components/ForgotPassword.tsx";
@@ -46,7 +45,6 @@ const routeDefinitions = createRoutesFromElements(
     <Route path="/products/:id" element={<ProductDetail />} />
     <Route path="/about" element={<About />} />
 
-    <Route path="/contact" element={<Contact />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
     <Route path="/forgot-password" element={<ForgotPassword />} />

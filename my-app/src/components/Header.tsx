@@ -367,13 +367,6 @@ export default function Header() {
                     >
                       About
                     </Link>
-                    <Link
-                      to="/contact"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="px-5 py-2.5 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
-                    >
-                      Contact
-                    </Link>
                   </div>
 
                   {/* Account / User Section */}

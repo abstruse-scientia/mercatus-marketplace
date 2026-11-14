@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 const AdminProducts = () => {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   
   // Pagination
   const [page, setPage] = useState(0);
@@ -48,6 +49,16 @@ const AdminProducts = () => {
     }
   };
 
+  const filteredProducts = products.filter((product) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      product.name.toLowerCase().includes(q) ||
+      (product.sku && product.sku.toLowerCase().includes(q)) ||
+      (product.categoryName && product.categoryName.toLowerCase().includes(q))
+    );
+  });
+
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
@@ -76,12 +87,14 @@ const AdminProducts = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input
               type="text"
-              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products by name, SKU, or category..."
               className="w-full pl-9 pr-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent text-sm focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent outline-none"
             />
           </div>
           <div className="text-sm text-neutral-500">
-            Total: {totalElements} items
+            Total: {searchQuery.trim() ? `${filteredProducts.length} of ${totalElements}` : `${totalElements}`} items
           </div>
         </div>
 
@@ -105,14 +118,16 @@ const AdminProducts = () => {
                     Loading products...
                   </td>
                 </tr>
-              ) : products.length === 0 ? (
+              ) : filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">
-                    No products found. Create one to get started!
+                    {searchQuery.trim()
+                      ? `No products match "${searchQuery}".`
+                      : "No products found. Create one to get started!"}
                   </td>
                 </tr>
               ) : (
-                products.map((product) => (
+                filteredProducts.map((product) => (
                   <tr key={product.productId} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">

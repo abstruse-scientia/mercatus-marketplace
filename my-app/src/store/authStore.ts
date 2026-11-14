@@ -43,7 +43,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: response.user,
             jwtToken: response.jwtToken,
-            refreshToken: response.refreshToken,
+              refreshToken: response.refreshToken,
             isAuthenticated: true,
             isLoading: false,
           });
@@ -72,7 +72,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          const { jwtToken } = get(); 
+          const { jwtToken } = get();
           if (jwtToken) {
             await authApi.logout();
           }

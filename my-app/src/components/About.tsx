@@ -1,5 +1,4 @@
 import { Camera, Shield, Users, Leaf, Globe2 } from "lucide-react";
-import { Link } from "react-router-dom";
 
 export default function About() {
   return (
@@ -10,7 +9,7 @@ export default function About() {
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(circle_at_center,theme(colors.muted/40),transparent_60%)] dark:opacity-40"
         />
-        <div className="relative mx-auto max-w-5xl px-4 py-14 sm:py-18 md:py-22 text-center">
+        <div className="relative mx-auto max-w-5xl px-4 py-14 sm:py-20 md:py-24 text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
             <span className="bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent px-2">
               Who we are?
@@ -97,12 +96,12 @@ export default function About() {
               Reach out and we’ll help you pick the right kit.
             </p>
           </div>
-          <Link
-            to="/contact"
+          <a
+            href="mailto:support@thearchive.store"
             className="inline-flex items-center rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background shadow hover:opacity-90 transition"
           >
-            Contact us
-          </Link>
+            Email Support
+          </a>
         </div>
       </section>
     </main>
