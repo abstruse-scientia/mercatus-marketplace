@@ -10,8 +10,11 @@ const AdminProtectedRoute = () => {
     return <Navigate to="/login" replace  state = {{from: location }}/>;
   }
 
-  // Check if user has ROLE_ADMIN
-  const isAdmin = user.roles.includes("ROLE_ADMIN");
+  // Check if user has ROLE_ADMIN or ADMIN (handles both string[] and string)
+  const isAdmin = Array.isArray(user.roles)
+    ? user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN")
+    : typeof user.roles === "string" &&
+      ((user.roles as string).includes("ROLE_ADMIN") || (user.roles as string).includes("ADMIN"));
 
   if (!isAdmin) {
     // If logged in but not admin, kick them to home

@@ -291,12 +291,12 @@ export default function OrderConfirmation() {
             )}
 
             <div className="mt-6 text-center">
-              <Link
-                to="/contact"
+              <a
+                href="mailto:support@thearchive.store"
                 className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground hover:text-foreground hover:underline"
               >
                 Need Help with this order?
-              </Link>
+              </a>
             </div>
           </div>
         </div>
