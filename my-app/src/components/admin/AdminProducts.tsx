@@ -64,14 +64,14 @@ const AdminProducts = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Products</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Products</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Manage your store's inventory and product details.
           </p>
         </div>
         <Link
           to="/admin/products/new"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-lg text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Plus className="w-4 h-4" />
           Create Product
@@ -79,21 +79,21 @@ const AdminProducts = () => {
       </div>
 
       {/* Table Container */}
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-card text-card-foreground border border-border rounded-xl overflow-hidden shadow-sm">
         
         {/* Table Toolbar */}
-        <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+        <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products by name, SKU, or category..."
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent text-sm focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent outline-none"
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-ring focus:border-transparent outline-none placeholder:text-muted-foreground"
             />
           </div>
-          <div className="text-sm text-neutral-500">
+          <div className="text-sm text-muted-foreground">
             Total: {searchQuery.trim() ? `${filteredProducts.length} of ${totalElements}` : `${totalElements}`} items
           </div>
         </div>
@@ -102,25 +102,25 @@ const AdminProducts = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-neutral-50 dark:bg-neutral-900/50 border-b border-neutral-200 dark:border-neutral-800">
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Product</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">SKU</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider text-right">Actions</th>
+              <tr className="bg-muted/40 border-b border-border">
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Product</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">SKU</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Price</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+            <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">
+                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                     Loading products...
                   </td>
                 </tr>
               ) : filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">
+                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                     {searchQuery.trim()
                       ? `No products match "${searchQuery}".`
                       : "No products found. Create one to get started!"}
@@ -128,39 +128,39 @@ const AdminProducts = () => {
                 </tr>
               ) : (
                 filteredProducts.map((product) => (
-                  <tr key={product.productId} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+                  <tr key={product.productId} className="hover:bg-accent/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         {product.primaryImageUrl ? (
                           <img
                             src={product.primaryImageUrl}
                             alt={product.name}
-                            className="w-10 h-10 rounded-md object-cover border border-neutral-200 dark:border-neutral-700 bg-white"
+                            className="w-10 h-10 rounded-md object-cover border border-border bg-card"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-md border border-dashed border-neutral-300 dark:border-neutral-700 flex items-center justify-center bg-neutral-50 dark:bg-neutral-800">
-                            <ImageIcon className="w-4 h-4 text-neutral-400" />
+                          <div className="w-10 h-10 rounded-md border border-dashed border-border flex items-center justify-center bg-muted">
+                            <ImageIcon className="w-4 h-4 text-muted-foreground" />
                           </div>
                         )}
-                        <span className="font-medium text-neutral-900 dark:text-white line-clamp-1 max-w-[200px]">
+                        <span className="font-medium text-foreground line-clamp-1 max-w-[200px]">
                           {product.name}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-400 font-mono">
+                    <td className="px-6 py-4 text-sm text-muted-foreground font-mono">
                       {product.sku}
                     </td>
-                    <td className="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-400">
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {product.categoryName}
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-neutral-900 dark:text-white">
+                    <td className="px-6 py-4 text-sm font-medium text-foreground">
                       ${product.price.toFixed(2)}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
                         product.isActive 
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
-                          : 'bg-neutral-100 text-neutral-600 border-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700'
+                          : 'bg-muted text-muted-foreground border-border'
                       }`}>
                         {product.isActive ? 'Active' : 'Inactive'}
                       </span>
@@ -169,7 +169,7 @@ const AdminProducts = () => {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           to={`/admin/products/${product.productId}`}
-                          className="p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-white rounded-lg transition-colors"
+                          className="p-2 text-muted-foreground hover:bg-accent hover:text-foreground rounded-lg transition-colors"
                           title="Edit Product"
                         >
                           <Pencil className="w-4 h-4" />
@@ -178,7 +178,7 @@ const AdminProducts = () => {
                           onClick={() => handleToggleStatus(product)}
                           className={`p-2 rounded-lg transition-colors ${
                             product.isActive 
-                              ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10' 
+                              ? 'text-destructive hover:bg-destructive/10' 
                               : 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
                           }`}
                           title={product.isActive ? "Deactivate Product" : "Reactivate Product"}
@@ -196,22 +196,22 @@ const AdminProducts = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-            <span className="text-sm text-neutral-500">
+          <div className="p-4 border-t border-border flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
               Showing page {page + 1} of {totalPages}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="px-3 py-1.5 text-sm border border-neutral-300 dark:border-neutral-700 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page === totalPages - 1}
-                className="px-3 py-1.5 text-sm border border-neutral-300 dark:border-neutral-700 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
               >
                 Next
               </button>

@@ -126,28 +126,28 @@ const AdminUsers = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Users</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Users</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Manage system users, access roles, and account statuses.
           </p>
         </div>
       </div>
 
       {/* Table Container */}
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-card text-card-foreground border border-border rounded-xl overflow-hidden shadow-sm">
         {/* Table Toolbar */}
-        <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by name or email..."
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent text-sm focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent outline-none text-neutral-900 dark:text-white placeholder-neutral-400"
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-ring focus:border-transparent outline-none placeholder:text-muted-foreground"
             />
           </div>
-          <div className="text-sm text-neutral-500">
+          <div className="text-sm text-muted-foreground">
             Total: {totalElements} users
           </div>
         </div>
@@ -156,27 +156,27 @@ const AdminUsers = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-neutral-50 dark:bg-neutral-900/50 border-b border-neutral-200 dark:border-neutral-800">
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">User</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Roles</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider text-right">Actions</th>
+              <tr className="bg-muted/40 border-b border-border">
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">User</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Roles</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+            <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-neutral-500">
+                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                       <span>Loading users...</span>
                     </div>
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-neutral-500">
+                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
                     {searchTerm ? "No users match your search." : "No users found."}
                   </td>
                 </tr>
@@ -189,17 +189,17 @@ const AdminUsers = () => {
                   return (
                     <tr
                       key={user.userId}
-                      className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
+                      className="hover:bg-accent/50 transition-colors"
                     >
                       {/* User Info */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center shrink-0 font-semibold text-sm text-neutral-700 dark:text-neutral-300">
+                          <div className="w-9 h-9 rounded-full bg-muted border border-border flex items-center justify-center shrink-0 font-semibold text-sm text-foreground">
                             {user.userName ? user.userName.charAt(0).toUpperCase() : <UserIcon className="w-4 h-4" />}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-neutral-900 dark:text-white">
+                              <span className="text-sm font-medium text-foreground">
                                 {user.userName}
                               </span>
                               {isSelf && (
@@ -208,7 +208,7 @@ const AdminUsers = () => {
                                 </span>
                               )}
                             </div>
-                            <span className="text-xs text-neutral-500 font-mono">
+                            <span className="text-xs text-muted-foreground font-mono">
                               ID: #{user.userId}
                             </span>
                           </div>
@@ -216,7 +216,7 @@ const AdminUsers = () => {
                       </td>
 
                       {/* Email */}
-                      <td className="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-400 font-mono">
+                      <td className="px-6 py-4 text-sm text-muted-foreground font-mono">
                         {user.email}
                       </td>
 
@@ -232,7 +232,7 @@ const AdminUsers = () => {
                                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
                                     isRoleAdmin
                                       ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20"
-                                      : "bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700"
+                                      : "bg-muted text-muted-foreground border-border"
                                   }`}
                                 >
                                   {isRoleAdmin ? <Shield className="w-3 h-3" /> : null}
@@ -241,7 +241,7 @@ const AdminUsers = () => {
                               );
                             })
                           ) : (
-                            <span className="text-xs text-neutral-400">None</span>
+                            <span className="text-xs text-muted-foreground">None</span>
                           )}
                         </div>
                       </td>
@@ -262,13 +262,13 @@ const AdminUsers = () => {
                       {/* Actions */}
                       <td className="px-6 py-4 text-right">
                         {isSelf ? (
-                          <span className="text-xs text-neutral-400 italic">
+                          <span className="text-xs text-muted-foreground italic">
                             Protected
                           </span>
                         ) : (
                           <div className="flex items-center justify-end gap-1.5">
                             {isActionLoading ? (
-                              <Loader2 className="w-4 h-4 animate-spin text-neutral-400" />
+                              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                             ) : (
                               <>
                                 {/* Promote / Demote */}
@@ -276,7 +276,7 @@ const AdminUsers = () => {
                                   onClick={() => handleToggleRole(user)}
                                   className={`p-2 rounded-lg text-xs font-medium transition-colors border ${
                                     isAdmin
-                                      ? "text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                                      ? "text-foreground border-border hover:bg-accent"
                                       : "text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/30 hover:bg-purple-50 dark:hover:bg-purple-500/10"
                                   }`}
                                   title={isAdmin ? "Demote to User" : "Promote to Admin"}
@@ -320,7 +320,7 @@ const AdminUsers = () => {
                                 {/* Delete */}
                                 <button
                                   onClick={() => setUserToDelete(user)}
-                                  className="p-2 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg text-xs font-medium transition-colors"
+                                  className="p-2 text-destructive border border-destructive/30 hover:bg-destructive/10 rounded-lg text-xs font-medium transition-colors"
                                   title="Delete User"
                                 >
                                   <span className="flex items-center gap-1">
@@ -343,22 +343,22 @@ const AdminUsers = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-            <span className="text-sm text-neutral-500">
+          <div className="p-4 border-t border-border flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
               Showing page {page + 1} of {totalPages}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="px-3 py-1.5 text-sm border border-neutral-300 dark:border-neutral-700 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-neutral-700 dark:text-neutral-300"
+                className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page === totalPages - 1}
-                className="px-3 py-1.5 text-sm border border-neutral-300 dark:border-neutral-700 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-neutral-700 dark:text-neutral-300"
+                className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
               >
                 Next
               </button>
@@ -370,16 +370,16 @@ const AdminUsers = () => {
       {/* Delete Confirmation Modal */}
       {userToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 max-w-md w-full shadow-xl">
-            <div className="flex items-center gap-3 text-red-600 dark:text-red-400 mb-4">
-              <div className="p-2 rounded-full bg-red-100 dark:bg-red-500/10">
+          <div className="bg-card text-card-foreground border border-border rounded-xl p-6 max-w-md w-full shadow-xl">
+            <div className="flex items-center gap-3 text-destructive mb-4">
+              <div className="p-2 rounded-full bg-destructive/10">
                 <AlertTriangle className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Delete User</h3>
+              <h3 className="text-lg font-bold text-foreground">Delete User</h3>
             </div>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6">
+            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
               Are you sure you want to permanently delete user{" "}
-              <strong className="text-neutral-900 dark:text-white">
+              <strong className="text-foreground">
                 {userToDelete.userName}
               </strong>{" "}
               ({userToDelete.email})? This action cannot be undone.
@@ -389,7 +389,7 @@ const AdminUsers = () => {
                 type="button"
                 onClick={() => setUserToDelete(null)}
                 disabled={isDeleting}
-                className="px-4 py-2 text-sm font-medium border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium border border-border rounded-lg hover:bg-accent text-foreground transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -397,7 +397,7 @@ const AdminUsers = () => {
                 type="button"
                 onClick={handleDeleteUser}
                 disabled={isDeleting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors disabled:opacity-50"
               >
                 {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
                 Confirm Delete

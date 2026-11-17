@@ -1,4 +1,3 @@
-
 import { NavLink, Outlet } from "react-router-dom";
 import { Package, Tags, ShoppingCart, LayoutDashboard, Users } from "lucide-react";
 
@@ -11,11 +10,11 @@ const AdminLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-[#0a0a0a] flex flex-col md:flex-row pt-16">
+    <div className="min-h-screen bg-background flex flex-col md:flex-row pt-16">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 shrink-0 h-auto md:h-[calc(100vh-4rem)] md:sticky md:top-16 z-10">
+      <aside className="w-full md:w-64 bg-card border-r border-border shrink-0 h-auto md:h-[calc(100vh-4rem)] md:sticky md:top-16 z-10">
         <div className="p-6">
-          <div className="flex items-center gap-3 mb-8 text-neutral-900 dark:text-white">
+          <div className="flex items-center gap-3 mb-8 text-foreground">
             <LayoutDashboard className="w-6 h-6" />
             <h2 className="text-xl font-bold tracking-tight">Admin Portal</h2>
           </div>
@@ -27,8 +26,8 @@ const AdminLayout = () => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-black text-white dark:bg-white dark:text-black"
-                      : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
                   }`
                 }
               >

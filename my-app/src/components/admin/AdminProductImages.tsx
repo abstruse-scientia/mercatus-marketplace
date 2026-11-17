@@ -91,7 +91,7 @@ const AdminProductImages = ({ productId }: AdminProductImagesProps) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -106,12 +106,12 @@ const AdminProductImages = ({ productId }: AdminProductImagesProps) => {
           placeholder="Paste image URL here..."
           value={newImageUrl}
           onChange={(e) => setNewImageUrl(e.target.value)}
-          className="flex-1 px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent text-sm focus:ring-2 focus:ring-black dark:focus:ring-white outline-none"
+          className="flex-1 px-4 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-ring outline-none placeholder:text-muted-foreground"
         />
         <button
           type="submit"
           disabled={isUploading}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black rounded-lg text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors disabled:opacity-50 shrink-0"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
         >
           {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
           Add
@@ -120,13 +120,13 @@ const AdminProductImages = ({ productId }: AdminProductImagesProps) => {
 
       {/* Image Gallery */}
       {images.length === 0 ? (
-        <div className="text-center py-8 px-4 border border-dashed border-neutral-300 dark:border-neutral-700 rounded-lg">
-          <p className="text-sm text-neutral-500">No images added yet.</p>
+        <div className="text-center py-8 px-4 border border-dashed border-border rounded-lg">
+          <p className="text-sm text-muted-foreground">No images added yet.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {images.map((img, index) => (
-            <div key={img.id} className="group relative aspect-square rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden bg-neutral-50 dark:bg-neutral-900/50">
+            <div key={img.id} className="group relative aspect-square rounded-lg border border-border overflow-hidden bg-muted/30">
               <img src={img.url} alt={`Product view ${index + 1}`} className="w-full h-full object-cover" />
               
               {/* Primary Badge */}
@@ -151,7 +151,7 @@ const AdminProductImages = ({ productId }: AdminProductImagesProps) => {
                   )}
                   <button
                     onClick={() => handleDeleteImage(img.id)}
-                    className="p-1.5 bg-white/20 hover:bg-red-500 text-white rounded backdrop-blur-sm transition-colors"
+                    className="p-1.5 bg-white/20 hover:bg-destructive text-white rounded backdrop-blur-sm transition-colors"
                     title="Delete Image"
                   >
                     <Trash2 className="w-4 h-4" />

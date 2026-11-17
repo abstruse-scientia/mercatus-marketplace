@@ -115,7 +115,7 @@ const AddressBook = () => {
   if (isLoading && addresses.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <span className="text-lg text-neutral-500">Loading addresses...</span>
+        <span className="text-lg text-muted-foreground">Loading addresses...</span>
       </div>
     );
   }
@@ -127,10 +127,10 @@ const AddressBook = () => {
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isFormOpen ? "lg:w-7/12" : "w-full"}`}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-foreground">
               Address Book
             </h1>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Manage your saved addresses for a faster checkout experience.
             </p>
           </div>
@@ -138,7 +138,7 @@ const AddressBook = () => {
           {/* Add New Button (hidden on mobile if form is open to save space, but visible on desktop) */}
           <button
             onClick={() => handleOpenForm()}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-lg text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors ${isFormOpen ? 'hidden lg:inline-flex' : 'inline-flex'}`}
+            className={`inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity ${isFormOpen ? 'hidden lg:inline-flex' : 'inline-flex'}`}
           >
             <Plus className="w-4 h-4" />
             Add New Address
@@ -146,17 +146,17 @@ const AddressBook = () => {
         </div>
 
         {addresses.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 border border-dashed border-neutral-300 dark:border-neutral-800 rounded-xl bg-neutral-50 dark:bg-neutral-900/50">
-            <div className="w-16 h-16 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center mb-4">
-              <Plus className="w-8 h-8 text-neutral-400" />
+          <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border rounded-xl bg-muted/30">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+              <Plus className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">No addresses saved</h3>
-            <p className="text-neutral-500 text-center max-w-sm mb-6">
+            <h3 className="text-lg font-medium text-foreground mb-2">No addresses saved</h3>
+            <p className="text-muted-foreground text-center max-w-sm mb-6">
               You haven't saved any addresses yet. Add one now to make your next checkout perfectly smooth.
             </p>
             <button
               onClick={() => handleOpenForm()}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-lg text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
             >
               <Plus className="w-4 h-4" />
               Add New Address
@@ -175,7 +175,7 @@ const AddressBook = () => {
                 isSettingDefault={settingDefaultId === address.addressId}
               />
             ))}
-            <div className="mt-4 text-sm text-neutral-500 dark:text-neutral-500">
+            <div className="mt-4 text-sm text-muted-foreground">
               Showing 1 to {addresses.length} of {addresses.length} addresses
             </div>
           </div>
@@ -191,7 +191,7 @@ const AddressBook = () => {
             onClick={handleCloseForm}
           />
           {/* Form Container */}
-          <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white dark:bg-neutral-900 lg:relative lg:max-w-none lg:h-full lg:bg-transparent animate-in slide-in-from-right-8 lg:animate-none">
+          <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-card text-card-foreground border-l border-border lg:border-none lg:relative lg:max-w-none lg:h-full lg:bg-transparent animate-in slide-in-from-right-8 lg:animate-none">
             <AddressForm
               initialData={editingAddress}
               onClose={handleCloseForm}
