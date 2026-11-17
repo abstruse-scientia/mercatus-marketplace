@@ -95,7 +95,7 @@ const AdminProductForm = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-neutral-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -106,15 +106,15 @@ const AdminProductForm = () => {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate("/admin/products")}
-          className="p-2 -ml-2 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors"
+          className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-foreground">
             {isEditMode ? "Edit Product" : "Create Product"}
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {isEditMode ? "Update the details and images of your product." : "Add a new product to your inventory."}
           </p>
         </div>
@@ -123,14 +123,14 @@ const AdminProductForm = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Form */}
         <div className="lg:col-span-2 space-y-6">
-          <form id="product-form" onSubmit={handleSubmit} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm space-y-6">
-            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white border-b border-neutral-200 dark:border-neutral-800 pb-4">
+          <form id="product-form" onSubmit={handleSubmit} className="bg-card text-card-foreground border border-border rounded-xl p-6 shadow-sm space-y-6">
+            <h2 className="text-lg font-semibold text-foreground border-b border-border pb-4">
               Basic Details
             </h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Product Name
                 </label>
                 <input
@@ -140,12 +140,12 @@ const AdminProductForm = () => {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="e.g. Vintage Leather Jacket"
-                  className="w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent text-neutral-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all placeholder:text-muted-foreground"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Description
                 </label>
                 <textarea
@@ -154,14 +154,14 @@ const AdminProductForm = () => {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Describe your product..."
-                  className="w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent text-neutral-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all resize-y"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all resize-y placeholder:text-muted-foreground"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Price ($)
                 </label>
                 <input
@@ -173,12 +173,12 @@ const AdminProductForm = () => {
                   value={formData.price}
                   onChange={handleChange}
                   placeholder="0.00"
-                  className="w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent text-neutral-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   SKU
                 </label>
                 <input
@@ -188,12 +188,12 @@ const AdminProductForm = () => {
                   value={formData.sku}
                   onChange={handleChange}
                   placeholder="e.g. VINT-LEATH-01"
-                  className="w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent text-neutral-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all font-mono"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Category
                 </label>
                 <select
@@ -201,7 +201,7 @@ const AdminProductForm = () => {
                   required
                   value={formData.categoryId}
                   onChange={handleChange}
-                  className="w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent text-neutral-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all appearance-none"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all appearance-none"
                 >
                   <option value="" disabled>Select a category</option>
                   {categories.map((cat) => (
@@ -214,8 +214,8 @@ const AdminProductForm = () => {
 
               {isEditMode && (
                 <div>
-                  <label className="block text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-2">
-                    Slug <span className="text-neutral-400 font-normal">(Auto-generated if empty)</span>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Slug <span className="text-muted-foreground font-normal">(Auto-generated if empty)</span>
                   </label>
                   <input
                     type="text"
@@ -223,17 +223,17 @@ const AdminProductForm = () => {
                     value={formData.slug}
                     onChange={handleChange}
                     placeholder="vintage-leather-jacket"
-                    className="w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent text-neutral-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all font-mono text-sm"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all font-mono text-sm"
                   />
                 </div>
               )}
             </div>
 
-            <div className="pt-6 border-t border-neutral-200 dark:border-neutral-800 flex justify-end">
+            <div className="pt-6 border-t border-border flex justify-end">
               <button
                 type="submit"
                 disabled={isSaving}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-lg text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors disabled:opacity-50 min-w-[140px] justify-center"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 min-w-[140px] justify-center"
               >
                 {isSaving ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -249,22 +249,22 @@ const AdminProductForm = () => {
         {/* Sidebar / Images */}
         <div className="lg:col-span-1">
           {isEditMode ? (
-            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm">
-               <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
+            <div className="bg-card text-card-foreground border border-border rounded-xl p-6 shadow-sm">
+               <h2 className="text-lg font-semibold text-foreground mb-4">
                   Product Images
                </h2>
-               <p className="text-sm text-neutral-500 mb-6">
+               <p className="text-sm text-muted-foreground mb-6">
                  Image management is available in the dedicated images module.
                </p>
                {/* Image Manager Component */}
                <AdminProductImages productId={Number(id)} />
             </div>
           ) : (
-            <div className="bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6">
-               <h2 className="text-sm font-semibold text-neutral-900 dark:text-white mb-2">
+            <div className="bg-muted/40 border border-border rounded-xl p-6">
+               <h2 className="text-sm font-semibold text-foreground mb-2">
                   Images
                </h2>
-               <p className="text-sm text-neutral-500">
+               <p className="text-sm text-muted-foreground">
                  You can add images after creating the product.
                </p>
             </div>

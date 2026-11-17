@@ -62,15 +62,15 @@ const AdminOrders = () => {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Orders</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Orders</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Manage customer orders and fulfillments.
           </p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-card text-card-foreground border border-border rounded-xl overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-border flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
             {["ALL", "CREATED", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"].map((status) => (
               <button
@@ -78,15 +78,15 @@ const AdminOrders = () => {
                 onClick={() => { setStatusFilter(status as any); setPage(0); }}
                 className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${
                   statusFilter === status 
-                    ? "bg-black text-white dark:bg-white dark:text-black" 
-                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                    ? "bg-primary text-primary-foreground" 
+                    : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground"
                 }`}
               >
                 {status}
               </button>
             ))}
           </div>
-          <div className="text-sm text-neutral-500 shrink-0">
+          <div className="text-sm text-muted-foreground shrink-0">
             Total: {totalElements} orders
           </div>
         </div>
@@ -94,51 +94,51 @@ const AdminOrders = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-neutral-50 dark:bg-neutral-900/50 border-b border-neutral-200 dark:border-neutral-800">
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Order ID</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Total</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Payment</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider text-right">Status Action</th>
+              <tr className="bg-muted/40 border-b border-border">
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order ID</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Customer</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Payment</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">Status Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+            <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">
+                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                     Loading orders...
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">
+                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                     No orders found.
                   </td>
                 </tr>
               ) : (
                 orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+                  <tr key={order.id} className="hover:bg-accent/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-neutral-900 dark:text-white font-mono">
+                      <div className="text-sm font-medium text-foreground font-mono">
                         {order.orderReference}
                       </div>
-                      <div className="text-xs text-neutral-500">
+                      <div className="text-xs text-muted-foreground">
                         #{order.id}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-neutral-900 dark:text-white">
+                      <div className="text-sm font-medium text-foreground">
                         {order.userName}
                       </div>
-                      <div className="text-xs text-neutral-500">
+                      <div className="text-xs text-muted-foreground">
                         {order.userEmail}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-400">
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-neutral-900 dark:text-white">
+                    <td className="px-6 py-4 text-sm font-medium text-foreground">
                       ${order.totalAmount.toFixed(2)}
                     </td>
                     <td className="px-6 py-4">
@@ -153,13 +153,13 @@ const AdminOrders = () => {
                     <td className="px-6 py-4 text-right">
                       {updatingOrderId === order.id ? (
                         <div className="flex items-center justify-end">
-                          <Loader2 className="w-5 h-5 animate-spin text-neutral-400" />
+                          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                         </div>
                       ) : (
                         <select
                           value={order.orderStatus}
                           onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
-                          className={`text-xs font-semibold uppercase tracking-wider rounded-md border px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white appearance-none text-center cursor-pointer ${orderStatusColors[order.orderStatus]}`}
+                          className={`text-xs font-semibold uppercase tracking-wider rounded-md border px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-ring appearance-none text-center cursor-pointer ${orderStatusColors[order.orderStatus]}`}
                         >
                           <option value="CREATED">Created</option>
                           <option value="CONFIRMED">Confirmed</option>
@@ -178,22 +178,22 @@ const AdminOrders = () => {
         </div>
 
         {totalPages > 1 && (
-          <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-            <span className="text-sm text-neutral-500">
+          <div className="p-4 border-t border-border flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
               Showing page {page + 1} of {totalPages}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="px-3 py-1.5 text-sm border border-neutral-300 dark:border-neutral-700 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 transition-colors text-foreground"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page === totalPages - 1}
-                className="px-3 py-1.5 text-sm border border-neutral-300 dark:border-neutral-700 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 transition-colors text-foreground"
               >
                 Next
               </button>

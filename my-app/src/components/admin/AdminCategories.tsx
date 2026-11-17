@@ -101,27 +101,27 @@ const AdminCategories = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Categories</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Categories</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Manage your product categories.
           </p>
         </div>
         <button
           onClick={() => { setIsCreating(true); cancelEdit(); }}
           disabled={isCreating}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-lg text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           <Plus className="w-4 h-4" />
           Add Category
         </button>
       </div>
 
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-          <div className="text-sm font-medium text-neutral-900 dark:text-white">
+      <div className="bg-card text-card-foreground border border-border rounded-xl overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="text-sm font-medium text-foreground">
             All Categories
           </div>
-          <div className="text-sm text-neutral-500">
+          <div className="text-sm text-muted-foreground">
             Total: {totalElements} items
           </div>
         </div>
@@ -129,19 +129,19 @@ const AdminCategories = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-neutral-50 dark:bg-neutral-900/50 border-b border-neutral-200 dark:border-neutral-800">
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider w-16">ID</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Slug</th>
-                <th className="px-6 py-4 text-xs font-semibold text-neutral-500 uppercase tracking-wider text-right w-32">Actions</th>
+              <tr className="bg-muted/40 border-b border-border">
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-16">ID</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Slug</th>
+                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right w-32">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+            <tbody className="divide-y divide-border">
               
               {/* Create Row Inline */}
               {isCreating && (
-                <tr className="bg-blue-50/50 dark:bg-blue-900/10">
-                  <td className="px-6 py-4 text-sm text-neutral-400">New</td>
+                <tr className="bg-muted/20">
+                  <td className="px-6 py-4 text-sm text-muted-foreground">New</td>
                   <td className="px-6 py-4">
                     <input
                       autoFocus
@@ -149,18 +149,18 @@ const AdminCategories = () => {
                       placeholder="Category Name"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm focus:ring-2 focus:ring-black outline-none"
+                      className="w-full px-3 py-1.5 rounded-md border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-ring outline-none"
                     />
                   </td>
-                  <td className="px-6 py-4 text-sm text-neutral-400 italic">
+                  <td className="px-6 py-4 text-sm text-muted-foreground italic">
                     Auto-generated
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={handleCreate} disabled={isSaving} className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-md">
+                      <button onClick={handleCreate} disabled={isSaving} className="p-1.5 text-emerald-600 hover:bg-emerald-500/10 rounded-md">
                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                       </button>
-                      <button onClick={() => setIsCreating(false)} className="p-1.5 text-neutral-500 hover:bg-neutral-100 rounded-md">
+                      <button onClick={() => setIsCreating(false)} className="p-1.5 text-muted-foreground hover:bg-accent rounded-md">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
@@ -170,20 +170,20 @@ const AdminCategories = () => {
 
               {isLoading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-neutral-500">
+                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
                     Loading categories...
                   </td>
                 </tr>
               ) : categories.length === 0 && !isCreating ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-neutral-500">
+                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
                     No categories found.
                   </td>
                 </tr>
               ) : (
                 categories.map((cat) => (
-                  <tr key={cat.categoryId} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-neutral-500 font-mono">#{cat.categoryId}</td>
+                  <tr key={cat.categoryId} className="hover:bg-accent/50 transition-colors">
+                    <td className="px-6 py-4 text-sm text-muted-foreground font-mono">#{cat.categoryId}</td>
                     
                     {/* Editing Mode */}
                     {editingId === cat.categoryId ? (
@@ -193,7 +193,7 @@ const AdminCategories = () => {
                             type="text"
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
-                            className="w-full px-3 py-1.5 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm focus:ring-2 focus:ring-black outline-none"
+                            className="w-full px-3 py-1.5 rounded-md border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-ring outline-none"
                           />
                         </td>
                         <td className="px-6 py-4">
@@ -201,15 +201,15 @@ const AdminCategories = () => {
                             type="text"
                             value={editSlug}
                             onChange={(e) => setEditSlug(e.target.value)}
-                            className="w-full px-3 py-1.5 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm focus:ring-2 focus:ring-black outline-none font-mono"
+                            className="w-full px-3 py-1.5 rounded-md border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-ring outline-none font-mono"
                           />
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => handleUpdate(cat.categoryId)} disabled={isSaving} className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-md">
+                            <button onClick={() => handleUpdate(cat.categoryId)} disabled={isSaving} className="p-1.5 text-emerald-600 hover:bg-emerald-500/10 rounded-md">
                               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                             </button>
-                            <button onClick={cancelEdit} className="p-1.5 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md">
+                            <button onClick={cancelEdit} className="p-1.5 text-muted-foreground hover:bg-accent rounded-md">
                               <X className="w-4 h-4" />
                             </button>
                           </div>
@@ -217,18 +217,18 @@ const AdminCategories = () => {
                       </>
                     ) : (
                       <>
-                        <td className="px-6 py-4 font-medium text-neutral-900 dark:text-white">
+                        <td className="px-6 py-4 font-medium text-foreground">
                           {cat.categoryName}
                         </td>
-                        <td className="px-6 py-4 text-sm text-neutral-500 font-mono">
+                        <td className="px-6 py-4 text-sm text-muted-foreground font-mono">
                           {cat.slug}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => startEdit(cat)} className="p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white rounded-lg transition-colors">
+                            <button onClick={() => startEdit(cat)} className="p-2 text-muted-foreground hover:bg-accent hover:text-foreground rounded-lg transition-colors">
                               <Pencil className="w-4 h-4" />
                             </button>
-                            <button onClick={() => handleDelete(cat.categoryId)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                            <button onClick={() => handleDelete(cat.categoryId)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -244,22 +244,22 @@ const AdminCategories = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-            <span className="text-sm text-neutral-500">
+          <div className="p-4 border-t border-border flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
               Showing page {page + 1} of {totalPages}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="px-3 py-1.5 text-sm border border-neutral-300 dark:border-neutral-700 rounded-md hover:bg-neutral-50 disabled:opacity-50 transition-colors"
+                className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 transition-colors text-foreground"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page === totalPages - 1}
-                className="px-3 py-1.5 text-sm border border-neutral-300 dark:border-neutral-700 rounded-md hover:bg-neutral-50 disabled:opacity-50 transition-colors"
+                className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-accent disabled:opacity-50 transition-colors text-foreground"
               >
                 Next
               </button>

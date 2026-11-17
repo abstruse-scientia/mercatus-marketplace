@@ -85,7 +85,7 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 rounded-lg bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 font-medium text-sm transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center"
+                className="w-full h-12 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-sm transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center"
               >
                 {isLoading ? "Sending..." : "Send Reset Link"}
               </button>
@@ -98,7 +98,7 @@ export default function ForgotPassword() {
                   setIsSubmitted(false);
                   setEmail("");
                 }}
-                className="w-full h-12 rounded-lg bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 font-medium text-sm transition-colors cursor-pointer flex items-center justify-center"
+                className="w-full h-12 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-sm transition-colors cursor-pointer flex items-center justify-center"
               >
                 Send Another Link
               </button>
