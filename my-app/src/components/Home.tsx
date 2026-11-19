@@ -28,9 +28,7 @@ export default function Home() {
           setFeaturedProducts(prods.content.slice(0, 3));
           setCategories(catSummaries.slice(-3));
         }
-      } catch (error) {
-        console.error("Failed to load home data", error);
-      }
+      } catch {}
     };
     fetchHomeData();
     return () => {

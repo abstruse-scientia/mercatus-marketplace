@@ -50,8 +50,7 @@ export default function OrderConfirmation() {
             } catch {}
           }, 1500);
         }
-      } catch (err) {
-        console.error("Failed to fetch order details", err);
+      } catch {
         toast.error("Order not found");
         navigate("/orders");
       } finally {

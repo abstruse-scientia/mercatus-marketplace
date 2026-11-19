@@ -76,8 +76,8 @@ export const useAuthStore = create<AuthState>()(
           if (jwtToken) {
             await authApi.logout();
           }
-        } catch (error) {
-          console.error("Logout API failed, continuing client logout.", error);
+        } catch {
+          // Ignore server logout failure, continue client cleanup
         } finally {
           set({
             user: null,

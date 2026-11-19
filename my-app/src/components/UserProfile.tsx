@@ -38,7 +38,6 @@ const UserProfile = () => {
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: any) {
-      console.error("Change password error:", err);
       const message =
         err.response?.data?.message ||
         "Failed to update password. Please try again.";

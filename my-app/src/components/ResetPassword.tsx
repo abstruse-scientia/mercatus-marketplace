@@ -47,7 +47,6 @@ export default function ResetPassword() {
       });
       setIsSuccess(true);
     } catch (err: any) {
-      console.error("Reset password failed:", err);
       const message =
         err.response?.data?.message ||
         "Unable to reset password. The link may have expired or is invalid.";
