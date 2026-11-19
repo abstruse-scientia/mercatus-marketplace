@@ -20,7 +20,6 @@ export default function ForgotPassword() {
       await userApi.forgotPassword(email.trim());
       setIsSubmitted(true);
     } catch (err: any) {
-      console.error("Forgot password request failed:", err);
       // For security and privacy, if email not found or general error, show appropriate message
       if (err.response?.status === 404) {
         setIsSubmitted(true);

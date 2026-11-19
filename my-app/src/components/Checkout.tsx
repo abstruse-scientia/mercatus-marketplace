@@ -45,8 +45,7 @@ export default function Checkout() {
         } else {
           setShowNewAddressForm(true);
         }
-      } catch (error) {
-        console.error("Failed to load addresses", error);
+      } catch {
         setShowNewAddressForm(true);
       }
     };

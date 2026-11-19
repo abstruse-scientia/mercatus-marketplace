@@ -42,7 +42,7 @@ export default function ProductsPage() {
       .then((data) => {
         if (mounted) setCategories(data);
       })
-      .catch((err) => console.error("Failed to load categories", err));
+      .catch(() => {});
     return () => {
       mounted = false;
     };
@@ -74,8 +74,7 @@ export default function ProductsPage() {
           setProductsPage(res);
           setIsInitialMount(false);
         }
-      } catch (err) {
-        console.error("Failed to fetch products", err);
+      } catch {
         if (mounted) {
 
           setIsInitialMount(false);

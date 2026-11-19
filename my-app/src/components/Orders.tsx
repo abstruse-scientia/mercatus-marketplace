@@ -39,8 +39,7 @@ export default function Orders() {
       setOrders(response.content);
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
-    } catch (err) {
-      console.error("Order history load failed.", err);
+    } catch {
       toast.error("Failed to load orders history.");
     } finally {
       setIsLoading(false);
