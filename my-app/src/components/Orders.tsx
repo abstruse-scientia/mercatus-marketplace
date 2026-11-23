@@ -89,13 +89,14 @@ export default function Orders() {
   const lifetimeTotal = orders.reduce((sum, o) => sum + o.totalAmount, 0); // Mock for current page
 
   return (
-    <div className="w-full font-sans">
-      
-      {/* Page Header */}
-      <div className="w-full mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase mb-8">
-          ORDER HISTORY
-        </h1>
+    <div className="w-full min-h-[calc(100vh-3.5rem)] bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
+        
+        {/* Page Header */}
+        <div className="w-full mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase mb-6">
+            ORDER HISTORY
+          </h1>
 
         {/* Tabs */}
         <div className="flex gap-8 border-b border-border/40 text-[11px] md:text-xs font-bold tracking-widest uppercase overflow-x-auto">
@@ -330,17 +331,6 @@ export default function Orders() {
             </Link>
           </div>
 
-          {/* Need Help Box */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <h2 className="text-xs font-bold tracking-widest uppercase mb-3 text-foreground">Need Help?</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              If you have any questions about your order, our support team is here to help.
-            </p>
-            <a href="mailto:support@thearchive.store" className="text-xs font-bold tracking-widest uppercase text-foreground hover:underline flex items-center gap-2">
-              Contact Support →
-            </a>
-          </div>
-
         </div>
 
       </div>
@@ -384,6 +374,7 @@ export default function Orders() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
