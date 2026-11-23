@@ -274,7 +274,7 @@ const AdminUsers = () => {
                                 {/* Promote / Demote */}
                                 <button
                                   onClick={() => handleToggleRole(user)}
-                                  className={`p-2 rounded-lg text-xs font-medium transition-colors border ${
+                                  className={`w-[115px] h-8 rounded-lg text-xs font-medium transition-colors border flex items-center justify-center gap-1.5 shrink-0 ${
                                     isAdmin
                                       ? "text-foreground border-border hover:bg-accent"
                                       : "text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/30 hover:bg-purple-50 dark:hover:bg-purple-500/10"
@@ -282,22 +282,22 @@ const AdminUsers = () => {
                                   title={isAdmin ? "Demote to User" : "Promote to Admin"}
                                 >
                                   {isAdmin ? (
-                                    <span className="flex items-center gap-1">
-                                      <ShieldAlert className="w-3.5 h-3.5" />
-                                      <span className="hidden lg:inline">Demote</span>
-                                    </span>
+                                    <>
+                                      <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
+                                      <span>Demote</span>
+                                    </>
                                   ) : (
-                                    <span className="flex items-center gap-1">
-                                      <Shield className="w-3.5 h-3.5" />
-                                      <span className="hidden lg:inline">Make Admin</span>
-                                    </span>
+                                    <>
+                                      <Shield className="w-3.5 h-3.5 shrink-0" />
+                                      <span>Make Admin</span>
+                                    </>
                                   )}
                                 </button>
 
                                 {/* Deactivate / Reactivate */}
                                 <button
                                   onClick={() => handleToggleStatus(user)}
-                                  className={`p-2 rounded-lg text-xs font-medium transition-colors border ${
+                                  className={`w-[110px] h-8 rounded-lg text-xs font-medium transition-colors border flex items-center justify-center gap-1.5 shrink-0 ${
                                     user.isActive
                                       ? "text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30 hover:bg-amber-50 dark:hover:bg-amber-500/10"
                                       : "text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
@@ -305,28 +305,26 @@ const AdminUsers = () => {
                                   title={user.isActive ? "Deactivate User" : "Reactivate User"}
                                 >
                                   {user.isActive ? (
-                                    <span className="flex items-center gap-1">
-                                      <PowerOff className="w-3.5 h-3.5" />
-                                      <span className="hidden lg:inline">Deactivate</span>
-                                    </span>
+                                    <>
+                                      <PowerOff className="w-3.5 h-3.5 shrink-0" />
+                                      <span>Deactivate</span>
+                                    </>
                                   ) : (
-                                    <span className="flex items-center gap-1">
-                                      <Power className="w-3.5 h-3.5" />
-                                      <span className="hidden lg:inline">Reactivate</span>
-                                    </span>
+                                    <>
+                                      <Power className="w-3.5 h-3.5 shrink-0" />
+                                      <span>Reactivate</span>
+                                    </>
                                   )}
                                 </button>
 
                                 {/* Delete */}
                                 <button
                                   onClick={() => setUserToDelete(user)}
-                                  className="p-2 text-destructive border border-destructive/30 hover:bg-destructive/10 rounded-lg text-xs font-medium transition-colors"
+                                  className="w-[84px] h-8 text-destructive border border-destructive/30 hover:bg-destructive/10 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1.5 shrink-0"
                                   title="Delete User"
                                 >
-                                  <span className="flex items-center gap-1">
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                    <span className="hidden lg:inline">Delete</span>
-                                  </span>
+                                  <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                                  <span>Delete</span>
                                 </button>
                               </>
                             )}

@@ -10,9 +10,9 @@ const AdminLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row pt-16">
+    <div className="min-h-[calc(100vh-3.5rem)] bg-background flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-card border-r border-border shrink-0 h-auto md:h-[calc(100vh-4rem)] md:sticky md:top-16 z-10">
+      <aside className="w-full md:w-64 bg-card border-r border-border shrink-0 h-auto md:h-[calc(100vh-3.5rem)] md:sticky md:top-14 z-10">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-8 text-foreground">
             <LayoutDashboard className="w-6 h-6" />
